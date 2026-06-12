@@ -75,6 +75,24 @@ blackcow-skill-review --all
 blackcow-skill-evolver .omo/meta-review/review-*.md --approve
 ```
 
+## 💡 Reasonix에서 호출하는 방법
+
+BlackCow 스킬은 Reasonix 스킬 파일입니다. `run_skill` 도구나 `/` 슬래시 단축키로 호출합니다:
+
+```
+run_skill({ name: "blackcow-plan", arguments: "OAuth2 인증 추가" })
+run_skill({ name: "blackcow-loop", arguments: "Execute plans/auth.md --trust-level=2" })
+run_skill({ name: "blackcow-qa", arguments: "src/auth/" })
+```
+
+Reasonix가 스킬을 인덱싱했다면:
+
+```
+/blackcow-plan OAuth2 인증 추가
+/blackcow-loop Execute plans/auth.md --trust-level=2
+/blackcow-qa src/auth/
+```
+
 ## 🧩 제공 기능
 
 | 기능 | 설명 |
