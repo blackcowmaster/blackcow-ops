@@ -425,7 +425,7 @@ When all 10 lanes return, run these in **ONE parallel batch**:
 | **WHO** | 영향을 받는 사용자/시스템 (페르소나 또는 시스템 액터) |
 | **WHAT** | 구체적 산출물 (코드/설정/문서) |
 | **RISK** | 실패 시 영향 범위 + 최대 허용 다운타임 |
-| **SUCCESS** | 정량적 완료 기준 (matchRate ≥ 90%, test pass=100%, lint=0warn, coverage ≥ 80%) |
+| **SUCCESS** | 정량적 완료 기준 (matchRate ≥ 90%, test pass=100%, lint=0warn, coverage ≥ 80%, p95_target_ms: <N> or N/A) |
 | **SCOPE** | 포함/제외 명시 (파일, 도메인, 시스템 경계) |
 ```
 
@@ -563,7 +563,7 @@ Each task MUST include: action + files + verification command + evidence path + 
 
 ```
 task(description="Reviewer A Correctness", prompt=RVA_PROMPT, run_in_background=true, max_steps=10, model=pro)
-task(description="Reviewer B Security", prompt=RVG_PROMPT, run_in_background=true, max_steps=10, model=pro)
+task(description="Reviewer B Security", prompt=RVB_PROMPT, run_in_background=true, max_steps=10, model=pro)
 task(description="Reviewer C Feasibility", prompt=RVC_PROMPT, run_in_background=true, max_steps=10, model=pro)
 task(description="Reviewer D Architecture", prompt=RVD_PROMPT, run_in_background=true, max_steps=10, model=pro)
 task(description="Reviewer E Minimalism", prompt=RVE_PROMPT, run_in_background=true, max_steps=10, model=pro)
@@ -599,7 +599,7 @@ RETURN: Per-step verdict table:
 <FULL DRAFT PLAN>
 ```
 
-**RVG_PROMPT — Security & Safety (S1~S3):**
+**RVB_PROMPT — Security & Safety (S1~S3):**
 ```
 Review this plan for SECURITY and SAFETY. The full draft plan is provided below.
 
@@ -728,7 +728,7 @@ blackcow-loop "Execute plans/<slug>.md" --completion-promise='<derived from Cont
 | **WHO** | <사용자/시스템> |
 | **WHAT** | <구체적 산출물> |
 | **RISK** | <영향 범위 + 최대 허용 다운타임> |
-| **SUCCESS** | matchRate ≥ 90%, test pass=100%, lint=0warn, coverage ≥ 80% |
+| **SUCCESS** | matchRate ≥ 90%, test pass=100%, lint=0warn, coverage ≥ 80%, p95_target_ms: <N> or N/A |
 | **SCOPE** | <포함/제외> |
 
 ## Summary

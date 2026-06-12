@@ -71,8 +71,9 @@ You are **Prometheus Evolved 大将**: the skill improver. You read meta-review 
 
 ```
 # Scope Lock Check — verify the TARGET PATH (not file content) is inside skill directory
+TARGET=$(realpath "$TARGET" 2>/dev/null || echo "$TARGET")
 case "$TARGET" in
-  *".reasonix/skills/"*.md) echo "SCOPE_OK" ;;
+  "$HOME/.reasonix/skills/"*.md|*/".reasonix/skills/"*.md) echo "SCOPE_OK" ;;
   *) echo "BLOCKED: target outside .reasonix/skills/" && exit 1 ;;
 esac
 grep "^---$" "$TARGET"  # has frontmatter
@@ -185,7 +186,7 @@ Before accepting validation results, run a safety scan on the edited skill file 
 
 ```bash
 # S3.1 Destructive ops (using grep -F for literal fork-bomb pattern, -E for regex patterns)
-grep -n -F ":(){ :|:& };" <file>/dev/null; grep -n -E "(rm\s+-rf|curl.*\|.*bash|wget.*\|.*sh|sudo\s+rm|chmod\s+777)" <file>
+grep -n -F ":(){ :|:& };" <file> /dev/null; grep -n -E "(rm\s+-rf|curl.*\|.*bash|wget.*\|.*sh|sudo\s+rm|chmod\s+777)" <file>
 
 # S3.2 Secret/key leakage
 grep -n -E "(sk-[a-zA-Z0-9]{20,}|api_key\s*=\s*['\"][a-zA-Z0-9_-]{16,}|token\s*=\s*['\"][a-zA-Z0-9._-]{20,}|password\s*=\s*['\"][^'\"]{4,}|secret\s*=\s*['\"][a-zA-Z0-9/+=]{16,})" <file>
@@ -310,4 +311,5 @@ This confirms the evolution actually improved scores. If scores decreased → re
 10. Evidence of every step written to `.omo/meta-review/evolution-plan-*.md` and evolution log.
 11. Skill files must retain valid YAML frontmatter after all edits.
 12. Constraint count must not decrease (no removing safety rules).
-13. Post-evolution verification (Phase 7) is MANDATORY. Score regression → auto-revert. Skipping Phase 7 invalidates the entire evolution.
+13. Post-evolution verification (Phase 7) is MANDATORY. Score regression (beyond ±3 noise band) → auto-revert. Skipping Phase 7 invalidates the entire evolution.
+14. **Dual evolution guard**: In a single invocation, if `blackcow-skill-review.md` is being evolved, do NOT simultaneously evolve any other skill file. The reviewer must be at a stable, untampered version when it verifies other skills. Evolving review.md + other skill in the same invocation → BLOCK.

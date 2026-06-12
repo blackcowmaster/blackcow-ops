@@ -268,7 +268,7 @@ AGENTS.md Skipped (low score): <list>
 
 ## Phase 3 — scan (Structure Cache Builder) [3-BATCH DISPATCH]
 
-Build the full `.omo/library/` cache from scratch. Dispatch is split into two serial batches to resolve hidden data dependencies (SCAN_SYMBOL needs SCAN_SURFACE file list; SCAN_DEP and SCAN_ENTRY need SCAN_SURFACE entry points). Serialization overhead ~+2K tokens — required for correctness.
+Build the full `.omo/library/` cache from scratch. Dispatch is split into three serial batches to resolve hidden data dependencies (SCAN_SYMBOL needs SCAN_SURFACE file list and entry points; SCAN_DEP needs SCAN_SYMBOL output). Serialization overhead ~+2K tokens — required for correctness.
 
 ### 3.1 Pre-scan Setup
 
@@ -767,7 +767,7 @@ Applicable gates: 7/11. Covered: 7/7.
 3. **Deduplicate cache entries** by file path
 4. **Handle NO_GIT gracefully** — timestamp-based staleness
 5. **Max cache size: 10MB** — warn and suggest rotation if exceeded
-6. **Parallel dispatch always** — all scan lanes run simultaneously
+6. **Parallel dispatch within each batch** — all scan lanes within a batch run simultaneously
 7. **Skip dirs**: node_modules, .git, dist, build, __pycache__, .venv, vendor, target, .omo
 8. **JSON Lines format** for structure-cache.jsonl — append-friendly, human-readable
 9. **Git diff --name-status** for update — captures adds, modifies, deletes, renames

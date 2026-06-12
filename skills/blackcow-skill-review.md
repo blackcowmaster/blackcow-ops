@@ -42,7 +42,7 @@ Every lane subagent uses:
 - `max_steps`: 12
 - `run_in_background`: `true`
 
-**Batch fire all 5 at once, then wait for all to return before Phase 1:**
+**Batch fire all 6 at once, then wait for all to return before Phase 1:**
 
 ```
 task(description="R1 Syntax Check", prompt=R1_PROMPT, run_in_background=true, max_steps=12, model=budget)
@@ -154,7 +154,7 @@ Check:
 - Are referenced model names still current? (e.g., deepseek-v4-pro still available?)
 - Are referenced tool names still valid? (check against current tool list: read_file, grep, glob, ls, bash, web_fetch, write_file, edit_file, multi_edit, task, lsp_definition, lsp_diagnostics, lsp_hover, lsp_references, explore, research)
 - Are referenced file paths consistent with current project structure?
-- Are referenced skill names (blackcow-plan, blackcow-loop, blackcow-qa, blackcow-skill-review, blackcow-skill-evolver) all existing?
+- Are referenced skill names (blackcow-plan, blackcow-loop, blackcow-qa, blackcow-skill-review, blackcow-skill-evolver, blackcow-librarian) all existing?
 - Does the BKIT 11-gate taxonomy match the current standard?
 - Any TODO/FIXME/HACK markers indicating incomplete sections?
 
