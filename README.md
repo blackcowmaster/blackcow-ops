@@ -1,8 +1,8 @@
 <div align="center">
   <h1>🐂 BlackCow Ops</h1>
 
-  <p><strong>The agent engineering harness for Reasonix + DeepSeek.</strong><br />
-  BKIT-inspired 11-gate quality. Self-improving skills. ~$0.005 per cycle.</p>
+  <p><strong>BKIT-inspired agent engineering harness.</strong><br />
+  Built for Reasonix + DeepSeek. Portable to any agent runtime.</p>
 
   <p>
     <a href="#-install">Install</a>
@@ -31,6 +31,15 @@ cp blackcow-ops/skills/*.md ~/.reasonix/skills/
 ```
 
 Restart Reasonix. The 6 `blackcow-*` skills are now available globally.
+
+## 🎯 When to Use
+
+| Scenario | Recommendation |
+| --- | --- |
+| **You use Reasonix + DeepSeek** | ✅ **Native.** Every model tier, context budget, and PDCA cycle count is tuned for DeepSeek's ~$0.14/1M pricing. Use all 6 skills with zero config. |
+| **You use Reasonix + another model** (GPT-5, Claude, Gemini) | ✅ **Works.** Edit `model_tiers` in each skill's YAML frontmatter to your provider's model names. The 11-gate methodology is model-agnostic. Adjust context budgets for your model's window size. |
+| **You use Claude Code, Codex CLI, OpenCode, or another harness** | ⚠️ **Needs porting.** The BKIT methodology (11-gate taxonomy, PDCA, IntentGate) is universal. The current `.md` skill files are Reasonix-native — rewrite the tool calls (`task`, `edit_file`, `multi_edit`) for your harness's equivalents. See OmO/LazyCodeX for an example of the same ideas in OpenCode/Codex. |
+| **You just want the 11-gate quality methodology** | ✅ **Free.** Read `docs/BKIT.md` — the taxonomy, thresholds, and audit agent design are documented independently. Adapt to any workflow. Apache 2.0. |
 
 ## ⚡ Commands
 

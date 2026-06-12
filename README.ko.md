@@ -1,8 +1,8 @@
 <div align="center">
   <h1>🐂 BlackCow Ops</h1>
 
-  <p><strong>Reasonix + DeepSeek를 위한 에이전트 엔지니어링 하네스.</strong><br />
-  BKIT 기반 11-게이트 품질. 자기 개선형 스킬. 사이클당 ~$0.005.</p>
+  <p><strong>BKIT 기반 에이전트 엔지니어링 하네스.</strong><br />
+  Reasonix + DeepSeek 네이티브. 어떤 에이전트 런타임에도 이식 가능.</p>
 
   <p>
     <a href="#-설치">설치</a>
@@ -31,6 +31,15 @@ cp blackcow-ops/skills/*.md ~/.reasonix/skills/
 ```
 
 Reasonix를 재시작하면 6개의 `blackcow-*` 스킬이 전역에서 사용 가능합니다.
+
+## 🎯 사용 시나리오
+
+| 상황 | 권장사항 |
+| --- | --- |
+| **Reasonix + DeepSeek 사용 중** | ✅ **네이티브.** 모든 모델 티어, 컨텍스트 버짓, PDCA 사이클이 DeepSeek의 ~$0.14/1M 가격에 맞춰져 있습니다. 6개 스킬을 설정 없이 바로 사용하세요. |
+| **Reasonix + 다른 모델 사용 중** (GPT-5, Claude, Gemini) | ✅ **동작함.** 각 스킬의 YAML frontmatter에 있는 `model_tiers`를 사용 중인 제공사의 모델명으로 수정하세요. 11-게이트 방법론은 모델에 구애받지 않습니다. 컨텍스트 버짓은 모델 윈도우 크기에 맞게 조정하세요. |
+| **Claude Code, Codex CLI, OpenCode 등 다른 하네스 사용 중** | ⚠️ **포팅 필요.** BKIT 방법론(11-게이트, PDCA, IntentGate)은 범용적입니다. 현재 `.md` 스킬 파일은 Reasonix 네이티브이므로 — `task`, `edit_file`, `multi_edit` 등의 도구 호출을 해당 하네스에 맞게 재작성하세요. 동일한 아이디어의 OpenCode/Codex 구현체로 OmO/LazyCodeX를 참고하세요. |
+| **11-게이트 품질 방법론만 필요함** | ✅ **무료.** `docs/BKIT.md`를 읽어보세요 — 분류 체계, 임계값, 감사 에이전트 설계가 독립적으로 문서화되어 있습니다. 어떤 워크플로우에도 적용 가능합니다. Apache 2.0. |
 
 ## ⚡ 명령어
 
