@@ -130,11 +130,11 @@ task(description="L7 Dependency Impact", prompt=L7_PROMPT, run_in_background=tru
 **Dispatch 2 additional `task` subagents alongside the 7 bootstrap lanes. These are [SPECULATIVE] — their output feeds into Phase 1 as OPTIONAL alternative strategies, never overriding the main execution path.**
 
 ```
-task(description="S1 Alternative Architecture", prompt=S1_PROMPT, run_in_background=true, max_steps=10, model=budget)
-task(description="S2 Simpler Approach", prompt=S2_PROMPT, run_in_background=true, max_steps=10, model=budget)
+task(description="SP1 Alternative Architecture", prompt=SP1_PROMPT, run_in_background=true, max_steps=10, model=budget)
+task(description="SP2 Simpler Approach", prompt=SP2_PROMPT, run_in_background=true, max_steps=10, model=budget)
 ```
 
-**S1_PROMPT — Alternative Architecture [SPECULATIVE]:**
+**SP1_PROMPT — Alternative Architecture [SPECULATIVE]:**
 ```
 Explore an ALTERNATIVE architecture for the same task. How would this be built if we used a completely different pattern?
 
@@ -152,7 +152,7 @@ RETURN EXACTLY:
 5. KEY_INSIGHT: 1 idea from this approach that could improve the main approach even if we don't adopt it
 ```
 
-**S2_PROMPT — Simpler Approach [SPECULATIVE]:**
+**SP2_PROMPT — Simpler Approach [SPECULATIVE]:**
 ```
 Explore the SIMPLEST possible approach that could satisfy the requirements. How would this be built if we minimized complexity above all else?
 
@@ -207,6 +207,8 @@ RETURN EXACTLY:
 1. CALL SITE TABLE: caller file:line | callee | context snippet | category
 2. SYMBOL → CALLERS mapping (inverted index)
 3. COUNT: total call sites (regression: must not decrease after changes)
+
+Write this baseline to `.omo/ulw-loop/evidence/<slug>-l2-baseline.txt` for downstream consumption by blackcow-qa M3 regression gate.
 ```
 
 **L3_PROMPT — Pattern Library:**
@@ -349,6 +351,7 @@ For every edit_file call in this skill:
 | Verify edit AFTER | MANDATORY — re-read changed section, confirm new content exists |
 | Check line counts | MANDATORY — pre/post line count matches expected delta (added_lines - removed_lines) |
 | Check context lines | MANDATORY — 3 lines before and after edit site are unchanged |
+| **Verify content hash** | MANDATORY — old_string hash must exist in pre-edit linehashes before edit is dispatched. If hash not found → reject edit, re-read file, retry with fresh content |
 | Snapshot on failure | MANDATORY — if edit fails, save both pre and post snapshots for diagnosis |
 
 **0.5.4 Evidence**
@@ -466,7 +469,7 @@ RETURN EXACTLY:
 <GAP REPORT>
 ```
 
-Max cycles = trust level (L0=0, L1=1, L2=3, L3=7, L4=7). After each cycle, re-run gap-detector. Adaptive ceiling: track PDCA success rate; if >95% for 3 consecutive runs, auto-reduce cycles by 1 (min floor = trust level default). Write PDCA metrics to `.omo/memory/pdca-history.jsonl`.
+Max cycles = trust level (L0=0, L1=1, L2=3, L3=7, L4=7). After each cycle, re-run gap-detector. Adaptive ceiling: track PDCA success rate; if >95% for 3 consecutive runs, auto-reduce cycles by 1 per successful run (minimum=3). Write PDCA metrics to `.omo/memory/pdca-history.jsonl`.
 
 ---
 
@@ -581,8 +584,8 @@ Every QA subagent uses:
 
 ```
 task(description="QA S3 Injection", prompt=QA_S3_PROMPT, run_in_background=true, max_steps=10, model=pro)
-task(description="QA S1 DataFlow", prompt=QA_S1_PROMPT, run_in_background=true, max_steps=10, model=pro)
-task(description="QA S2 Auth", prompt=QA_S2_PROMPT, run_in_background=true, max_steps=10, model=pro)
+task(description="QA S1 DataFlow", prompt=QA_**SP1_PROMPT, run_in_background=true, max_steps=10, model=pro)
+task(description="QA S2 Auth", prompt=QA_**SP2_PROMPT, run_in_background=true, max_steps=10, model=pro)
 task(description="QA M1 SpecMatch", prompt=QA_M1_PROMPT, run_in_background=true, max_steps=10, model=budget)
 task(description="QA M5 DeadCode", prompt=QA_M5_PROMPT, run_in_background=true, max_steps=10, model=budget)
 task(description="QA P1 Query", prompt=QA_P1_PROMPT, run_in_background=true, max_steps=10, model=budget)
@@ -593,7 +596,7 @@ task(description="QA P3 Latency", prompt=QA_P3_PROMPT, run_in_background=true, m
 **Batch 2 — PoC Exploit Engineers (dispatch AFTER Batch 1 completes). These depend on S1/S2/S3 audit findings from Batch 1:**
 ```
 task(description="QA PoC Exploit S3", prompt=QA_POC_S3_PROMPT, run_in_background=true, max_steps=12, model=pro)
-task(description="QA PoC Exploit S1S2", prompt=QA_POC_S1S2_PROMPT, run_in_background=true, max_steps=12, model=pro)
+task(description="QA PoC Exploit S1S2", prompt=QA_POC_S1**SP2_PROMPT, run_in_background=true, max_steps=12, model=pro)
 ```
 
 ### Adversarial QA Prompts
@@ -614,7 +617,7 @@ RETURN EXACTLY:
 The changed files are: <target files>
 ```
 
-**QA_S1_PROMPT — DataFlow Integrity:**
+**QA_**SP1_PROMPT — DataFlow Integrity:**
 ```
 Trace data through every layer boundary in the changed code. Check:
 - Does any data shape change format between layers (API → Domain → DB)?
@@ -631,7 +634,7 @@ DATAFLOW INTEGRITY SCORE: <0-100>
 The changed files are: <target files>
 ```
 
-**QA_S2_PROMPT — Auth Gate Audit:**
+**QA_**SP2_PROMPT — Auth Gate Audit:**
 ```
 Verify every entry point in the changed code is behind an auth gate.
 
@@ -750,7 +753,7 @@ The S3 findings are: <QA_S3 output>
 The changed files are: <target files>
 ```
 
-**QA_POC_S1S2_PROMPT — DataFlow + Auth Exploit Attempt:**
+**QA_POC_S1**SP2_PROMPT — DataFlow + Auth Exploit Attempt:**
 ```
 You are a RED TEAM exploit engineer. Review the S1 (dataFlow) and S2 (auth) audit findings. For each CRITICAL or HIGH finding, attempt to construct a working proof-of-concept exploit:
 
@@ -970,7 +973,7 @@ All quality gates passed. Emit final status:
 | All 11 gates + cleanup + commit + report passed | DONE (emit Phase 9) |
 | PDCA iterator exhausted | STOP — report gaps in completion report |
 | Same gate fails 3 times | STOP — escalate to completion report |
-| 8 total PDCA iterations | STOP — report partial completion |
+| 7 total PDCA iterations | STOP — report partial completion |
 | Destructive command | BLOCK |
 | Trust Level L0~L1 + commit attempted | BLOCK |
 | Cleanup fails | Continue — report unresolved items in carry items |

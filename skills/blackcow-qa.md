@@ -141,7 +141,7 @@ Every gate subagent uses:
 - `tools`: `["read_file","grep","glob","ls","bash"]`
 - `max_steps`: 12
 - `run_in_background`: `true`
-- `model`: `pro` (quality gates are analysis-critical)
+- `model`: tier-assigned (pro for M1/S1/S2/S3/P3, budget for M2/M3/M4/M5/P1/P2). See dispatch block below for exact routing.
 
 ### Gate Thresholds (Reference)
 
@@ -292,13 +292,20 @@ RETURN EXACTLY:
 
 **GATE_P3_PROMPT — Latency Assessment:**
 ```
-Identify latency-sensitive paths in the target code.
+Identify latency-sensitive paths in the target code. If no p95_target_ms is defined in the plan's Context Anchor, skip this gate and return P3: N/A.
+
+If p95_target_ms IS defined:
+- Identify critical paths
+- Estimate per-path p95 latency
 
 RETURN EXACTLY:
 1. LATENCY_HOTSPOTS: <N>
 2. FINDINGS: | file:line | path | est. latency | p95 target | fix |
-3. RECOMMENDATION: caching / async / batching suggestions
+3. P3_TARGET_DEFINED: YES/NO (NO = N/A, skip evaluation)
+4. RECOMMENDATION: caching / async / batching suggestions (or "N/A — no latency target specified")
 ```
+
+**P3 Target Source**: The p95 latency target is defined in the plan's Context Anchor SUCCESS field (`p95_target_ms`). If the plan was created by blackcow-plan, this field is present. If no plan is referenced or the field is absent, P3 is N/A.
 
 Wait for all 11 gate subagents to return. Then assemble scores into the 11-Gate Scorecard in Phase 3.
 
