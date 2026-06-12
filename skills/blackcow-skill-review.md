@@ -190,10 +190,10 @@ RETURN EXACTLY:
 
 ```
 task(description="XR1 Gate Consistency", prompt="Check R2 gate findings against R3 parallelism. If R2 says gate M2 covered but R3 shows test lanes run sequentially → contradiction. Check R4 cost findings against R3 serialization claims. RETURN EXACTLY: contradictions:list, escalations:list", run_in_background=true, max_steps=8, model=budget)
-task(description="XR2 Staleness vs Quality", prompt="Check R5 staleness vs R2 gates. If R5 says fresh but R2 found missing gates → stale skill that looks fresh. Cross-reference any lane finding that conflicts with another lane. RETURN EXACTLY: contradictions:list, escalations:list", run_in_background=true, max_steps=8, model=budget)
+task(description="XR2 Staleness vs Quality", prompt="Check R5 staleness vs R2 gates. If R5 says fresh but R2 found missing gates → stale skill that looks fresh. Cross-reference any lane finding that conflicts with another lane. Also audit R2's OWN gate coverage: does R2 check all 11 BKIT gates in the target skill? RETURN EXACTLY: contradictions:list, escalations:list, r2_self_audit:str", run_in_background=true, max_steps=8, model=budget)
 ```
 
-Wait for both to return. Consolidate findings.
+Wait for both to return. Consolidate findings. If XR2 detects R2 self-audit gaps → escalate in report as HIGH finding.
 
 ---
 
