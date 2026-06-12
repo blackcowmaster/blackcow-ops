@@ -9,8 +9,6 @@
     ·
     <a href="#快速开始">快速开始</a>
     ·
-    <a href="#理念">理念</a>
-    ·
     <a href="README.md">English</a>
     ·
     <a href="README.ko.md">한국어</a>
