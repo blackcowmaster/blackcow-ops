@@ -530,7 +530,7 @@ Wait for all 3 verification subagents to return. ALL must pass (100% test pass, 
 
 HTTP / CLI / File state / DB channel.
 
-## Phase 5 — Adversarial QA (10 task SUBAGENTS, ONE PARALLEL BATCH)
+## Phase 5 — Adversarial QA (10 task SUBAGENTS, 2 BATCHES)
 
 **Dispatch 8 `task` subagents with `run_in_background: true`. Each audits the changed code for one gate dimension. Full BKIT 11-gate coverage. Routing: S1/S2/S3 use pro (security audits are analytical), M1/M5/P1/P2/P3 use budget (pattern-matching and spec-comparison are mechanical).**
 
@@ -549,6 +549,10 @@ task(description="QA M5 DeadCode", prompt=QA_M5_PROMPT, run_in_background=true, 
 task(description="QA P1 Query", prompt=QA_P1_PROMPT, run_in_background=true, max_steps=10, model=budget)
 task(description="QA P2 Memory", prompt=QA_P2_PROMPT, run_in_background=true, max_steps=10, model=budget)
 task(description="QA P3 Latency", prompt=QA_P3_PROMPT, run_in_background=true, max_steps=10, model=budget)
+```
+
+**Batch 2 — PoC Exploit Engineers (dispatch AFTER Batch 1 completes). These depend on S1/S2/S3 audit findings from Batch 1:**
+```
 task(description="QA PoC Exploit S3", prompt=QA_POC_S3_PROMPT, run_in_background=true, max_steps=12, model=pro)
 task(description="QA PoC Exploit S1S2", prompt=QA_POC_S1S2_PROMPT, run_in_background=true, max_steps=12, model=pro)
 ```
