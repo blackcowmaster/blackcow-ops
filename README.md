@@ -2,7 +2,7 @@
   <h1>🐂 BlackCow Ops</h1>
 
   <p><strong>BKIT-inspired agent engineering harness.</strong><br />
-  Built for Reasonix + DeepSeek. Portable to any agent runtime.</p>
+  Built for Reasonix + DeepSeek.</p>
 
   <p>
     <a href="#-install">Install</a>
@@ -36,10 +36,10 @@ Restart Reasonix. The 6 `blackcow-*` skills are now available globally.
 
 | Scenario | Recommendation |
 | --- | --- |
-| **You use Reasonix + DeepSeek** | ✅ **Native.** Every model tier, context budget, and PDCA cycle count is tuned for DeepSeek's ~$0.14/1M pricing. Use all 6 skills with zero config. |
-| **You use Reasonix + another model** (GPT-5, Claude, Gemini) | ✅ **Works.** Edit `model_tiers` in each skill's YAML frontmatter to your provider's model names. The 11-gate methodology is model-agnostic. Adjust context budgets for your model's window size. |
-| **You use Claude Code, Codex CLI, OpenCode, or another harness** | ⚠️ **Needs porting.** The BKIT methodology (11-gate taxonomy, PDCA, IntentGate) is universal. The current `.md` skill files are Reasonix-native — rewrite the tool calls (`task`, `edit_file`, `multi_edit`) for your harness's equivalents. See OmO/LazyCodeX for an example of the same ideas in OpenCode/Codex. |
-| **You just want the 11-gate quality methodology** | ✅ **Free.** Read `docs/BKIT.md` — the taxonomy, thresholds, and audit agent design are documented independently. Adapt to any workflow. Apache 2.0. |
+| **You use Reasonix + DeepSeek** | ✅ **Native.** Every model tier, context budget, and PDCA cycle count is tuned for DeepSeek. Use all 6 skills with zero config. |
+| **You use Reasonix + another model** | ⚠️ **Untested.** Reasonix supports other providers via the AI SDK (Anthropic, OpenAI, Google, etc.), but BlackCow has only been tested with DeepSeek. If you try another model, edit `model_tiers` in each skill's YAML frontmatter and adjust context budgets for your model's window size. YMMV. |
+| **You use Claude Code, Codex CLI, OpenCode, or another harness** | ⚠️ **Needs porting.** The BKIT methodology is independent of any one harness. The current `.md` skill files are Reasonix-native — tool calls (`task`, `edit_file`, `multi_edit`) would need rewriting for your harness's equivalents. |
+| **You just want the 11-gate quality methodology** | ✅ **Free.** Read `docs/BKIT.md` — the taxonomy, thresholds, and audit agent design are documented. Adapt to any workflow. Apache 2.0. |
 
 ## ⚡ Commands
 
@@ -138,16 +138,16 @@ blackcow-ops/
 
 ## 🧠 Why DeepSeek?
 
-BlackCow was designed from the ground up for models that are **cheap enough to be wasteful**. DeepSeek at ~$0.14/1M input tokens is ~100x cheaper than GPT-5. This changes what's economically viable:
+BlackCow was designed for models that are **cheap enough to be wasteful**. DeepSeek's public pricing (~$0.14/1M input tokens) enables patterns that would be cost-prohibitive on frontier models:
 
-| Pattern | GPT-5 Cost | DeepSeek Cost | BlackCow Strategy |
-| --- | --- | --- | --- |
-| 15 discovery lanes | ~$1.50 | ~$0.002 | Always max lanes for XL |
-| 8 QA agents + 2 PoC | ~$1.00 | ~$0.001 | Run every gate, every time |
-| 7 PDCA cycles | ~$3.50 | ~$0.005 | Never settle for "good enough" |
-| Meta-review every invocation | ~$0.75 | ~$0.001 | Continuous self-improvement |
+| Pattern | Why it matters |
+| --- | --- |
+| 15 parallel discovery lanes | Full-spectrum codebase analysis every time |
+| 8 QA agents + 2 PoC engineers | Every gate audited, every exploit attempted |
+| 7 PDCA cycles | Never settle for "good enough" |
+| Meta-review every invocation | Continuous self-improvement loop |
 
-**This is the core insight**: when quality gates cost fractions of a cent, you run them all. You don't optimize for token count — you optimize for gate pass rate.
+> **Estimated cost per plan→execute→verify cycle**: <$0.03 (DeepSeek). This is an estimate based on token counting, not a measured benchmark. Actual costs depend on project size and task complexity.
 
 ## 🆚 Competitive Landscape
 
@@ -156,7 +156,7 @@ BlackCow was designed from the ground up for models that are **cheap enough to b
 | **Platform** | Reasonix + DeepSeek | OpenCode + Codex CLI | Standalone (Rust+TS) | Claude Code |
 | **Quality Framework** | 11-Gate (M/S/P) | None | None | 11-Gate (M1-M10+S1) |
 | **Self-Improvement** | ✅ Skills audit & evolve | ❌ | ❌ | ❌ |
-| **Cost per Cycle** | ~$0.005 | ~$0.50+ | Provider-dependent | ~$0.50+ |
+| **Cost per Cycle** | ~$0.03 est. | Provider-dependent | Provider-dependent | Provider-dependent |
 | **Intent Analysis** | ✅ IntentGate (6-class) | ❌ | Partial | ✅ Intent Router |
 | **Red Team PoC** | ✅ Exploit engineers | ✅ Security Research | ❌ | ❌ |
 | **Hashline Verification** | ✅ (Reasonix-adapted) | ✅ (Native) | ❌ | ❌ |
@@ -164,9 +164,7 @@ BlackCow was designed from the ground up for models that are **cheap enough to b
 
 ## 💤 What is this?
 
-**BlackCow Ops** packages the BKIT quality methodology for the Reasonix agent runtime, optimized for DeepSeek's extreme cost advantage.
-
-Think of it as: what if you took OmO's agent harness, added BKIT's quality gates, and tuned everything for a model where 15 parallel lanes cost less than a single GPT-5 inference? That's BlackCow.
+**BlackCow Ops** brings the BKIT quality methodology to the Reasonix agent runtime, designed for DeepSeek's cost profile.
 
 > *"OmO taught us to orchestrate. BKIT taught us to gate. DeepSeek taught us to stop counting tokens. BlackCow does all three."*
 
