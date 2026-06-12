@@ -9,8 +9,6 @@
     ·
     <a href="#quick-start">Quick Start</a>
     ·
-    <a href="#philosophy">Philosophy</a>
-    ·
     <a href="README.ko.md">한국어</a>
     ·
     <a href="README.ja.md">日本語</a>
@@ -53,7 +51,7 @@ Restart Reasonix. The 6 `blackcow-*` skills are now available globally.
 | `blackcow-loop` | Execution engine. TDD + Hashline content verification + PDCA iterator + 10-agent adversarial QA. Stops only when all 11 gates produce captured evidence above threshold. |
 | `blackcow-qa` | Quality assurance. 11-gate evaluation with numeric thresholds, L1-L5 test pyramid generation, evidence→memory pipeline with trend analysis. |
 | `blackcow-librarian` | Project memory. Generates hierarchical AGENTS.md, caches codebase structure (.omo/library/), incremental update via git diff. |
-| `blackcow-skill-review` | Meta-auditor. Reviews skill files for syntax, gate completeness, parallelism, cost efficiency, and staleness. 5 parallel discovery lanes. Never edits — only reports. |
+| `blackcow-skill-review` | Meta-auditor. Reviews skill files for syntax, gate completeness, parallelism, cost efficiency, and staleness. 6 parallel discovery lanes (5 audit + 1 devil's advocate). Never edits — only reports. |
 | `blackcow-skill-evolver` | Safe evolution engine. Reads review reports, applies approved fixes with triple safety (scope-lock → backup → approve → validate). |
 
 ## The Pipeline
@@ -129,7 +127,7 @@ blackcow-ops/
 │   ├── blackcow-plan.md             ← Strategic planner (Phase -1 to Phase 5)
 │   ├── blackcow-loop.md             ← Execution engine (Phase 0 to Phase 9)
 │   ├── blackcow-qa.md               ← Quality assurance (Phase 0 to Phase 3)
-│   ├── blackcow-skill-review.md     ← Meta-auditor (5 parallel review lanes)
+│   ├── blackcow-skill-review.md     ← Meta-auditor (6 parallel review lanes)
 │   ├── blackcow-skill-evolver.md    ← Safe evolution engine (7 phases, triple safety)
 │   └── blackcow-librarian.md        ← Project memory (5 commands, 7 phases)
 ├── docs/
