@@ -1,15 +1,15 @@
 <div align="center">
-  <h1>🐂 BlackCow Ops</h1>
+  <h1>BlackCow Ops</h1>
 
   <p><strong>BKIT-inspired agent engineering harness.</strong><br />
   Built for Reasonix + DeepSeek.</p>
 
   <p>
-    <a href="#-install">Install</a>
+    <a href="#install">Install</a>
     ·
-    <a href="#-quick-start">Quick Start</a>
+    <a href="#quick-start">Quick Start</a>
     ·
-    <a href="#-philosophy">Philosophy</a>
+    <a href="#philosophy">Philosophy</a>
     ·
     <a href="README.ko.md">한국어</a>
   </p>
@@ -18,11 +18,11 @@
 <hr />
 
 > [!NOTE]
-> **BlackCow Ops is a set of 6 self-improving Reasonix skills** that form a complete plan→execute→verify→evolve pipeline. It enforces BKIT — an 11-gate quality taxonomy with numeric thresholds — adapted and extended for DeepSeek's cost advantage.
+> **BlackCow Ops is a set of 6 self-improving Reasonix skills** that form a complete plan→execute→verify→evolve pipeline. It enforces BKIT — an 11-gate quality taxonomy with numeric thresholds — adapted for DeepSeek's cost advantage.
 >
-> At DeepSeek pricing (~$0.14/1M input), running 15 parallel discovery lanes + 8 adversarial QA agents + 7 PDCA cycles costs less than **$0.03 total**. The equivalent pipeline on GPT-5 would cost $3-5.
+> At DeepSeek pricing (~$0.14/1M input), running 15 parallel discovery lanes + 8 adversarial QA agents + 7 PDCA cycles costs less than **$0.03 total**.
 
-## 🚀 Install
+## Install
 
 ```bash
 # Clone into your Reasonix skills directory
@@ -32,16 +32,16 @@ cp blackcow-ops/skills/*.md ~/.reasonix/skills/
 
 Restart Reasonix. The 6 `blackcow-*` skills are now available globally.
 
-## 🎯 When to Use
+## When to Use
 
 | Scenario | Recommendation |
 | --- | --- |
-| **You use Reasonix + DeepSeek** | ✅ **Native.** Every model tier, context budget, and PDCA cycle count is tuned for DeepSeek. Use all 6 skills with zero config. |
-| **You use Reasonix + another model** | ⚠️ **Untested.** Reasonix supports other providers via the AI SDK (Anthropic, OpenAI, Google, etc.), but BlackCow has only been tested with DeepSeek. If you try another model, edit `model_tiers` in each skill's YAML frontmatter and adjust context budgets for your model's window size. YMMV. |
-| **You use Claude Code, Codex CLI, OpenCode, or another harness** | ⚠️ **Needs porting.** The BKIT methodology is independent of any one harness. The current `.md` skill files are Reasonix-native — tool calls (`task`, `edit_file`, `multi_edit`) would need rewriting for your harness's equivalents. |
-| **You just want the 11-gate quality methodology** | ✅ **Free.** Read `docs/BKIT.md` — the taxonomy, thresholds, and audit agent design are documented. Adapt to any workflow. Apache 2.0. |
+| **You use Reasonix + DeepSeek** | **Native.** Every model tier, context budget, and PDCA cycle count is tuned for DeepSeek. Use all 6 skills with zero config. |
+| **You use Reasonix + another model** | **Untested.** Reasonix supports other providers via the AI SDK (Anthropic, OpenAI, Google, etc.), but BlackCow has only been tested with DeepSeek. If you try another model, edit `model_tiers` in each skill's YAML frontmatter and adjust context budgets for your model's window size. YMMV. |
+| **You use Claude Code, Codex CLI, OpenCode, or another harness** | **Needs porting.** The BKIT methodology is independent of any one harness. The current `.md` skill files are Reasonix-native — tool calls (`task`, `edit_file`, `multi_edit`) would need rewriting for your harness's equivalents. |
+| **You just want the 11-gate quality methodology** | **Free.** Read `docs/BKIT.md` — the taxonomy, thresholds, and audit agent design are documented. Adapt to any workflow. Apache 2.0. |
 
-## ⚡ Commands
+## Commands
 
 | Command | What it does |
 | --- | --- |
@@ -52,7 +52,7 @@ Restart Reasonix. The 6 `blackcow-*` skills are now available globally.
 | `blackcow-skill-review` | Meta-auditor. Reviews skill files for syntax, gate completeness, parallelism, cost efficiency, and staleness. 5 parallel discovery lanes. Never edits — only reports. |
 | `blackcow-skill-evolver` | Safe evolution engine. Reads review reports, applies approved fixes with triple safety (scope-lock → backup → approve → validate). |
 
-## 🔄 The Pipeline
+## The Pipeline
 
 ```
 blackcow-plan ──→ blackcow-loop ──→ blackcow-qa
@@ -64,7 +64,7 @@ blackcow-skill-review ──→ blackcow-skill-evolver
 
 The first 3 are the **product cycle** — they work on your code. The last 2 are the **meta cycle** — the skills audit and improve themselves. Every cycle gets cheaper because `blackcow-librarian` caches the codebase.
 
-## 🎯 Quick Start
+## Quick Start
 
 ```
 # 1. Cache your codebase (first time only)
@@ -84,7 +84,7 @@ blackcow-skill-review --all
 blackcow-skill-evolver .omo/meta-review/review-*.md --approve
 ```
 
-## 💡 How to Invoke (Reasonix)
+## How to Invoke (Reasonix)
 
 BlackCow skills are Reasonix skill files. Invoke them via the `run_skill` tool or the `/` slash shortcut:
 
@@ -102,22 +102,22 @@ If Reasonix has indexed the skills:
 /blackcow-qa src/auth/
 ```
 
-## 🧩 What you get
+## What you get
 
 | Feature | Description |
 | --- | --- |
-| 🎯 **BKIT 11-Gate Quality** | M1-M5 (Implementation), S1-S3 (Security), P1-P3 (Performance). Every gate has a numeric threshold, a dedicated audit subagent, and verifiable evidence. No gate = no DONE. |
-| 🔀 **Parallel Execution** | 5-15 discovery lanes, 3-5 adversarial reviewers, 8 QA agents — all batch-dispatched with `run_in_background=true`. |
-| 🎛️ **Trust Level (L0-L4)** | Adaptive autonomy: L0 manual → L4 full-auto. PDCA cycles auto-adjust based on historical success rate. |
-| 🛡️ **Hashline Verification** | Pre-edit content snapshots + post-edit verification guard every `edit_file` call. Inspired by OmO's Harness Problem solution. |
-| 🔴 **Red Team PoC** | 2 exploit engineers attempt working payloads against S1/S2/S3 findings. Downgrades false positives, escalates confirmed exploits. |
-| 🧠 **IntentGate (Phase -1)** | 6-class intent detection (Performance/Bug/Feature/Security/Quality/Emergency) runs BEFORE any planning — prevents misdirected cycles. |
-| 📊 **Cost Attribution** | Per-gate, per-phase token accounting with actual vs budget comparison. JSONL trend tracking across invocations. |
-| 🔄 **Self-Improvement** | Skills audit themselves, propose improvements, and safely evolve with backup/approval/validation gates. |
-| 💾 **Checkpoint/Resume** | Phase-level checkpoint with resume support (L3+). Survives session crashes and context window overflows. |
-| 🧹 **DAG Dependencies** | `depends_on` syntax with critical path analysis for complex multi-feature sprints. |
+| **BKIT 11-Gate Quality** | M1-M5 (Implementation), S1-S3 (Security), P1-P3 (Performance). Every gate has a numeric threshold, a dedicated audit subagent, and verifiable evidence. No gate = no DONE. |
+| **Parallel Execution** | 5-15 discovery lanes, 3-5 adversarial reviewers, 8 QA agents — all batch-dispatched with `run_in_background=true`. |
+| **Trust Level (L0-L4)** | Adaptive autonomy: L0 manual → L4 full-auto. PDCA cycles auto-adjust based on historical success rate. |
+| **Hashline Verification** | Pre-edit content snapshots + post-edit verification guard every `edit_file` call. Inspired by OmO's Harness Problem solution. |
+| **Red Team PoC** | 2 exploit engineers attempt working payloads against S1/S2/S3 findings. Downgrades false positives, escalates confirmed exploits. |
+| **IntentGate (Phase -1)** | 6-class intent detection (Performance/Bug/Feature/Security/Quality/Emergency) runs BEFORE any planning — prevents misdirected cycles. |
+| **Cost Attribution** | Per-gate, per-phase token accounting with actual vs budget comparison. JSONL trend tracking across invocations. |
+| **Self-Improvement** | Skills audit themselves, propose improvements, and safely evolve with backup/approval/validation gates. |
+| **Checkpoint/Resume** | Phase-level checkpoint with resume support (L3+). Survives session crashes and context window overflows. |
+| **DAG Dependencies** | `depends_on` syntax with critical path analysis for complex multi-feature sprints. |
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 blackcow-ops/
@@ -136,7 +136,7 @@ blackcow-ops/
 └── NOTICE
 ```
 
-## 🧠 Why DeepSeek?
+## Why DeepSeek?
 
 BlackCow was designed for models that are **cheap enough to be wasteful**. DeepSeek's public pricing (~$0.14/1M input tokens) enables patterns that would be cost-prohibitive on frontier models:
 
@@ -149,26 +149,26 @@ BlackCow was designed for models that are **cheap enough to be wasteful**. DeepS
 
 > **Estimated cost per plan→execute→verify cycle**: <$0.03 (DeepSeek). This is an estimate based on token counting, not a measured benchmark. Actual costs depend on project size and task complexity.
 
-## 🆚 Competitive Landscape
+## Competitive Landscape
 
 | | BlackCow Ops | [OmO / LazyCodeX](https://github.com/code-yeongyu/oh-my-openagent) | [Gajae-Code](https://github.com/Yeachan-Heo/gajae-code) | [BKIT](https://github.com/popup-studio-ai/bkit-claude-code) |
 | --- | --- | --- | --- | --- |
 | **Platform** | Reasonix + DeepSeek | OpenCode + Codex CLI | Standalone (Rust+TS) | Claude Code |
 | **Quality Framework** | 11-Gate (M/S/P) | None | None | 11-Gate (M1-M10+S1) |
-| **Self-Improvement** | ✅ Skills audit & evolve | ❌ | ❌ | ❌ |
+| **Self-Improvement** | Yes — skills audit & evolve | No | No | No |
 | **Cost per Cycle** | ~$0.03 est. | Provider-dependent | Provider-dependent | Provider-dependent |
-| **Intent Analysis** | ✅ IntentGate (6-class) | ❌ | Partial | ✅ Intent Router |
-| **Red Team PoC** | ✅ Exploit engineers | ✅ Security Research | ❌ | ❌ |
-| **Hashline Verification** | ✅ (Reasonix-adapted) | ✅ (Native) | ❌ | ❌ |
-| **Checkpoint/Resume** | ✅ L3+ | ✅ Session Recovery | Provider retry | ✅ Sprint resume |
+| **Intent Analysis** | Yes — IntentGate (6-class) | No | Partial | Yes — Intent Router |
+| **Red Team PoC** | Yes — exploit engineers | Yes — Security Research | No | No |
+| **Hashline Verification** | Yes (Reasonix-adapted) | Yes (Native) | No | No |
+| **Checkpoint/Resume** | Yes (L3+) | Yes — Session Recovery | Provider retry | Yes — Sprint resume |
 
-## 💤 What is this?
+## What is this?
 
 **BlackCow Ops** brings the BKIT quality methodology to the Reasonix agent runtime, designed for DeepSeek's cost profile.
 
 > *"OmO taught us to orchestrate. BKIT taught us to gate. DeepSeek taught us to stop counting tokens. BlackCow does all three."*
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 BlackCow Ops builds on ideas from:
 
@@ -178,12 +178,12 @@ BlackCow Ops builds on ideas from:
 - **[pi-team](https://github.com/minzique/pi-team)** — Transcript-based multi-agent round-robin communication.
 - **[Claw Code](https://github.com/ultraworkers/claw-code)** — The agent-managed museum exhibit that inspired our self-improvement loop.
 
-## 📄 License
+## License
 
 Apache 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 ---
 
 <div align="center">
-  <p>Built with BlackCow Ops, by BlackCow Ops. 🐂</p>
+  <p>Built with BlackCow Ops, by BlackCow Ops.</p>
 </div>
