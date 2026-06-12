@@ -161,6 +161,7 @@ BlackCow was designed for models that are **cheap enough to be wasteful**. DeepS
 | **Red Team PoC** | Yes — exploit engineers | Yes — Security Research | No | No |
 | **Hashline Verification** | Yes (Reasonix-adapted) | Yes (Native) | No | No |
 | **Checkpoint/Resume** | Yes (L3+) | Yes — Session Recovery | Provider retry | Yes — Sprint resume |
+| **Loop Engineering** | 7-cycle adaptive PDCA | 500-iteration Ralph Loop | ultragoal revision | 5-cycle PDCA |
 
 ## What is this?
 
