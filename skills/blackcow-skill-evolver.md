@@ -146,7 +146,7 @@ For each approved recommendation:
 
 ## Phase 5 — Validation Gate
 
-After ALL edits are applied, dispatch 8 validation tasks in parallel. All use `run_in_background=true`, `max_steps=8`, `model=budget`. Each has a minimal prompt with `RETURN EXACTLY` schema. Collect all results before proceeding.
+After ALL edits are applied, dispatch 8 validation tasks in parallel. All use `run_in_background=true`, `max_steps=8`. Routing: V1(M1)/V7(S1)→pro (analytical), others→budget (mechanical). Each has a minimal prompt with `RETURN EXACTLY` schema. Collect all results before proceeding.
 
 ```
 task(description="V1 M1 SpecMatch", prompt="Verify each applied edit matches its review recommendation. Compare old_string and new_string against the review report. RETURN EXACTLY: pass:bool, mismatches:list, notes:str", run_in_background=true, max_steps=8, model=pro)

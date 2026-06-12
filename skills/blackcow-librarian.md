@@ -293,9 +293,13 @@ task(description="SCAN Surface Topology", prompt=SCAN_SURFACE_PROMPT, run_in_bac
 task(description="SCAN Directory Scores", prompt=SCAN_DIRSCORE_PROMPT, run_in_background=true, max_steps=15, model=budget)
 ```
 
-**Batch 2 — Dependent scans. Dispatch AFTER Batch 1 completes. SYMBOL reads SURFACE output (file list). DEP and ENTRY read SURFACE output (entry points). DEP also reads SYMBOL output (symbol list):**
+**Batch 2 — SCAN_SYMBOL (dispatch AFTER Batch 1 completes). Reads SURFACE output for file list:**
 ```
 task(description="SCAN Symbol Index", prompt=SCAN_SYMBOL_PROMPT, run_in_background=true, max_steps=15, model=budget)
+```
+
+**Batch 3 — SCAN_DEP + SCAN_ENTRY (dispatch AFTER Batch 2 completes). DEP reads SYMBOL output. ENTRY reads SURFACE output:**
+```
 task(description="SCAN Dep Graph", prompt=SCAN_DEP_PROMPT, run_in_background=true, max_steps=15, model=budget)
 task(description="SCAN EntryExit Points", prompt=SCAN_ENTRY_PROMPT, run_in_background=true, max_steps=15, model=budget)
 ```

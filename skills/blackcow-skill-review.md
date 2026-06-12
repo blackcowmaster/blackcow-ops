@@ -179,7 +179,7 @@ RETURN EXACTLY:
 1. R2_CHALLENGE: score_assigned | proposed_score | missing_evidence:list | verdict: AGREE/DISAGREE
 2. R3_CHALLENGE: score_assigned | proposed_score | serial_bottleneck:file:line | verdict: AGREE/DISAGREE
 3. R4_CHALLENGE: score_assigned | proposed_score | waste_sources:list | verdict: AGREE/DISAGREE
-4. BIGGEST_BLIND_SPOT: what the 5 review lanes collectively missed (1 sentence)
+4. BIGGEST_BLIND_SPOT: what the 5 audit lanes collectively missed (1 sentence)
 ```
 
 ---
@@ -278,7 +278,7 @@ Append summary row to `.omo/meta-review/review-history.jsonl`:
 ---
 
 ## Stop Rules
-- All 5 review lanes returned → DONE
+- All 6 review lanes returned → DONE
 - Skill file not found → report and stop
 - Skill file is empty → report and stop
 - Cannot parse frontmatter → report syntax errors, continue review
