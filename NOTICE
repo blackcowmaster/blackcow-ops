@@ -10,12 +10,11 @@ This product includes software developed by:
      S1-S3 (Security), and P1-P3 (Performance) categories, implemented
      with Reasonix-native parallel subagent architecture.
 
-2. oh-my-openagent / OmO (https://github.com/code-yeongyu/oh-my-openagent)
-   - Licensed under MIT License
-   - Discipline agent patterns, parallel orchestration, Hashline content
-     verification, and hyperplan adversarial review concepts influenced
-     BlackCow's parallel lane dispatch, Phase 0.5 Hashline guard, and
-     Phase 4 quintuple reviewer design.
+2. OmO / oh-my-openagent (https://github.com/code-yeongyu/oh-my-openagent)
+   - Inspired by discipline agent patterns, parallel orchestration,
+     Hashline content verification, and hyperplan adversarial review concepts.
+   - No OmO source code or proprietary project files are included in BlackCow Ops.
+   - See upstream repository for its current license terms.
 
 3. Gajae-Code (https://github.com/Yeachan-Heo/gajae-code)
    - Licensed under MIT License

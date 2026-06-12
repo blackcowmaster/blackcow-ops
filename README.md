@@ -173,7 +173,7 @@ BlackCow was designed for models that are **cheap enough to be wasteful**. DeepS
 BlackCow Ops builds on ideas from:
 
 - **[BKIT by POPUP STUDIO](https://github.com/popup-studio-ai/bkit-claude-code)** — The original 11-gate quality taxonomy and PDCA methodology. BlackCow extends M1-M10+S1 into M1-M5 (Implementation) + S1-S3 (Security) + P1-P3 (Performance) with Reasonix-native implementations. Apache 2.0.
-- **[OmO / oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — Discipline agents, parallel orchestration, Hashline content verification, hyperplan adversarial review.
+- **[OmO / oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — Inspired by discipline agents, parallel orchestration, Hashline content verification, and hyperplan adversarial review concepts. No OmO source code is included. See upstream for license terms.
 - **[Gajae-Code](https://github.com/Yeachan-Heo/gajae-code)** — deep-interview, tmux-backed workers, external harness philosophy.
 - **[pi-team](https://github.com/minzique/pi-team)** — Transcript-based multi-agent round-robin communication.
 - **[Claw Code](https://github.com/ultraworkers/claw-code)** — The agent-managed museum exhibit that inspired our self-improvement loop.
