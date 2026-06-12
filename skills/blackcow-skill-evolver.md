@@ -70,10 +70,13 @@ You are **Prometheus Evolved 大将**: the skill improver. You read meta-review 
 4. The edit location (file:line) exists and matches the review finding
 
 ```
-# Scope Lock Check
-grep "^.reasonix/skills/.*\.md$" < target_path
-grep "^---$" < target_path  # has frontmatter
-grep "^runAs: subagent" < target_path  # is a skill file
+# Scope Lock Check — verify the TARGET PATH (not file content) is inside skill directory
+case "$TARGET" in
+  *".reasonix/skills/"*.md) echo "SCOPE_OK" ;;
+  *) echo "BLOCKED: target outside .reasonix/skills/" && exit 1 ;;
+esac
+grep "^---$" "$TARGET"  # has frontmatter
+grep "^runAs: subagent" "$TARGET"  # is a skill file
 ```
 
 If ANY check fails → BLOCK and report. NEVER edit outside `.reasonix/skills/`.
@@ -155,7 +158,7 @@ task(description="V2 Syntax", prompt="Check YAML frontmatter validity in the edi
 
 task(description="V3 Lint", prompt="Check markdown integrity: balanced code fences (even count of triple-backticks), valid links, no broken formatting. RETURN EXACTLY: pass:bool, fence_count:int, broken_links:list, notes:str", run_in_background=true, max_steps=8, model=budget)
 
-task(description="V4 References", prompt="Verify all cross-skill references (blackcow-plan, blackcow-loop, blackcow-qa, blackcow-skill-review, blackcow-skill-evolver) exist in .reasonix/skills/. RETURN EXACTLY: pass:bool, missing_refs:list, notes:str", run_in_background=true, max_steps=8, model=budget)
+task(description="V4 References", prompt="Verify all cross-skill references (blackcow-plan, blackcow-loop, blackcow-qa, blackcow-skill-review, blackcow-skill-evolver, blackcow-librarian) exist in .reasonix/skills/. RETURN EXACTLY: pass:bool, missing_refs:list, notes:str", run_in_background=true, max_steps=8, model=budget)
 
 task(description="V5 M5 DeadCode", prompt="Scan for orphaned sections, unreferenced anchors, duplicated content, or stale references left by edits. RETURN EXACTLY: pass:bool, orphans:list, duplicates:list, notes:str", run_in_background=true, max_steps=8, model=budget)
 
@@ -181,8 +184,8 @@ Compare against the pre-evolution structural snapshot from the evolution plan. A
 Before accepting validation results, run a safety scan on the edited skill file for dangerous shell patterns:
 
 ```bash
-# S3.1 Destructive ops
-grep -n -E "(rm\s+-rf|curl.*\|.*bash|wget.*\|.*sh|sudo\s+rm|:(){ :\|:& };:|chmod\s+777)" <file>
+# S3.1 Destructive ops (using grep -F for literal fork-bomb pattern, -E for regex patterns)
+grep -n -F ":(){ :|:& };" <file>/dev/null; grep -n -E "(rm\s+-rf|curl.*\|.*bash|wget.*\|.*sh|sudo\s+rm|chmod\s+777)" <file>
 
 # S3.2 Secret/key leakage
 grep -n -E "(sk-[a-zA-Z0-9]{20,}|api_key\s*=\s*['\"][a-zA-Z0-9_-]{16,}|token\s*=\s*['\"][a-zA-Z0-9._-]{20,}|password\s*=\s*['\"][^'\"]{4,}|secret\s*=\s*['\"][a-zA-Z0-9/+=]{16,})" <file>

@@ -20,7 +20,7 @@ You are **Metis + Explore 大将**: the codebase archivist. You build and mainta
 | Command | Phase | Description | Est. Cost |
 |---|---|---|---|
 | `init-deep` | Phase 2 | Generate AGENTS.md with complexity scores per directory | ~8K tokens |
-| `scan` | Phase 3 | Full structure-cache scan → `.omo/library/structure-cache.jsonl` | ~12K tokens |
+| `scan` | Phase 3 | Full structure-cache scan → `.omo/library/structure-cache.jsonl` | ~14K tokens |
 | `update` | Phase 4 | Incremental update from git diff since last scan | ~6K tokens |
 | `check` | Phase 5 | Validate cache freshness against git HEAD | ~2K tokens |
 | `load` | Phase 6 | Load cache into context (returns structured summary) | ~1K tokens |
@@ -266,7 +266,7 @@ AGENTS.md Skipped (low score): <list>
 
 ---
 
-## Phase 3 — scan (Structure Cache Builder) [2-BATCH DISPATCH]
+## Phase 3 — scan (Structure Cache Builder) [3-BATCH DISPATCH]
 
 Build the full `.omo/library/` cache from scratch. Dispatch is split into two serial batches to resolve hidden data dependencies (SCAN_SYMBOL needs SCAN_SURFACE file list; SCAN_DEP and SCAN_ENTRY need SCAN_SURFACE entry points). Serialization overhead ~+2K tokens — required for correctness.
 
@@ -276,7 +276,7 @@ Build the full `.omo/library/` cache from scratch. Dispatch is split into two se
 mkdir -p .omo/library/agents
 ```
 
-### 3.2 Parallel Scan Lanes (5 LANES, 2-BATCH DISPATCH)
+### 3.2 Parallel Scan Lanes (5 LANES, 3-BATCH DISPATCH)
 
 **CRITICAL: Dispatch Batch 1 first, wait for ALL Batch 1 lanes to complete, then dispatch Batch 2.**
 **Data dependency chain: SCAN_SYMBOL reads SCAN_SURFACE output (file list + public symbol names before it can trace references). SCAN_DEP and SCAN_ENTRY read SCAN_SURFACE output (entry points). Serialization overhead ~+2K tokens — required for correctness.**
@@ -293,12 +293,12 @@ task(description="SCAN Surface Topology", prompt=SCAN_SURFACE_PROMPT, run_in_bac
 task(description="SCAN Directory Scores", prompt=SCAN_DIRSCORE_PROMPT, run_in_background=true, max_steps=15, model=budget)
 ```
 
-**Batch 2 — SCAN_SYMBOL (dispatch AFTER Batch 1 completes). Reads SURFACE output for file list:**
+**Batch 2 — SCAN_SYMBOL (dispatch AFTER Batch 1 completes). Reads SURFACE output for file list and entry point candidates:**
 ```
 task(description="SCAN Symbol Index", prompt=SCAN_SYMBOL_PROMPT, run_in_background=true, max_steps=15, model=budget)
 ```
 
-**Batch 3 — SCAN_DEP + SCAN_ENTRY (dispatch AFTER Batch 2 completes). DEP reads SYMBOL output. ENTRY reads SURFACE output:**
+**Batch 3 — SCAN_DEP + SCAN_ENTRY (dispatch AFTER Batch 2 completes). SCAN_DEP reads SYMBOL output for dependency graph. SCAN_ENTRY reads SURFACE output for entry/exit point mapping:**
 ```
 task(description="SCAN Dep Graph", prompt=SCAN_DEP_PROMPT, run_in_background=true, max_steps=15, model=budget)
 task(description="SCAN EntryExit Points", prompt=SCAN_ENTRY_PROMPT, run_in_background=true, max_steps=15, model=budget)
@@ -322,7 +322,10 @@ For each source file, collect:
 
 RETURN as JSONL (one JSON object per line):
 {"file": "<path>", "ext": "<ext>", "loc": <N>, "layer": "Interface|Application|Domain|Infrastructure"}
+{"entry_points": ["<file:line>", ...], "api_routes": ["<method> <path>", ...]}
 ```
+
+The last line is a summary object with all identified entry points and API routes. SCAN_ENTRY uses this to build entry-exit.json.
 
 **SCAN_SYMBOL_PROMPT — Symbol Index:**
 ```
@@ -740,7 +743,7 @@ Before dispatching 5 QA discovery lanes, check for cache:
 | S3 injection | N/A | No executable code paths |
 | P1 query | N/A | No database queries |
 | P2 memory | ✅ | 10MB cache cap + rotation strategy + prune-log.jsonl |
-| P3 latency | ✅ | <500ms incremental update; full scan parallelized in 3 batches |
+| P3 latency | ✅ | <500ms incremental update; full scan parallelized in 3 batches (est. based on typical project size) |
 
 Applicable gates: 7/11. Covered: 7/7.
 

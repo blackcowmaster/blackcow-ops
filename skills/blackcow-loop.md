@@ -528,7 +528,46 @@ Wait for all 3 verification subagents to return. ALL must pass (100% test pass, 
 
 ## Phase 4 — Manual-QA (MANDATORY)
 
-HTTP / CLI / File state / DB channel.
+Verify the implementation across all 4 channels. Each channel must produce captured evidence.
+
+### Channel 1 — HTTP
+If the change affects an HTTP endpoint:
+```bash
+# Verify endpoint responds
+curl -s -o /dev/null -w "%{http_code}" <endpoint-url> > .omo/ulw-loop/evidence/<slug>-manual-http.txt
+# Verify auth gate: unauthenticated request should return 401/403
+curl -s -o /dev/null -w "%{http_code}" -H "Authorization: invalid" <endpoint-url> >> .omo/ulw-loop/evidence/<slug>-manual-http.txt
+```
+RETURN EXACTLY: checked:bool, endpoints:list, auth_gate_pass:bool
+
+### Channel 2 — CLI
+If the change affects a CLI command:
+```bash
+# Verify command runs and produces expected output
+<cli-command> --help > .omo/ulw-loop/evidence/<slug>-manual-cli.txt 2>&1
+```
+RETURN EXACTLY: checked:bool, commands:list, exit_code:int
+
+### Channel 3 — File State
+If the change writes files:
+```bash
+# Verify expected files exist with correct content
+ls -la <expected-files> > .omo/ulw-loop/evidence/<slug>-manual-files.txt
+```
+RETURN EXACTLY: checked:bool, files_expected:list, files_found:list
+
+### Channel 4 — DB
+If the change affects database state:
+```bash
+# Query to verify expected DB state
+<db-query> > .omo/ulw-loop/evidence/<slug>-manual-db.txt
+```
+RETURN EXACTLY: checked:bool, tables_checked:list, row_count:int
+
+### Phase 4 Gate
+- ALL applicable channels checked → advance to Phase 5
+- Any channel fails → return to Phase 1.3 (GREEN) or trigger Phase 2a (PDCA)
+- **→ Write checkpoint.json**
 
 ## Phase 5 — Adversarial QA (10 task SUBAGENTS, 2 BATCHES)
 

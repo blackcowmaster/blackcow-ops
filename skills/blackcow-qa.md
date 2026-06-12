@@ -145,19 +145,7 @@ Every gate subagent uses:
 
 ### Gate Thresholds (Reference)
 
-| Gate | Threshold |
-|---|---|
-| M1 spec-match | ≥ 90% |
-| M2 test-pass | 100% pass, coverage ≥ 80% |
-| M3 regression | 0 new failures |
-| M4 lint | 0 warnings |
-| M5 dead-code | 0 unreferenced exports |
-| S1 dataFlow | integrity ≥ 85% |
-| S2 auth | 100% entry points guarded |
-| S3 injection | 0 unhandled injection surfaces |
-| P1 query | 0 N+1 patterns |
-| P2 memory | all collections bounded |
-| P3 latency | p95 < target |
+All 11 gates dispatched in ONE parallel batch. Routing: M1/S1/S2/S3/P3→pro (analytical), M2/M3/M4/M5/P1/P2→budget (mechanical).
 
 ### Batch — ALL 11 Gates in ONE Parallel Dispatch
 
@@ -208,15 +196,22 @@ RETURN EXACTLY:
 
 **GATE_M3_PROMPT — Regression Check:**
 ```
-Compare against the baseline call site inventory (from L2 in discovery). Check:
-- All pre-existing call sites still exist
-- No existing function signatures changed without migration
-- No existing tests broken
+Detect regressions in the target code.
+
+If a call-site baseline is available (from blackcow-loop L2 discovery, .omo/ulw-loop/evidence/*-l2-baseline.txt):
+- Compare current call sites against the baseline
+- Flag any removed or broken call sites
+
+If NO baseline exists (standalone QA invocation):
+- Run git diff against HEAD to identify changed files
+- grep for deleted function/method calls in changed regions
+- Flag any test files that reference deleted symbols
 
 RETURN EXACTLY:
 1. REGRESSION_COUNT: <N> (0 = pass)
 2. BROKEN_CALL_SITES: caller file:line | callee | change detected
 3. BROKEN_TESTS: file:line | test name | failure
+4. BASELINE_AVAILABLE: YES/NO (NO = reduced confidence assessment)
 ```
 
 **GATE_M4_PROMPT — Lint Check:**
