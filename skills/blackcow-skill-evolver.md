@@ -181,11 +181,26 @@ Compare against the pre-evolution structural snapshot from the evolution plan. A
 Before accepting validation results, run a safety scan on the edited skill file for dangerous shell patterns:
 
 ```bash
-# Dangerous patterns: rm -rf, curl-piped-to-bash, destructive ops
+# S3.1 Destructive ops
 grep -n -E "(rm\s+-rf|curl.*\|.*bash|wget.*\|.*sh|sudo\s+rm|:(){ :\|:& };:|chmod\s+777)" <file>
+
+# S3.2 Secret/key leakage
+grep -n -E "(sk-[a-zA-Z0-9]{20,}|api_key\s*=\s*['\"][a-zA-Z0-9_-]{16,}|token\s*=\s*['\"][a-zA-Z0-9._-]{20,}|password\s*=\s*['\"][^'\"]{4,}|secret\s*=\s*['\"][a-zA-Z0-9/+=]{16,})" <file>
 ```
 
-If any dangerous patterns found → **BLOCK** and flag for manual review. RETURN EXACTLY: safe:bool, matches:list.
+### S2 Auth Gate Check — Skill File Integrity
+
+Verify the edited skill file does not contain plaintext credentials or unauthorized access patterns:
+
+```bash
+# S2.1 No embedded API keys in examples
+grep -n -E "(sk-ant-api|sk-or-|sk-proj-|dmVyY|eyJhbGci)" <file> && echo "WARNING: possible embedded key"
+
+# S2.2 No hardcoded URLs with embedded credentials
+grep -n -E "https?://[^@]+:[^@]+@" <file> && echo "WARNING: embedded credentials in URL"
+```
+
+If any dangerous patterns found → **BLOCK** and flag for manual review. If any secrets found → **BLOCK immediately**, do NOT write to log. RETURN EXACTLY: safe:bool, s3_matches:list, s2_matches:list.
 
 ### M3 Regression — Pre/Post Structural Counts
 

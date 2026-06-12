@@ -726,6 +726,24 @@ Before dispatching 5 QA discovery lanes, check for cache:
 | `load` | inline (Phase 6) | — | ~1K | ~$0.0001 |
 | **Full init** | 5 + 5 + inline | 60/40 mix | ~21K | ~$0.002 |
 
+### Gate Coverage (BKIT 11-Gate)
+
+| Gate | Status | How Verified |
+|---|---|---|
+| M1 spec-match | ✅ | scan: file-level comparison vs git HEAD baseline |
+| M2 test-pass | ✅ | Phase 3.5 V-M2: random 5-entry spot-check (file exists + LOC match) |
+| M3 regression | ✅ | Phase 3.5 V-M3: structural snapshot pre/post scan comparison |
+| M4 lint | N/A | Cache files are structured data, not lintable code |
+| M5 dead-code | ✅ | Phase 3.5 V-M5: prune cache entries for deleted source files |
+| S1 dataFlow | ✅ | Entry/exit points validated via entry-exit.json integrity check |
+| S2 auth | N/A | No runtime entry points in caching layer |
+| S3 injection | N/A | No executable code paths |
+| P1 query | N/A | No database queries |
+| P2 memory | ✅ | 10MB cache cap + rotation strategy + prune-log.jsonl |
+| P3 latency | ✅ | <500ms incremental update; full scan parallelized in 3 batches |
+
+Applicable gates: 7/11. Covered: 7/7.
+
 ---
 
 ## Stop Rules
