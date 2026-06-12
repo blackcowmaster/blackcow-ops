@@ -734,3 +734,6 @@ Before dispatching 5 QA discovery lanes, check for cache:
 7. **Skip dirs**: node_modules, .git, dist, build, __pycache__, .venv, vendor, target, .omo
 8. **JSON Lines format** for structure-cache.jsonl — append-friendly, human-readable
 9. **Git diff --name-status** for update — captures adds, modifies, deletes, renames
+10. **M2 cache correctness verification** (MANDATORY after scan/update): sample 5 random cache entries, verify referenced file exists and LOC matches (`wc -l`). Log spot-check results to `.omo/library/spot-check.jsonl`. Any mismatch → flag in output.
+11. **M5 dead entry pruning** (MANDATORY after scan/update): scan cache for entries whose source files no longer exist on disk. Remove dead entries, write pruned count + file paths to `.omo/library/prune-log.jsonl`.
+12. **M3 structural snapshot** (MANDATORY before/after scan): capture `{file_count, total_loc, symbol_count, entry_points}` before scan. Compare after scan — flag any unexpected decreases (>5%). Write snapshot to `.omo/library/structural-snapshot.json`.
