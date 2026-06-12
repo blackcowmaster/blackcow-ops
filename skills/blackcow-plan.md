@@ -477,7 +477,7 @@ Based on Lane 10 pattern analysis, propose **3 options**:
 Wave 1 — Foundation    [task-A] [task-B] [task-C] [task-D]  ← 4-6 tasks, parallel
   Context Budget: ≤115K tokens (dynamic)
 Wave 2 — Core          [task-E] [task-F]                     ← serial on Wave 1
-  Context Budget: ≤90K tokens (dynamic)
+  Context Budget: ≤115K tokens (dynamic)
 Wave 3 — Integration   [task-G]                               ← serial on Wave 2
   Context Budget: ≤50K tokens (dynamic)
 Wave 4 — Hardening     [task-H] [task-I] [task-J]             ← parallel, on Wave 3
@@ -799,7 +799,7 @@ blackcow-loop "Execute plans/<slug>.md" --completion-promise='<SUCCESS criteria>
 7. Every claim: file:line or tool output evidence.
 8. Vague task → assumptions documented, don't refuse.
 9. Auto-generate execution command at plan bottom.
-10. **Context Budget**: if total estimated >90K tokens, split into sequential plans.
+10. **Context Budget**: if total estimated > effective_budget (≈115K) tokens, split into sequential plans.
 11. **3 Architecture Options mandatory for M/XL tasks.**
 12. **Context Anchor written BEFORE gap matrix and waves.**
 13. **All quality gates must have explicit numeric thresholds.**
