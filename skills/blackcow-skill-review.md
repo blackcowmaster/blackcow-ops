@@ -3,7 +3,7 @@ name: blackcow-skill-review
 description: Meta-review skill for BKIT skill files. 6 parallel discovery lanes (5 audit + 1 devil's advocate) evaluating skill quality: syntax check, gate completeness, parallelism audit, cost efficiency, staleness detection. Produces scored review report. NEVER edits skills directly — only reports.
 runAs: subagent
 version: 2.0.0
-updated: 2026-06-13
+updated: 2026-06-12
 model: deepseek-v4-pro
 allowed-tools: read_file, grep, glob, ls, bash, web_fetch, write_file, task
 model_tiers:

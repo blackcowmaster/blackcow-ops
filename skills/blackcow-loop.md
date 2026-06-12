@@ -3,7 +3,7 @@ name: blackcow-loop
 description: Hephaestus+Oracle execution loop. BKIT-enhanced. Trust Level(0-4) + gap-detector + PDCA iterator(≤7) + 11-gate thresholds + Completion Report(KPI+lessons). 7+2 speculative parallel bootstrap lanes → TDD → gap-detect → pdca-iterate → parallel verification → 10-agent adversarial QA (8 gate auditors + 2 PoC exploit engineers) → report. Cost-tier routing (budget|pro).
 runAs: subagent
 version: 2.0.0
-updated: 2026-06-13
+updated: 2026-06-12
 model: deepseek-v4-pro
 model_tiers:
   budget: deepseek-v4-lite    # grep, glob, ls, basic read tasks (~$0.07/1M input)
@@ -574,7 +574,7 @@ RETURN EXACTLY: checked:bool, tables_checked:list, row_count:int
 
 ## Phase 5 — Adversarial QA (10 task SUBAGENTS, 2 BATCHES)
 
-**Dispatch 8 `task` subagents with `run_in_background: true`. Each audits the changed code for one gate dimension. Full BKIT 11-gate coverage. Routing: S1/S2/S3 use pro (security audits are analytical), M1/M5/P1/P2/P3 use budget (pattern-matching and spec-comparison are mechanical).**
+**Dispatch 8 `task` subagents with `run_in_background: true`. Each audits the changed code for one gate dimension (8 of 11 gates — M2/M3/M4 are verified in Phase 3). Routing: S1/S2/S3 use pro (security audits are analytical), M1/M5/P1/P2/P3 use budget (pattern-matching and spec-comparison are mechanical).**
 
 Every QA subagent uses:
 - `tools`: `["read_file","grep","glob","ls","bash"]`

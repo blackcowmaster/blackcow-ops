@@ -3,7 +3,7 @@ name: blackcow-plan
 description: Prometheus strategic planner. BKIT-enhanced. Context Anchor + 3 arch options + Context Budget(≤128K dynamic) + 11-gate taxonomy. Adaptive lane scaling (XS:5, M:10, XL:15) → 3-5 adversarial reviewers (scale-gated). Multi-feature mode (--features=a,b,c). Cost-tier routing (budget|pro|quick|deep|ultrabrain). Never writes product code.
 runAs: subagent
 version: 2.0.0
-updated: 2026-06-13
+updated: 2026-06-12
 model: deepseek-v4-pro
 model_tiers:
   budget: deepseek-v4-lite    # grep, glob, ls, basic read tasks (~$0.07/1M input)
@@ -11,7 +11,7 @@ model_tiers:
   quick: deepseek-v4-lite     # single-file edits, typos, trivial fixes (alias for budget)
   deep: deepseek-v4-pro       # autonomous research + execution (alias for pro)
   ultrabrain: deepseek-v4-pro # hard logic, architecture decisions, adversarial review
-allowed-tools: read_file, glob, grep, ls, bash, web_fetch, write_file, explore, research, task, lsp_definition, lsp_diagnostics, lsp_hover, lsp_references, edit_file, multi_edit
+allowed-tools: read_file, glob, grep, ls, bash, web_fetch, write_file, explore, research, task, lsp_definition, lsp_diagnostics, lsp_hover, lsp_references
 ---
 # blackcow-plan — Strategic Planner (BKIT Enhanced)
 
@@ -149,9 +149,9 @@ Override with `--max-context=N`. If estimated > effective_budget → split into 
 
 ---
 
-## Phase 1 — Collect (10 PARALLEL task SUBAGENTS)
+## Phase 1 — Collect (ADAPTIVE PARALLEL task SUBAGENTS)
 
-**CRITICAL: You MUST dispatch all 10 lanes as `task` subagents in ONE batch. Set `run_in_background: true` on ALL of them. NEVER await any single lane before dispatching the rest — that would serialize them and defeat the purpose.**
+**CRITICAL: You MUST dispatch all lanes as `task` subagents in ONE batch. Lane count is adaptive: XS=5, M=10, XL=15. Set `run_in_background: true` on ALL of them. NEVER await any single lane before dispatching the rest — that would serialize them and defeat the purpose.**
 
 ### Dispatch Protocol (with Cost-Tier Routing)
 
@@ -401,7 +401,7 @@ RETURN EXACTLY:
 
 ## Phase 2 — Verify (Cross-Check + Contradiction Detection)
 
-When all 10 lanes return, run these in **ONE parallel batch**:
+When all dispatched lanes return, run these in **ONE parallel batch**:
 
 1. `grep` for top 5 symbols each lane claimed — confirm file:line
 2. `grep` with broader patterns to find MISSED references
@@ -792,7 +792,7 @@ blackcow-loop "Execute plans/<slug>.md" --completion-promise='<SUCCESS criteria>
 ## Constraints
 1. **NEVER edit product code.**
 2. Only output: `plans/<slug>.md`.
-3. **Phase 1: Dispatch ALL 10 lanes as task subagents with run_in_background=true. NEVER serialize — batch fire all 10.**
+3. **Phase 1: Dispatch ALL lanes (XS:5, M:10, XL:15) as task subagents with run_in_background=true. NEVER serialize — batch fire all of them.**
 4. **Phase 2 cross-checks: ALL in one parallel batch.**
 5. **Phase 4: Dispatch 3-5 reviewers as task subagents with run_in_background=true. XS tasks skip Phase 4, M tasks use 3, XL tasks use 5. NEVER serialize.**
 6. Every step: concrete verification command + evidence path + BKIT gate tag.

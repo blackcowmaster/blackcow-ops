@@ -3,7 +3,7 @@ name: blackcow-qa
 description: Athena QA specialist. BKIT 11-gate evaluation with numeric thresholds + per-task cost tracking. L1-L5 test pyramid generation + dataFlow integrity + Zero Script QA. Evidence→memory pipeline (qa-history.jsonl). Independent or called inline. Never writes product code.
 runAs: subagent
 version: 2.0.0
-updated: 2026-06-13
+updated: 2026-06-12
 model: deepseek-v4-pro
 model_tiers:
   budget: deepseek-v4-lite    # grep, glob, ls, basic read tasks (~$0.07/1M input)

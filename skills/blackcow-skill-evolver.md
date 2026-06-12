@@ -3,7 +3,7 @@ name: blackcow-skill-evolver
 description: Skill evolution engine. Reads blackcow-skill-review reports, proposes concrete edits to skill files. Triple safety: (1) only edits .reasonix/skills/*.md, (2) creates backup before any edit, (3) requires --approve flag to apply. Writes evolution log with before/after diffs.
 runAs: subagent
 version: 2.0.0
-updated: 2026-06-13
+updated: 2026-06-12
 model: deepseek-v4-pro
 allowed-tools: read_file, grep, glob, ls, bash, write_file, edit_file, multi_edit, task
 model_tiers:
@@ -180,6 +180,16 @@ After all 8 validation tasks return, capture a structural snapshot as JSON:
 
 Compare against the pre-evolution structural snapshot from the evolution plan. Any decrease in `constraints` or `gate_refs` is a regression → FAIL. Log the snapshot to `.omo/meta-review/structural-snapshot-<date>-<skill>.json`.
 
+Also run a quick structural count comparison:
+```bash
+grep -c "^## " <file>          # phase/section count
+grep -c "^### " <file>          # subsection count
+grep -c '```' <file>            # code fence lines
+grep -c "^[0-9]\+\." <file>     # numbered constraint/step lines
+grep -c -E "M[1-5]|S[1-3]" <file>  # gate reference count
+```
+Flag any count that decreased vs pre-evolution baseline.
+
 ### S3 Injection Audit — Bash Command Safety
 
 Before accepting validation results, run a safety scan on the edited skill file for dangerous shell patterns:
@@ -206,22 +216,6 @@ grep -n -E "https?://[^@]+:[^@]+@" <file> && echo "WARNING: embedded credentials
 
 If any dangerous patterns found → **BLOCK** and flag for manual review. If any secrets found → **BLOCK immediately**, do NOT write to log. RETURN EXACTLY: safe:bool, s3_matches:list, s2_matches:list.
 
-### M3 Regression — Pre/Post Structural Counts
-
-After all 8 parallel tasks complete, run a structural checkpoint comparing pre- and post-evolution counts:
-
-```bash
-# Capture structural counts
-grep -c "^## " <file>          # phase/section count
-grep -c "^### " <file>          # subsection count
-grep -c '```' <file>            # code fence lines (÷2 for block count)
-grep -c "^[0-9]\+\." <file>     # numbered constraint/step lines
-grep -c -E "M[1-5]|S[1-3]" <file>  # gate reference count
-```
-
-Compare these against pre-evolution baselines captured before edits. Flag any count that decreased. If any structural count decreased → investigate before passing validation.
-
-If validation fails → auto-revert from backup and report.
 
 ---
 
