@@ -1,6 +1,6 @@
 ---
 name: blackcow-skill-review
-description: Meta-review skill for BKIT skill files. 5 parallel discovery lanes auditing skill quality: syntax check, gate completeness, parallelism audit, cost efficiency, staleness detection. Produces scored review report. NEVER edits skills directly — only reports.
+description: Meta-review skill for BKIT skill files. 6 parallel discovery lanes (5 audit + 1 devil's advocate) evaluating skill quality: syntax check, gate completeness, parallelism audit, cost efficiency, staleness detection. Produces scored review report. NEVER edits skills directly — only reports.
 runAs: subagent
 version: 2.0.0
 updated: 2026-06-13
@@ -21,21 +21,21 @@ You are **Metis 大将**: the skill auditor. You review skill files (markdown pr
 
 `arguments`: skill file path(s) to review, `--skill=<skill-name>`, or `--all` to review all blackcow-* skills.
 
-## Phase 0 — Discovery (5 PARALLEL LANES, ONE BATCH)
+## Phase 0 — Discovery (6 PARALLEL LANES, ONE BATCH)
 
 ### Context Budget Estimation
 
 | Phase | Lanes | Est. Tokens Each | Total |
 |---|---|---|---|
-| Phase 0 (5 review lanes) | 5 | ~8K | ~40K |
-| Phase 1 (cross-reference) | — | ~3K | ~3K |
+| Phase 0 (5 review + 1 devil's-advocate) | 6 | ~8K | ~48K |
+| Phase 1 (cross-reference, 2 parallel) | 2 | ~3K | ~3K |
 | Phase 2 (report writing) | — | ~5K | ~5K |
 | Phase 3 (trend append) | — | ~1K | ~1K |
-| **Total** | — | — | **~49K / 115K effective** |
+| **Total** | — | — | **~57K / 115K effective** |
 
 DeepSeek cost estimate: ~$0.005 per invocation (30K × $0.07/1M budget + 19K × $0.14/1M pro ≈ $0.0048). Equivalent GPT-4: ~$0.74.
 
-**CRITICAL: Dispatch all 5 lanes as `task` subagents with `run_in_background: true`. NEVER await any single lane before dispatching the rest.**
+**CRITICAL: Dispatch all 6 lanes as `task` subagents with `run_in_background: true`. NEVER await any single lane before dispatching the rest.**
 
 Every lane subagent uses:
 - `tools`: `["read_file","grep","glob","ls","bash"]`
@@ -50,6 +50,7 @@ task(description="R2 Gate Completeness", prompt=R2_PROMPT, run_in_background=tru
 task(description="R3 Parallelism Audit", prompt=R3_PROMPT, run_in_background=true, max_steps=12, model=pro)
 task(description="R4 Cost Efficiency", prompt=R4_PROMPT, run_in_background=true, max_steps=12, model=budget)
 task(description="R5 Staleness Detection", prompt=R5_PROMPT, run_in_background=true, max_steps=12, model=budget)
+task(description="R6 Devil's Advocate", prompt=R6_PROMPT, run_in_background=true, max_steps=12, model=ultrabrain)
 ```
 
 ### Lane Prompts
@@ -165,16 +166,34 @@ RETURN EXACTLY:
 5. FRESHNESS_RECOMMENDATION: review schedule (weekly/monthly/quarterly)
 ```
 
+**R6_PROMPT — Devil's Advocate (Self-Review Adversarial Audit):**
+```
+You are the DEVIL'S ADVOCATE for the meta-review. Challenge every dimension score.
+
+For each dimension (R2 Gate, R3 Parallelism, R4 Cost):
+1. Pick the weakest evidence cited by the other lanes
+2. Argue why the score should be LOWER — what was missed? What was hand-waved?
+3. If you agree, produce a counter-argument anyway. If you disagree, propose a new score with file:line justification.
+
+RETURN EXACTLY:
+1. R2_CHALLENGE: score_assigned | proposed_score | missing_evidence:list | verdict: AGREE/DISAGREE
+2. R3_CHALLENGE: score_assigned | proposed_score | serial_bottleneck:file:line | verdict: AGREE/DISAGREE
+3. R4_CHALLENGE: score_assigned | proposed_score | waste_sources:list | verdict: AGREE/DISAGREE
+4. BIGGEST_BLIND_SPOT: what the 5 review lanes collectively missed (1 sentence)
+```
+
 ---
 
-## Phase 1 — Cross-Reference & Contradiction Detection
+## Phase 1 — Cross-Reference & Contradiction Detection (2 PARALLEL budget SUBAGENTS)
 
-When all 5 review lanes return, run these checks:
+**Dispatch 2 `task` subagents with `run_in_background=true`, `model=budget`, `max_steps=8`:**
 
-1. If R2 says "gate M2 covered" but R3 shows that test lanes run sequentially → contradiction
-2. If R4 says "cost efficient" but R3 found serialization → contradiction
-3. If R5 says "fresh" but R2 found missing gates → stale skill that looks fresh
-4. Cross-reference: any lane finding that conflicts with another → escalate
+```
+task(description="XR1 Gate Consistency", prompt="Check R2 gate findings against R3 parallelism. If R2 says gate M2 covered but R3 shows test lanes run sequentially → contradiction. Check R4 cost findings against R3 serialization claims. RETURN EXACTLY: contradictions:list, escalations:list", run_in_background=true, max_steps=8, model=budget)
+task(description="XR2 Staleness vs Quality", prompt="Check R5 staleness vs R2 gates. If R5 says fresh but R2 found missing gates → stale skill that looks fresh. Cross-reference any lane finding that conflicts with another lane. RETURN EXACTLY: contradictions:list, escalations:list", run_in_background=true, max_steps=8, model=budget)
+```
+
+Wait for both to return. Consolidate findings.
 
 ---
 
@@ -263,11 +282,11 @@ Append summary row to `.omo/meta-review/review-history.jsonl`:
 - Skill file not found → report and stop
 - Skill file is empty → report and stop
 - Cannot parse frontmatter → report syntax errors, continue review
-- **Self-review guard**: If reviewing blackcow-skill-review.md itself, validate review determinism — re-run and confirm scores match within ±3 points. If scores diverge beyond ±3, flag in report as self-consistency failure.
+- **Self-review guard**: If reviewing blackcow-skill-review.md itself, validate review determinism — re-run and confirm scores match within ±3 points. If scores diverge beyond ±3, flag in report as self-consistency failure. R6 (Devil's Advocate) provides the adversarial counter-check.
 
 ## Constraints
 1. **NEVER edit skill files.** This skill only reads and reports.
-2. All 5 review lanes dispatched with `run_in_background=true` in ONE batch.
+2. All 6 review lanes dispatched with `run_in_background=true` in ONE batch.
 3. Every finding must have file:line or section evidence.
 4. All scores are numeric (0-100).
 5. Review report always written to `.omo/meta-review/`.
