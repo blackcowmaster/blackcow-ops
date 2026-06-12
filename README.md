@@ -12,6 +12,10 @@
     <a href="#philosophy">Philosophy</a>
     ·
     <a href="README.ko.md">한국어</a>
+    ·
+    <a href="README.ja.md">日本語</a>
+    ·
+    <a href="README.zh-cn.md">简体中文</a>
   </p>
 </div>
 
@@ -132,6 +136,8 @@ blackcow-ops/
 │   └── BKIT.md                      ← 11-gate taxonomy reference
 ├── README.md
 ├── README.ko.md
+├── README.ja.md
+├── README.zh-cn.md
 ├── LICENSE
 └── NOTICE
 ```

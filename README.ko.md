@@ -12,6 +12,10 @@
     <a href="#철학">철학</a>
     ·
     <a href="README.md">English</a>
+    ·
+    <a href="README.ja.md">日本語</a>
+    ·
+    <a href="README.zh-cn.md">简体中文</a>
   </p>
 </div>
 
@@ -132,6 +136,8 @@ blackcow-ops/
 │   └── BKIT.md                      ← 11-게이트 분류 체계 레퍼런스
 ├── README.md
 ├── README.ko.md
+├── README.ja.md
+├── README.zh-cn.md
 ├── LICENSE
 └── NOTICE
 ```
