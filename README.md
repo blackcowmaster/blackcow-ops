@@ -75,6 +75,24 @@ blackcow-skill-review --all
 blackcow-skill-evolver .omo/meta-review/review-*.md --approve
 ```
 
+## 💡 How to Invoke (Reasonix)
+
+BlackCow skills are Reasonix skill files. Invoke them via the `run_skill` tool or the `/` slash shortcut:
+
+```
+run_skill({ name: "blackcow-plan", arguments: "Add OAuth2 auth" })
+run_skill({ name: "blackcow-loop", arguments: "Execute plans/auth.md --trust-level=2" })
+run_skill({ name: "blackcow-qa", arguments: "src/auth/" })
+```
+
+If Reasonix has indexed the skills:
+
+```
+/blackcow-plan Add OAuth2 auth
+/blackcow-loop Execute plans/auth.md --trust-level=2
+/blackcow-qa src/auth/
+```
+
 ## 🧩 What you get
 
 | Feature | Description |
