@@ -1,0 +1,37 @@
+BlackCow Ops
+Copyright 2026 BlackCow Ops Contributors
+
+This product includes software developed by:
+
+1. POPUP STUDIO PTE. LTD. (https://github.com/popup-studio-ai/bkit-claude-code)
+   - Licensed under Apache License 2.0
+   - The 11-gate quality taxonomy (M1-M10+S1) originated in BKIT.
+     BlackCow Ops reorganizes and extends this into M1-M5 (Implementation),
+     S1-S3 (Security), and P1-P3 (Performance) categories, implemented
+     with Reasonix-native parallel subagent architecture.
+
+2. oh-my-openagent / OmO (https://github.com/code-yeongyu/oh-my-openagent)
+   - Licensed under MIT License
+   - Discipline agent patterns, parallel orchestration, Hashline content
+     verification, and hyperplan adversarial review concepts influenced
+     BlackCow's parallel lane dispatch, Phase 0.5 Hashline guard, and
+     Phase 4 quintuple reviewer design.
+
+3. Gajae-Code (https://github.com/Yeachan-Heo/gajae-code)
+   - Licensed under MIT License
+   - deep-interview, tmux-backed workers, and external harness philosophy
+     influenced BlackCow's intent classification and checkpoint/resume design.
+
+4. pi-team (https://github.com/minzique/pi-team)
+   - Licensed under MIT License
+   - Transcript-based multi-agent round-robin communication pattern
+     influenced the file-based agent communication analysis.
+
+5. Claw Code (https://github.com/ultraworkers/claw-code)
+   - Licensed under MIT License
+   - The agent-managed self-improvement philosophy influenced
+     BlackCow's skill-review → skill-evolver meta cycle.
+
+The BlackCow Ops skills, documentation, and associated files are original
+works that adapt and extend these ideas for the Reasonix agent runtime
+with DeepSeek-native cost optimization.
