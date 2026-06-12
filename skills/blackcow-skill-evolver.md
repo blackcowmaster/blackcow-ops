@@ -149,7 +149,7 @@ For each approved recommendation:
 After ALL edits are applied, dispatch 8 validation tasks in parallel. All use `run_in_background=true`, `max_steps=8`, `model=budget`. Each has a minimal prompt with `RETURN EXACTLY` schema. Collect all results before proceeding.
 
 ```
-task(description="V1 M1 SpecMatch", prompt="Verify each applied edit matches its review recommendation. Compare old_string and new_string against the review report. RETURN EXACTLY: pass:bool, mismatches:list, notes:str", run_in_background=true, max_steps=8, model=budget)
+task(description="V1 M1 SpecMatch", prompt="Verify each applied edit matches its review recommendation. Compare old_string and new_string against the review report. RETURN EXACTLY: pass:bool, mismatches:list, notes:str", run_in_background=true, max_steps=8, model=pro)
 
 task(description="V2 Syntax", prompt="Check YAML frontmatter validity in the edited skill file. Count '---' markers — should be ≥ 2 (opening + closing frontmatter; extra thematic breaks below are fine). RETURN EXACTLY: pass:bool, frontmatter_count:int, errors:list", run_in_background=true, max_steps=8, model=budget)
 
@@ -161,7 +161,7 @@ task(description="V5 M5 DeadCode", prompt="Scan for orphaned sections, unreferen
 
 task(description="V6 Constraints", prompt="Count constraints in the edited skill's Constraints section. Compare against pre-evolution count from the evolution plan. Flag any decrease. RETURN EXACTLY: pass:bool, count_before:int, count_after:int, delta:int, notes:str", run_in_background=true, max_steps=8, model=budget)
 
-task(description="V7 S1 DataIntegrity", prompt="Verify heading hierarchy is consistent, RETURN EXACTLY schemas are intact, required frontmatter fields present (name, description, runAs, version). RETURN EXACTLY: pass:bool, heading_issues:list, missing_fields:list, notes:str", run_in_background=true, max_steps=8, model=budget)
+task(description="V7 S1 DataIntegrity", prompt="Verify heading hierarchy is consistent, RETURN EXACTLY schemas are intact, required frontmatter fields present (name, description, runAs, version). RETURN EXACTLY: pass:bool, heading_issues:list, missing_fields:list, notes:str", run_in_background=true, max_steps=8, model=pro)
 
 task(description="V8 GateCoverage", prompt="Count BKIT gate references (M1, M2, M3, M4, M5, S1, S2, S3) in the edited skill. Compare against pre-evolution counts. Flag any gate that decreased. RETURN EXACTLY: pass:bool, gates_before:dict, gates_after:dict, regressions:list, notes:str", run_in_background=true, max_steps=8, model=budget)
 ```

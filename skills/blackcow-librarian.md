@@ -414,6 +414,18 @@ Directories Scored: <N>
 Cache Size: <N> KB
 ```
 
+### 3.5 Post-Scan Verification (MANDATORY — M2/M5/M3 Gates)
+
+**Dispatch 3 verification `task` subagents with `run_in_background=true`, `model=budget`, `max_steps=8`:**
+
+```
+task(description="V-M2 SpotCheck", prompt="Randomly sample 5 entries from .omo/library/structure-cache.jsonl. For each: verify the referenced file exists on disk, verify LOC matches (bash wc -l). RETURN EXACTLY: pass:bool, samples_checked:int, mismatches:list, notes:str", run_in_background=true, max_steps=8, model=budget)
+task(description="V-M5 Prune", prompt="Scan .omo/library/structure-cache.jsonl for entries whose source files no longer exist on disk. Remove dead entries, write pruned count + file paths to .omo/library/prune-log.jsonl. RETURN EXACTLY: pass:bool, dead_entries_found:int, pruned:int, pruned_files:list", run_in_background=true, max_steps=8, model=budget)
+task(description="V-M3 Snapshot", prompt="Capture structural snapshot: count files, total LOC, symbols, entry points from cache. Compare against pre-scan baseline if exists. Flag any decrease >5%. Write to .omo/library/structural-snapshot.json. RETURN EXACTLY: pass:bool, files_before:int, files_after:int, loc_before:int, loc_after:int, symbols_before:int, symbols_after:int, regressions:list", run_in_background=true, max_steps=8, model=budget)
+```
+
+Wait for all 3 to return. If any fail → flag in scan summary. Evidence written to `.omo/ulw-loop/evidence/scan-verification.txt`.
+
 ---
 
 ## Phase 4 — update (Incremental Updater)
