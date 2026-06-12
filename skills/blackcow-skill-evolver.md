@@ -258,14 +258,16 @@ Trigger a re-review of the evolved skill:
 blackcow-skill-review --skill=<skill-name>
 ```
 
+**Self-modification guard**: If the evolved skill IS `blackcow-skill-review.md` itself, do NOT use it for re-verification. Instead, use a pinned baseline: compare against the last review score stored in `.omo/meta-review/review-history.jsonl` for this skill. If `after ≥ before - 3` (allowing for ±3 review noise) → CONFIRMED. If the drop exceeds 3 → auto-revert.
+
 Verify:
-1. **M2 verification**: total_score_after ≥ total_score_before (must NOT decrease)
+1. **M2 verification**: total_score_after ≥ total_score_before - 3 (noise band, matching skill-review's own ±3 tolerance)
 2. **M3 regression**: no NEW critical/high findings introduced by the edit
 3. **Gate comparison**: compare gate coverage before/after — no gate should drop
 
-If total_score_after < total_score_before OR new critical findings → **auto-revert from backup** and log the failure.
+If total_score_after < total_score_before - 3 OR new critical findings → **auto-revert from backup** and log the failure.
 
-If total_score_after ≥ total_score_before → evolution is CONFIRMED. Log success.
+If total_score_after ≥ total_score_before - 3 → evolution is CONFIRMED. Log success.
 
 ### Verification Output
 ```markdown

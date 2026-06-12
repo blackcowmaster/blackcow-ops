@@ -35,7 +35,7 @@ Parse `--trust-level=N` (default: 2).
 | **L3** | Auto-Review | 7 cycles | After M1~M5+S1~S3 | 7 | Full |
 | **L4** | Full-Auto | 7 cycles | Auto | 7 | Full + load |
 
-**Adaptive PDCA Ceiling**: Track PDCA success rate across invocations. If success rate >95% for 3 consecutive runs, L3/L4 can auto-reduce to 5 cycles. If success rate <80%, increase to max 7. Write PDCA metrics to `.omo/memory/pdca-history.jsonl`.
+**Adaptive PDCA Ceiling**: Track PDCA success rate across invocations. If success rate >95% for 3 consecutive runs, L3/L4 can auto-reduce by 1 cycle per successful run (minimum=3, regardless of Trust Level). If success rate <80%, increase by 1 per failed run (maximum=7). Write PDCA metrics to `.omo/memory/pdca-history.jsonl`.
 
 ### Session Persistence & Checkpoint Resume (L3+)
 
@@ -307,7 +307,7 @@ RETURN EXACTLY:
 
 ## Phase 0.5 — Hashline Content Verification (MANDATORY before every destructive edit)
 
-**Inspired by OmO's Hashline (The Harness Problem solution by Can Bölük). Grok Code Fast 1 benchmark: 6.7% → 68.3% edit success rate purely from content-hash verification.**
+**Inspired by OmO's Hashline (The Harness Problem solution by Can Bölük). Public benchmark: Grok Code Fast 1 reported 6.7% → 68.3% edit success rate improvement from content-hash verification alone. [UNVERIFIED EXTERNAL CLAIM — not independently reproduced]**
 
 ### Rationale
 The `edit_file` tool requires reproducing exact text to find the replacement point. When the model cannot reproduce whitespace or exact formatting, the edit fails silently or corrupts the file. Hashline solves this by tagging every line with a content hash the agent reads back, then the edit references the hash — if the hash changed (file was modified since read), the edit is rejected.

@@ -28,12 +28,12 @@ You are **Metis 大将**: the skill auditor. You review skill files (markdown pr
 | Phase | Lanes | Est. Tokens Each | Total |
 |---|---|---|---|
 | Phase 0 (5 review + 1 devil's-advocate) | 6 | ~8K | ~48K |
-| Phase 1 (cross-reference, 2 parallel) | 2 | ~3K | ~3K |
+| Phase 1 (cross-reference, 2 parallel) | 2 | ~3K each | ~6K |
 | Phase 2 (report writing) | — | ~5K | ~5K |
 | Phase 3 (trend append) | — | ~1K | ~1K |
-| **Total** | — | — | **~57K / 115K effective** |
+| **Total** | — | — | **~60K / 115K effective** |
 
-DeepSeek cost estimate: ~$0.005 per invocation (30K × $0.07/1M budget + 19K × $0.14/1M pro ≈ $0.0048). Equivalent GPT-4: ~$0.74.
+DeepSeek cost estimate: ~$0.006 per invocation (41K × $0.07/1M budget + 19K × $0.14/1M pro ≈ $0.0055). Equivalent GPT-4: ~$0.90.
 
 **CRITICAL: Dispatch all 6 lanes as `task` subagents with `run_in_background: true`. NEVER await any single lane before dispatching the rest.**
 
