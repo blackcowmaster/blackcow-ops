@@ -33,14 +33,16 @@ Ask four questions. If ANY answer is "no", widen discovery scope before proceedi
 
 **Rule**: Never proceed to gate selection with incomplete context. Insufficient context → widen Phase 0 exploration → re-assess. This prevents the most common governance failure: selecting wrong mode because the task wasn't understood.
 
+**Output**: Extract a `context_tags` list from the task domain (language, framework, database, infrastructure). Example: `["typescript", "express", "postgresql"]`. This feeds Phase 0.1 failure-pattern filtering.
+
 ### 0.1 Load Failure-Pattern Memory
 Check `.omo/memory/failure-patterns.jsonl`. Filter by `context_tags` matching the detected tech stack from Phase 0.0:
-- **Exact tag match** → auto-fix enabled (effectiveness ≥ 80)
-- **Partial match** (e.g., same language, different framework) → suggest fix, require confirmation
-- **No tag match** → load as reference only, disable auto-fix
-- **No context_tags on pattern** → treat as universal, apply normally
+- **Exact match** (all task tags ⊆ pattern tags) → apply feed effectiveness rules normally
+- **Partial match** (≥1 overlapping tag) → suggest fix, require confirmation regardless of effectiveness
+- **No tag match** (zero overlapping tags) → load as reference only, disable auto-fix
+- **No context_tags on pattern** → treat as universal, apply feed rules normally
 
-If no context_tags are present in the task profile, fall back to universal matching (all patterns considered). Record which patterns were filtered and why in the governance decision.
+If the Phase 0.0 `arguments` input yields no context_tags, fall back to universal matching. Record each pattern's filter decision (exact/partial/none/universal) in the Failure-Pattern Feed table's Action column.
 
 ### 0.2 Load Loop ROI History
 Check `.omo/memory/loop-roi.jsonl`. If historical ROI for this area was low, suggest higher trust level or scope reduction.
