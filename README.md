@@ -184,7 +184,7 @@ BlackCow was designed for models that are **cheap enough to be wasteful**. DeepS
 
 ## Quality Score Evolution
 
-BlackCow Ops was improved through a **score-driven self-evolution loop** (40 rounds, 29 commits). Each round: score → identify weakness → apply minimal fix → re-score → accept only if improved.
+BlackCow Ops was improved through a **score-driven self-evolution loop** (55 rounds, 31 commits). Each round: score → identify weakness → apply minimal fix → re-score → accept only if improved.
 
 | Round | Score | Key Improvements |
 |---|---:|---:|---|
@@ -196,8 +196,10 @@ BlackCow Ops was improved through a **score-driven self-evolution loop** (40 rou
 | R11-R13 | **92.8** | Governor wiring, evidence reader, 1M context window |
 | R14-R20 | **95.0** | Per-language gate detection, anti-hallucination guards, widening quality gate |
 | R21-R40 | **91.4** | All 11 dimensions ≥ 90; Observable capped at 90 (infrastructure-honest) |
+| R51-R55 | **91.5** | Governor E2E verified; governor→plan→loop→qa full pipeline; ESCALATE tested; ecosystem health + cross-skill contract |
 
-| Dimension | 57 | 91.4 |
+| Dimension | 57 | 91.5 |
+
 |---|---:|---:|
 | Reasonix-native | 52 | 91 |
 | DeepSeek fit | 78 | 92 |
