@@ -68,6 +68,19 @@ Parse `--mode=auto|fast|standard|full|siege|escalate` (default: auto, which sele
 | 6 Cleanup | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 7 Completion | ✅ | ✅ | ✅ | ✅ | ✅ |
 
+**Mode → Token Budget (estimated per phase):**
+
+| Phase | FAST | STANDARD | FULL | SIEGE | ESCALATE |
+|---|---|---|---|---|---|
+| 0 Bootstrap | 2K | 15K | 35K | 50K | 50K |
+| 1 TDD | 5K | 15K | 20K | 20K | 20K |
+| 2-2a Gap+PDCA | 0 | 20K | 50K | 50K | 80K |
+| 3 Verification | 3K | 10K | 15K | 15K | 20K |
+| 4 Manual-QA | 0 | 5K | 10K | 10K | 10K |
+| 5 Adversarial QA | 0 | 25K | 60K | 80K | 100K |
+| 6-7 Cleanup+Report | 2K | 5K | 10K | 10K | 10K |
+| **TOTAL** | **~12K** | **~95K** | **~200K** | **~235K** | **~290K** |
+
 **Auto mode selection**: If no `--mode` specified, infer from IntentGate class:
 - Emergency → FAST
 - Bug Fix → STANDARD
@@ -1125,6 +1138,8 @@ Each artifact produced during execution is indexed for compact downstream consum
 | `E003` | M4 | `npm run lint` | PASS | 0 warnings | `.omo/ulw-loop/evidence/<slug>-m4.txt` | `<sha256>` |
 | `E004` | S2 | `curl -H "Authorization: invalid"` | PASS | 401 returned on all endpoints | `.omo/ulw-loop/evidence/<slug>-s2.txt` | `<sha256>` |
 | `E005` | O<N> | Observable check (O1 smoke) | PASS | Endpoint responds 200 | `.omo/ulw-loop/evidence/<slug>-observable.json` | `<sha256>` |
+
+**Hash verification**: Before trusting any evidence index entry, recompute `sha256` of the artifact and compare against stored hash. If mismatch → artifact was tampered or corrupted → re-run the gate evaluation. Write hash verification result per entry: `hash_valid: true|false`.
 | ... | ... | ... | ... | ... | ... | ... |
 
 **Index usage contract:**

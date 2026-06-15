@@ -205,7 +205,7 @@ echo "$CHANGED" | grep -qE '(types|schema|interface|model|entity)' && GATES="$GA
 echo "$CHANGED" | grep -qE '(auth|middleware|guard|route|handler|controller)' && GATES="$GATES S2"
 
 # S3 (injection): user input surfaces changed (forms, API handlers, parsers)
-echo "$CHANGED" | grep -qE '(form|input|parse|handler|controller|route)' && GATES="$GATES S3"
+echo "$CHANGED" | grep -qE '(form|input|parse|handler|controller|route|eval|exec|innerHTML|dangerouslySetInnerHTML)' && GATES="$GATES S3"
 
 # P1 (query): DB/repository/ORM code changed
 echo "$CHANGED" | grep -qE '(repository|dao|query|database|db|\.sql)' && GATES="$GATES P1"

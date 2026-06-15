@@ -815,6 +815,18 @@ Before each `blackcow-plan` or `blackcow-loop` invocation, check `.omo/memory/fa
 - If pattern resolved >3 times → suggest automated fix template
 - Feed unresolved patterns into IntentGate for severity escalation
 
+### Trend Analysis
+
+Before feeding patterns to governor, compute:
+- **Recurrence rate**: occurrences per 30 days → if >3, escalate from HIGH to CRITICAL
+- **Mean time to resolve**: avg days from first_seen to resolved → if >14 days, flag for architectural review
+- **Gate hotspot**: which gate appears most in unresolved patterns → suggest permanent gate hardening
+
+Write trend summary to `.omo/memory/failure-trends.json`:
+```json
+{"gate_hotspots": {"S2": 4, "M1": 2}, "mean_resolution_days": 12.3, "recurrence_alerts": ["<pattern_id>"]}
+```
+
 ### Rotation
 - Cap at 200 entries
 - Archive entries with `resolved: true` and `last_seen > 90 days` to `.omo/memory/failure-patterns-archive.jsonl.gz`
