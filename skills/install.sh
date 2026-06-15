@@ -6,25 +6,157 @@
 # skills with the correct `allowed-tools` frontmatter for that platform.
 #
 # Usage:
-#   bash skills/install.sh              # install to ~/.reasonix/skills/
-#   bash skills/install.sh --dry-run    # show what would change, don't write
-#   bash skills/install.sh --target ~/custom/skills/  # custom target dir
+#   bash skills/install.sh                  # install to ~/.reasonix/skills/
+#   bash skills/install.sh --dry-run        # show what would change, don't write
+#   bash skills/install.sh --target ~/custom/skills/      # custom target dir
+#   bash skills/install.sh --install-path ~/custom/skills/ # alias for --target
 # =============================================================================
 
 set -euo pipefail
+
+# =============================================================================
+# Path Validation — Security Hardening (governed: install-path-security)
+# =============================================================================
+# resolve_path(raw_path) → resolved absolute path (stdout)
+# Tiered fallback for cross-platform realpath:
+#   1. realpath -m (GNU coreutils / macOS with coreutils)
+#   2. python3 -c "import os; print(os.path.realpath(...))" (macOS 10.15+)
+#   3. readlink -f (GNU)
+#   4. cd "$dir" && pwd -P (POSIX ultimate fallback)
+
+resolve_path() {
+  local dir="$1"
+
+  # Tier 1: realpath -m (doesn't require path to exist)
+  if command -v realpath &>/dev/null; then
+    realpath -m "$dir" 2>/dev/null && return 0
+  fi
+
+  # Tier 2: python3
+  if command -v python3 &>/dev/null; then
+    python3 -c "import os,sys; print(os.path.realpath(sys.argv[1]))" "$dir" 2>/dev/null && return 0
+  fi
+
+  # Tier 3: readlink -f
+  if command -v readlink &>/dev/null && readlink -f / &>/dev/null 2>&1; then
+    readlink -f "$dir" 2>/dev/null && return 0
+  fi
+
+  # Tier 4: cd + pwd -P (POSIX, requires parent dir to exist)
+  local parent
+  parent=$(dirname "$dir")
+  if [[ -d "$parent" ]]; then
+    (
+      cd "$parent" 2>/dev/null || exit 1
+      echo "$(pwd -P)/$(basename "$dir")"
+    ) 2>/dev/null && return 0
+  fi
+
+  # All tiers failed
+  echo "FATAL: Cannot resolve path: $dir (no realpath/python3/readlink available)" >&2
+  exit 1
+}
+
+# validate_install_path(raw_path) → resolved absolute path (stdout)
+# Blocks 6 traversal vectors:
+#   1. Empty string
+#   2. Null byte injection (defense-in-depth)
+#   3. Home-relative confusion (~ expansion before .. check)
+#   4. Dot-dot traversal (.. anywhere in path)
+#   5. Double-slash bypass (// anywhere)
+#   6. Resolved path outside allowed prefix
+
+validate_install_path() {
+  local raw="$1"
+  local ALLOWED_PREFIX="${HOME}/.reasonix"
+
+  # Step 1: reject empty
+  if [[ -z "$raw" ]]; then
+    echo "FATAL: --install-path / --target requires a non-empty path" >&2
+    exit 1
+  fi
+
+  # Step 2: reject null bytes (defense-in-depth — bash already truncates)
+  if [[ "$(printf '%s' "$raw" | tr -d '\000')" != "$raw" ]]; then
+    echo "FATAL: Path contains null bytes: ${raw}" >&2
+    exit 1
+  fi
+
+  # Step 3: expand ~ to $HOME (before further checks)
+  local expanded="$raw"
+  if [[ "$raw" == '~/'* ]]; then
+    expanded="${HOME}${raw#'~'}"
+  elif [[ "$raw" == '~' ]]; then
+    expanded="${HOME}"
+  fi
+
+  # Step 4: reject dot-dot traversal (.. anywhere)
+  if [[ "$expanded" == *..* ]]; then
+    echo "FATAL: Path traversal detected (..): ${raw}" >&2
+    exit 1
+  fi
+
+  # Step 5: reject double-slash (// anywhere)
+  if [[ "$expanded" == *//* ]]; then
+    echo "FATAL: Double-slash detected (//): ${raw}" >&2
+    exit 1
+  fi
+
+  # Step 6: resolve to absolute path (symlink defense)
+  local resolved
+  if ! resolved=$(resolve_path "$expanded"); then
+    echo "FATAL: Cannot resolve path: ${raw}" >&2
+    exit 1
+  fi
+
+  # Step 7: prefix check — resolved path must equal ALLOWED_PREFIX or be under ALLOWED_PREFIX/
+  if [[ "$resolved" != "${ALLOWED_PREFIX}" && "$resolved" != "${ALLOWED_PREFIX}/"* ]]; then
+    echo "FATAL: Path outside allowed prefix (${ALLOWED_PREFIX}): ${raw} → ${resolved}" >&2
+    exit 1
+  fi
+
+  echo "$resolved"
+}
 
 DRY_RUN=false
 TARGET_DIR="${HOME}/.reasonix/skills"
 SOURCE_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Parse args
+# Parse args — collect raw values first, check conflicts, then validate
+INSTALL_FLAG_USED=""
+RAW_TARGET_DIR=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) DRY_RUN=true; shift ;;
-    --target) TARGET_DIR="$2"; shift 2 ;;
+    --target)
+      if [[ -n "$INSTALL_FLAG_USED" ]]; then
+        echo "FATAL: --target and --install-path are mutually exclusive" >&2
+        exit 1
+      fi
+      INSTALL_FLAG_USED="--target"
+      RAW_TARGET_DIR="$2"
+      shift 2
+      ;;
+    --install-path)
+      if [[ -n "$INSTALL_FLAG_USED" ]]; then
+        echo "FATAL: --target and --install-path are mutually exclusive" >&2
+        exit 1
+      fi
+      INSTALL_FLAG_USED="--install-path"
+      RAW_TARGET_DIR="$2"
+      shift 2
+      ;;
     *) echo "Unknown arg: $1"; exit 1 ;;
   esac
 done
+
+# Validate the target path after all args are parsed
+if [[ -n "$RAW_TARGET_DIR" ]]; then
+  TARGET_DIR="$(validate_install_path "$RAW_TARGET_DIR")"
+else
+  # Default path: resolve to ensure it passes validation
+  TARGET_DIR="$(validate_install_path "${HOME}/.reasonix/skills" 2>/dev/null || echo "${HOME}/.reasonix/skills")"
+fi
 
 # =============================================================================
 # Platform Detection
