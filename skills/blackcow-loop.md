@@ -1382,3 +1382,4 @@ Before emitting DONE, verify:
 - Count gates claimed FAIL → verify each has gap documentation
 - If PASS count + FAIL count + UNVERIFIED count ≠ total selected gates → report INCONSISTENCY, re-audit
 - If evidence index hash mismatches found → re-run affected gate evaluations
+- **Commit message safety**: Before git commit, verify no secrets in diff (`grep -E '(sk-[a-zA-Z0-9]{20,}|api_key\s*=\s*["'"'"'][a-zA-Z0-9_-]{16,}|token\s*=\s*["'"'"'][a-zA-Z0-9._-]{20,})' `)

@@ -158,6 +158,16 @@ Every gate subagent uses:
 
 Parse `--gates=auto|all|M-only|security|performance|minimal|custom:M1,M2,...` (default: auto).
 
+**Change-size-based gate scaling**:
+| Lines Changed | Min Gates | Rationale |
+|---|---|---|
+| 1-10 | M1, M2, M3 (universal only) | Trivial — skip conditional |
+| 11-100 | Universal + auto-detected | Standard |
+| 101-500 | Universal + all conditional | Full coverage |
+| 500+ | All 11 gates + PoC-level | Maximum scrutiny |
+
+Override with `--gates=all` or `--gates=minimal`.
+
 **Gate dispatch priority** (dispatch in this order; stop early if budget exhausted):
 
 | Priority | Gates | Reason |

@@ -288,6 +288,15 @@ uncertainty_score = clamp(uncertainty_score * 100, 0, 100)
 
 **Widening budget cap**: Total tokens across all stages ≤ 40% of context budget. If Stage 2 alone exceeds 40%, stop and use best available evidence. Log cap events to widening-history.
 
+**Task-type widening presets**:
+| Task Type | Start Stage | Max Stage |
+|---|---|---|
+| Typo/doc/config | Stage 1 | Stage 1 |
+| Single-file bug | Stage 1 | Stage 2 |
+| Multi-file feature | Stage 2 | Stage 3 |
+| Security audit | Stage 3 (force) | Stage 3 |
+| Unknown cause | Stage 1 | Stage 3 (if needed) |
+
 **Widening quality gate**: Before accepting widened evidence, verify:
 - New evidence from Stage N must resolve ≥ 30% of uncertainties from Stage N-1
 - If resolution rate < 30% → widening was ineffective → STOP, do not widen further

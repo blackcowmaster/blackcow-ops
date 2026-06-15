@@ -124,7 +124,11 @@ Produce `.omo/governor/<slug>-governance.md`:
 | **Tokens (TDD + PDCA)** | ~<N>K |
 | **Tokens (QA)** | ~<N>K |
 | **Total estimated** | ~<N>K |
+| **Est. cost (flash)** | $<X> |
+| **Est. cost (pro)** | $<X> |
+| **Est. cost (blended)** | $<X> |
 | **Historical ROI** | <score/token ratio from loop-roi.jsonl> |
+| **Budget utilization** | <N>% of mode budget |
 | **Recommendation** | PROCEED / REDUCE SCOPE / USER_REVIEW |
 ```
 
