@@ -14,9 +14,9 @@ loaded into the immutable system prefix every session — keep it terse.
 - P3 latency gate 트리거 (51% 실행시간 단축)
 - Failure Pattern Memory: 10개 패턴, context_tags 지원
 - Ecosystem health: 514/514 (100%) 🟢 ALL GREEN
-- 11-dimension 점수: 96.2/100
-- Loop Phase 5: native review + security_review 통합 (FAST/STANDARD)
-- Findings Gate: FableCodex 패턴 흡수, Phase 7에서 commit 전에 gate
+- 11-dimension 점수: 89.0/100 (R74 honest recalibration: 96.2는 거품)
+- Governor Phase 0.0: Context self-diagnosis (4 questions before gate selection)
+- Honest Limits: 절차는 모델의 천장을 올리지 않는다 — fablize/prometheus 철학 반영
 - Main 머지 완료
 
 ## 다음 목표

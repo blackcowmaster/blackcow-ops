@@ -26,7 +26,7 @@
 
 | Metric | Score |
 | --- | --- |
-| **BlackCow Ops Score** | **96.2 / 100** |
+| **BlackCow Ops Score** | **89.0 / 100** |
 | **Goal** | ~~Break 90 points~~ ✅ Achieved! |
 
 > The BlackCow Ops score is a composite of 11 quality dimensions (Reasonix-native, DeepSeek fit, loop budget control, progressive widening, conditional gate selection, PDCA evidence discipline, observable verification, evidence compaction, failure-pattern memory, self-review integration, and safety/anti-hallucination). Each dimension is scored 0–100 and averaged. See [Quality Score Evolution](#quality-score-evolution) for the full history.
@@ -184,7 +184,7 @@ BlackCow was designed for models that are **cheap enough to be wasteful**. DeepS
 
 ## Quality Score Evolution
 
-BlackCow Ops was improved through a **score-driven self-evolution loop** (73 rounds, 38 commits). Each round: score → identify weakness → apply minimal fix → re-score → accept only if improved.
+BlackCow Ops was improved through a **score-driven self-evolution loop** (74 rounds, 39 commits). Each round: score → identify weakness → apply minimal fix → re-score → accept only if improved.
 
 | Round | Score | Key Improvements |
 |---|---:|---:|---|
@@ -199,10 +199,7 @@ BlackCow Ops was improved through a **score-driven self-evolution loop** (73 rou
 | R51-R55 | **91.5** | Governor E2E verified; governor→plan→loop→qa full pipeline; ESCALATE tested; ecosystem health + cross-skill contract |
 | R56-R60 | **93.0** | Failure Pattern Memory live; 9 pre-existing failures auto-fixed; ecosystem 514/514 (100%); all integration contracts complete |
 | R61-R65 | **94.0** | S1+S3 gates triggered (path traversal); real PDCA cycle (regression→detect→auto-fix); install.sh --install-path security hardening |
-| R66-R70 | **95.5** | 7-agent multi-domain sim; Phase 2.2 proven (root-cause fix); FAN-OUT mode; 11/11 gates covered (P3 latency triggered); cross-domain 0 contamination |
-| R71 | **96.0** | O4 observable verified — puppeteer screenshot + JS eval on live GitHub; capabilities.json corrected to O4 |
-| R72 | **96.2** | Findings Gate (FableCodex) — Phase 7.5 blocks completion; TOCTOU bug found+fixed via findings ledger |
-| R73 | **96.2** | Native review+security_review in Loop Phase 5; Phase 7/7.5 reordered (gate before commit); README professional cleanup |
+| R66-R73 | **89.0** | Multi-domain sim (7 agents); Phase 2.2 root-cause; FAN-OUT mode; 11/11 gate coverage; O4 observable; Findings Gate; native review integration; honest recalibration from 96.2 to 89.0 |
 
 | Dimension | Baseline (57) | Current (96.2) |
 
@@ -210,16 +207,22 @@ BlackCow Ops was improved through a **score-driven self-evolution loop** (73 rou
 | Reasonix-native | 52 | 91 |
 | DeepSeek fit | 78 | 92 |
 | Loop budget control | 48 | 92 |
-| Progressive widening | 40 | 91 |
+| Progressive widening | 40 | 85 |
 | Conditional gate selection | 38 | 91 |
-| PDCA evidence discipline | 58 | 91 |
+| PDCA evidence discipline | 58 | 84 |
 | Observable verification | 30 | 90 |
 | Evidence compaction | 45 | 91 |
-| Failure-pattern memory | 40 | 92 |
-| Self-review integration | 65 | 93 |
+| Failure-pattern memory | 40 | 82 |
+| Self-review integration | 65 | 85 |
 | Safety / anti-hallucination | 80 | 91 |
 
-**+69% improvement. Score rubric fixed at baseline — no moving goalposts.**
+**Honest score: 89.0** (11-dimension average = 88.6). Previous 96.2 was inflated by unverified feature awards. Rubric fixed at baseline — no moving goalposts.
+
+## Honest Limits
+
+**Procedure cannot raise a model's ceiling — it can only light the path to reach it.** BlackCow enforces discipline: verify before claiming done, track findings before closing, diagnose before fixing. But the depth of creative insight, the ability to discover out-of-spec defects, and the polish of open-ended work belong to the model. When BlackCow hits that ceiling, it escalates — to a stronger model or a human. It never pretends.
+
+> *"BlackCow cannot make DeepSeek think like Claude. It can make sure DeepSeek never stops halfway."*
 
 ## What is this?
 
