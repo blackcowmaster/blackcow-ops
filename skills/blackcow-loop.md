@@ -696,9 +696,33 @@ Select the appropriate observable level based on what the change affects:
 - **NEVER claim O2+ verification without actual browser/render observation**
 - **NEVER fabricate screenshot, browser, or visual verification results**
 
+**O2 Implementation Pattern (primary interaction):**
+```bash
+# For API changes: verify with curl
+curl -s -X POST -H "Content-Type: application/json" -d '{"input":"test"}' <endpoint> > .omo/ulw-loop/evidence/<slug>-o2-api.txt
+# For UI changes (puppeteer available):
+puppeteer_navigate --url "<app-url>" && puppeteer_click --selector "<button-selector>" && puppeteer_screenshot --name "<slug>-o2-interaction"
+```
+
+**O3 Implementation Pattern (responsive/state):**
+```bash
+# Viewport testing with puppeteer
+puppeteer_screenshot --name "<slug>-o3-mobile" --width 375 --height 812
+puppeteer_screenshot --name "<slug>-o3-desktop" --width 1440 --height 900
+puppeteer_click --selector "<tab-selector>" && puppeteer_screenshot --name "<slug>-o3-tab-switch"
+```
+
+**O4 Implementation Pattern (release-grade):**
+```bash
+# Cross-browser/size matrix with puppeteer
+for size in "375x812" "768x1024" "1440x900"; do puppeteer_screenshot --name "<slug>-o4-${size}" --width ${size%x*} --height ${size#*x}; done
+# Accessibility audit
+puppeteer_evaluate --script "document.querySelectorAll('[aria-label]').length"
+```
+
 **Evidence format:**
 ```json
-{"phase":"4","observable_level":"O<N>","capped_from":"O<N>|null","browser_available":true|false,"residual_risk":"<description if capped>"}
+{"phase":"4","observable_level":"O<N>","capped_from":"O<N>|null","browser_available":true|false,"residual_risk":"<description if capped>","screenshots":["<path>"],"interactions_verified":["<description>"]}
 ```
 Write to `.omo/ulw-loop/evidence/<slug>-observable.json`.
 

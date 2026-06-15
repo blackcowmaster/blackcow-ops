@@ -187,6 +187,47 @@ Parse `--gates=auto|all|M-only|security|performance|minimal|custom:M1,M2,...` (d
 
 **Auto mode logic**: After Phase 0 discovery, inspect changed files. For each conditional gate, check trigger signal → if present, include gate. Universal gates always included.
 
+**Auto-detect implementation** (run before gate dispatch):
+```
+# Determine which gates to run based on git diff
+CHANGED=$(git diff --name-only HEAD~1 2>/dev/null || echo "")
+
+# M4 (lint): any .ts/.js/.py/.rs/.go file changed
+echo "$CHANGED" | grep -qE '\.(ts|js|py|rs|go)$' && GATES="$GATES M4"
+
+# M5 (dead-code): any file with deleted lines in diff
+git diff HEAD~1 2>/dev/null | grep -q '^-' && GATES="$GATES M5"
+
+# S1 (dataFlow): type/schema/interface files changed
+echo "$CHANGED" | grep -qE '(types|schema|interface|model|entity)' && GATES="$GATES S1"
+
+# S2 (auth): auth middleware, guards, route definitions changed
+echo "$CHANGED" | grep -qE '(auth|middleware|guard|route|handler|controller)' && GATES="$GATES S2"
+
+# S3 (injection): user input surfaces changed (forms, API handlers, parsers)
+echo "$CHANGED" | grep -qE '(form|input|parse|handler|controller|route)' && GATES="$GATES S3"
+
+# P1 (query): DB/repository/ORM code changed
+echo "$CHANGED" | grep -qE '(repository|dao|query|database|db|\.sql)' && GATES="$GATES P1"
+
+# P2 (memory): collections, streams, buffers changed
+echo "$CHANGED" | grep -qE '(collection|array|stream|buffer|cache|pool)' && GATES="$GATES P2"
+
+# P3 (latency): only if plan defines p95_target_ms
+grep -q 'p95_target_ms' plans/*.md 2>/dev/null && GATES="$GATES P3"
+```
+
+**IntentGate integration**: The detected intent from `blackcow-plan` Phase -1 overrides auto-detection:
+- Security intent → force-add S1+S2+S3 even if no diff signals
+- Performance intent → force-add P1+P2+P3 even if no diff signals
+- Emergency intent → force `minimal` preset regardless of diff
+
+### Batch Dispatch (Selected Gates Only)
+
+**CRITICAL: Dispatch ONLY the gates selected by `--gates` or auto-detection. NEVER dispatch all 11 gates unless `--gates=all` or SIEGE mode.**
+
+Routing: M1/S1/S2/S3/P3→pro (analytical), M2/M3/M4/M5/P1/P2→budget (mechanical).
+
 ### Batch Dispatch (Selected Gates Only)
 
 **CRITICAL: Dispatch ONLY the gates selected by `--gates` or auto-detection. NEVER dispatch all 11 gates unless `--gates=all` or SIEGE mode.**
