@@ -657,3 +657,5 @@ Before emitting QA report, verify:
 - [ ] All gate scores are numeric (0-100), not "good" or "reasonable"
 - [ ] qa-history.jsonl appended with valid JSON schema
 - [ ] No claimed test pass without actual execution evidence
+- [ ] No invented gate scores or verification results
+- [ ] Residual risk documented when full verification unavailable

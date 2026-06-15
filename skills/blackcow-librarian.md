@@ -846,3 +846,5 @@ Before completing any command, verify:
 - [ ] No phantom file references in cache (all entries resolve to existing files)
 - [ ] M2 spot-check passed: 5 random cache entries verified
 - [ ] M5 pruning completed: dead entries removed
+- [ ] No fabricated cache entries or file references
+- [ ] All spot-check results from actual file reads

@@ -688,7 +688,11 @@ Select the appropriate observable level based on what the change affects:
 
 **Residual risk handling:**
 - If browser/puppeteer tooling is **unavailable**, cap at O1 (use `curl` / `run_command` only)
-- If puppeteer MCP server is available (`puppeteer_navigate`, `puppeteer_screenshot`, `puppeteer_click`, `puppeteer_evaluate`), O2-O4 become feasible:
+- If puppeteer MCP server is available, register it first:
+  ```
+  add_mcp_server({ name: "puppeteer", from_catalog: "puppeteer" })
+  ```
+  Then use: `puppeteer_navigate`, `puppeteer_screenshot`, `puppeteer_click`, `puppeteer_evaluate` for O2-O4:
   - O2: `puppeteer_navigate` + `puppeteer_click` for primary interaction
   - O3: `puppeteer_screenshot` with `width`/`height` for viewport testing
   - O4: multiple `puppeteer_screenshot` calls + visual diff
@@ -1228,3 +1232,5 @@ Before emitting DONE, verify:
 - [ ] Evidence Compaction Index populated with all gate results
 - [ ] Loop ROI logged to `.omo/memory/loop-roi.jsonl`
 - [ ] No claimed visual/browser verification without actual observation
+- [ ] No invented test results, scores, or evidence
+- [ ] All token/cost numbers are estimates unless measured

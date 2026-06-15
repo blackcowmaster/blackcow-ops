@@ -159,6 +159,25 @@ Before emitting governance decision, verify:
 - [ ] Escalation rules defined with concrete actions
 - [ ] Governance document written to `.omo/governor/`
 
+## Cross-Skill Evidence Contract
+
+Every skill in the pipeline MUST honor this contract for evidence exchange:
+
+| Producer | Artifact | Consumer | Loaded Via |
+|---|---|---|---|
+| `blackcow-governor` | `.omo/governor/<slug>-governance.md` | plan, loop, qa | `--govern=<slug>` |
+| `blackcow-plan` | `plans/<slug>.md` | loop | `blackcow-loop "Execute plans/<slug>.md"` |
+| `blackcow-loop` | `.omo/ulw-loop/completion-report.md` (evidence index) | qa, governor, librarian | Phase 0 evidence load |
+| `blackcow-qa` | `.omo/memory/qa-history.jsonl` | librarian, governor | Failure-pattern auto-population |
+| `blackcow-librarian` | `.omo/library/structure-cache.jsonl` | plan, loop, qa | Phase 0 cache load |
+| `blackcow-librarian` | `.omo/memory/failure-patterns.jsonl` | governor | Phase 0 memory load |
+
+**Contract rules:**
+- Producer writes artifact BEFORE DONE emission
+- Consumer checks artifact freshness (staleness threshold per artifact type)
+- Broken contract → consumer falls back to legacy discovery
+- All paths are relative to project root
+
 ## Constraints
 
 1. Never edit product code.

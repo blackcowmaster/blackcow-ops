@@ -926,3 +926,5 @@ Before emitting the final plan, verify ALL of the following. If any check fails,
 - [ ] No reference to `lsp_*` tools (use `get_symbols`/`find_in_code`)
 - [ ] No reference to non-existent skills or files
 - [ ] DAG example is generic (not self-referential)
+- [ ] No invented file paths, commands, or verification results
+- [ ] All estimates marked as estimates (not measurements)
