@@ -24,6 +24,15 @@
 >
 > At DeepSeek pricing (~$0.14/1M flash, ~$0.435/1M pro), the pipeline uses progressive widening (3 stages), conditional gate selection, and 5 execution modes (FAST~ESCALATE) to optimize token spend. A FAST-mode typo fix costs ~$0.001; a FULL-mode multi-file feature costs ~$0.03.
 
+## Project Status
+
+| Metric | Score |
+| --- | --- |
+| **BlackCow Ops Score** | **88.6 / 100** |
+| **Goal** | Break 90 points |
+
+> The BlackCow Ops score is a composite of 11 quality dimensions (Reasonix-native, DeepSeek fit, loop budget control, progressive widening, conditional gate selection, PDCA evidence discipline, observable verification, evidence compaction, failure-pattern memory, self-review integration, and safety/anti-hallucination). Each dimension is scored 0–100 and averaged. See [Quality Score Evolution](#quality-score-evolution) for the full history.
+
 ## Install
 
 ```bash
