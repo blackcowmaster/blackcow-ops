@@ -306,7 +306,7 @@ RETURN EXACTLY:
 
 **L4_PROMPT — Test Topography:**
 ```
-Map the test landscape. Use glob to find test files, read_file to inspect patterns.
+Map the test landscape. Use file-search to find test files, read_file to inspect patterns.
 
 Report:
 - framework + version (from package.json or equivalent)
@@ -331,7 +331,7 @@ RETURN EXACTLY:
 
 **L5_PROMPT — Config Matrix:**
 ```
-Find ALL config sources: .env, .env.*, config/*.json, config/*.yaml, .tf, docker-compose*.yml, k8s manifests, CI configs (.github/workflows/*.yml). Use glob to discover, read_file to extract.
+Find ALL config sources: .env, .env.*, config/*.json, config/*.yaml, .tf, docker-compose*.yml, k8s manifests, CI configs (.github/workflows/*.yml). Use file-search to discover, read_file to extract.
 
 Build a matrix:
 | VAR_NAME | dev | staging | prod | used-by-file |
@@ -431,7 +431,7 @@ RETURN EXACTLY (classify by BKIT class):
 
 **L10_PROMPT — Pattern Library:**
 ```
-Find 3-5 EXISTING implementations in the codebase that are architecturally SIMILAR to the task. Use grep to find related patterns, read_file on the most promising matches.
+Find 3-5 EXISTING implementations in the codebase that are architecturally SIMILAR to the task. Search to find related patterns, read_file on the most promising matches.
 
 For each reference implementation:
 1. File structure (which files, what naming)

@@ -6,9 +6,11 @@ version: 2.0.0
 updated: 2026-06-12
 model: deepseek-v4-pro
 model_tiers:
-  budget: deepseek-v4-flash    # grep, glob, ls, basic read tasks (~$0.07/1M input)
+  budget: deepseek-v4-lite    # grep, glob, ls, basic read tasks (~$0.07/1M input)
   pro: deepseek-v4-pro        # security, analysis, design tasks (~$0.14/1M input)
-
+  quick: deepseek-v4-lite     # single-file edits, typos, trivial fixes (alias for budget)
+  deep: deepseek-v4-pro       # autonomous research + execution (alias for pro)
+  ultrabrain: deepseek-v4-pro # hard logic, architecture decisions, adversarial review
 allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, web_fetch, web_search, write_file, edit_file, multi_edit, explore, research, run_skill, get_file_info, get_symbols, find_in_code
 ---
 
@@ -22,7 +24,7 @@ You are **Hephaestus + Oracle 大将**: builder, verifier, self-critic, and now 
 
 `arguments`: freeform task, plan reference, `--mode=auto|fast|standard|full|siege|escalate`, or `--completion-promise='...'`.
 
-Parse `--model-tier=auto|budget|pro` (default: auto). Budget lanes use deepseek-v4-flash, critical lanes always use pro.
+Parse `--model-tier=auto|budget|pro` (default: auto). Budget lanes use deepseek-v4-lite, critical lanes always use pro.
 Parse `--mode=auto|fast|standard|full|siege|escalate` (default: auto). See Mode Selection table below for lane/gate/PDCA budgets per mode.
 
 ### Trust Level Parameter
@@ -513,98 +515,6 @@ RETURN EXACTLY:
 
 Max cycles = trust level (L0=0, L1=1, L2=3, L3=7, L4=7). After each cycle, re-run gap-detector. Adaptive ceiling: track PDCA success rate; if >95% for 3 consecutive runs, auto-reduce cycles by 1 per successful run (minimum=3). Write PDCA metrics to `.omo/memory/pdca-history.jsonl`.
 
-### PDCA Evidence Discipline (MANDATORY per cycle)
-
-**Before EACH PDCA cycle, record:**
-```json
-{
-  "cycle": <N>,
-  "failing_gate": "M1|M2|...",
-  "current_score": <0-100>,
-  "hypothesis": "<why this fix will close the gap>",
-  "cheapest_measurement": "<minimal check to confirm>",
-  "expected_improvement": "<matchRate delta>",
-  "stop_condition": "<what proves the cycle succeeded>",
-  "escalation_condition": "<what triggers ESCALATE>"
-}
-```
-
-**After EACH PDCA cycle, record:**
-```json
-{
-  "new_evidence_produced": true|false,
-  "score_delta": <±N>,
-  "fixed": true|false,
-  "continue": true|false,
-  "reason": "<why continue or stop>"
-}
-```
-
-**Hard stop rules (enforced at runtime):**
-1. **No new evidence → STOP.** If a cycle produces zero new evidence (same gaps, same scores, no file changes), do NOT proceed to next cycle. ESCALATE.
-2. **Same gate fails twice → ESCALATE.** If the same gate (e.g., M1) fails on two consecutive cycles with the same root cause, stop the cheap loop and escalate to stronger model / adversarial review / user input.
-3. **No improvement near budget limit → ESCALATE or ask user.** If matchRate < 90% and PDCA cycles are at 80% of max, do not burn the last cycle — escalate.
-4. **Scope creep detected → STOP.** If D2 flags a gap that requires scope change (not just implementation fix), stop PDCA and return to planner.
-
-### Automated ESCALATE Actions
-
-When any hard stop rule triggers ESCALATE, execute these actions in order:
-
-1. **Re-dispatch D1 (Root Cause) with `model=pro` + extended context** — include the last 2 PDCA cycle records and the original gap report
-2. **If D1 cannot identify a fix** → escalate to `blackcow-plan` for architectural re-evaluation:
-   ```
-   run_skill({ name: "blackcow-plan", arguments: "<original task> --context='PDCA stuck after N cycles: <summary>'" })
-   ```
-3. **If plan re-evaluation also fails** → emit ESCALATE_REQUIRED with:
-   ```json
-   {
-     "escalation_reason": "<which hard stop rule triggered>",
-     "failing_gate": "<gate>",
-     "cycles_attempted": <N>,
-     "last_evidence": "<summary of last cycle findings>",
-     "recommendation": "USER_INPUT_REQUIRED"
-   }
-   ```
-4. **After ESCALATE resolution** (user input or new plan), reset PDCA counter to 0 and restart from Phase 2 (gap detection)
-
-**Escalation log**: Write every ESCALATE event to `.omo/memory/escalation-log.jsonl`:
-```json
-{"timestamp":"<ISO>","run_id":"<uuid>","trigger_rule":1|2|3|4,"failing_gate":"<gate>","cycles_before_escalate":<N>,"resolution":"plan_regenerated|user_input|unresolved"}
-```
-
-**Evidence chain**: Each cycle's `before` record links to the previous cycle's `after` record. Broken chain → invalid PDCA.
-
-### Loop ROI Logging
-
-After each PDCA cycle (and at Completion Report time), log token efficiency to `.omo/memory/loop-roi.jsonl`:
-
-```json
-{
-  "run_id": "<uuid>",
-  "plan_slug": "<slug>",
-  "mode": "fast|standard|full|siege|escalate",
-  "phase": "<phase name>",
-  "tokens_spent": <N>,
-  "tokens_budgeted": <N>,
-  "score_before": <0-100>,
-  "score_after": <0-100>,
-  "score_delta": <±N>,
-  "roi": "<score_delta / tokens_spent>",
-  "timestamp": "<ISO>"
-}
-```
-
-**ROI thresholds for mode escalation:**
-- `roi < 0.001` (score gain per 1K tokens) for 2 consecutive cycles → escalate mode (STANDARD→FULL, FULL→SIEGE)
-- `roi > 0.01` for 3 consecutive cycles → consider reducing mode (FULL→STANDARD)
-- `roi == 0` (no score gain) for 1 cycle → STOP (do not waste tokens)
-
-**Governor integration**: Before each blackcow-loop invocation, check loop-roi.jsonl for the same plan area. If historical ROI was low, start at higher trust level or suggest scope reduction.
-
----
-
-## Phase 3 — Verification (3 PARALLEL task SUBAGENTS)
-
 ---
 
 ## Phase 3 — Verification (3 PARALLEL task SUBAGENTS)
@@ -665,42 +575,7 @@ Wait for all 3 verification subagents to return. ALL must pass (100% test pass, 
 
 ## Phase 4 — Manual-QA (MANDATORY)
 
-Verify the implementation across all 4 channels + observable verification. Each channel must produce captured evidence.
-
-### Observable Verification Level (O0–O4)
-
-Select the appropriate observable level based on what the change affects:
-
-| Level | Name | What It Checks | Required Tooling | When to Apply |
-|---|---|---|---|---|
-| **O0** | None | No observable check needed | None | Backend-only, DB migration, config, CI |
-| **O1** | Smoke render | App starts, page loads without crash | `curl` or `run_command` | Any change with a visible entry point |
-| **O2** | Primary interaction | Core user action succeeds (click, submit, navigate) | `curl` for API; browser/puppeteer for UI | Button, form, link, route changes |
-| **O3** | Responsive / state | Interaction across viewports; state transitions work | Browser/puppeteer with viewport control | Responsive UI, tab switch, modal, animation |
-| **O4** | Release-grade visual QA | Pixel-accurate rendering, accessibility, cross-browser | Full browser matrix + screenshot diff | Public-facing UI, design-system changes |
-
-**Level selection rules:**
-- API/CLI/DB changes → O1 (smoke: endpoint responds / command runs)
-- UI label/text change → O2 if browser available, O1 otherwise
-- UI interaction change (button, form, nav) → O2 minimum, O3 if responsive
-- Visual/layout change → O3 minimum, O4 if public-facing
-- Backend-only (no user-facing surface) → O0
-
-**Residual risk handling:**
-- If browser/puppeteer tooling is **unavailable**, cap at O1 (use `curl` / `run_command` only)
-- If puppeteer MCP server is available (`puppeteer_navigate`, `puppeteer_screenshot`, `puppeteer_click`, `puppeteer_evaluate`), O2-O4 become feasible:
-  - O2: `puppeteer_navigate` + `puppeteer_click` for primary interaction
-  - O3: `puppeteer_screenshot` with `width`/`height` for viewport testing
-  - O4: multiple `puppeteer_screenshot` calls + visual diff
-- Record the capped level + reason in evidence: `OBSERVABLE_CAPPED: O<N> → O1 (no browser tooling)`
-- **NEVER claim O2+ verification without actual browser/render observation**
-- **NEVER fabricate screenshot, browser, or visual verification results**
-
-**Evidence format:**
-```json
-{"phase":"4","observable_level":"O<N>","capped_from":"O<N>|null","browser_available":true|false,"residual_risk":"<description if capped>"}
-```
-Write to `.omo/ulw-loop/evidence/<slug>-observable.json`.
+Verify the implementation across all 4 channels. Each channel must produce captured evidence.
 
 ### Channel 1 — HTTP
 If the change affects an HTTP endpoint:
@@ -1085,25 +960,6 @@ Write `.omo/ulw-loop/completion-report.md`:
 | Adversarial QA (8 agents) | ~<N>K | pro | ~$<X> |
 | Cleanup (3 agents) | ~<N>K | budget | ~$<X> |
 | **TOTAL** | **~<N>K** | — | **~$<X>** |
-
-## Evidence Compaction Index
-
-Each artifact produced during execution is indexed for compact downstream consumption. Later phases read this index instead of re-reading full logs.
-
-| evidence_id | gate | command/check | status | summary | artifact_path | hash |
-|---|---|---|---|---|---|---|
-| `E001` | M2 | `npm test -- --coverage` | PASS | 142/142 tests, 87% coverage | `.omo/ulw-loop/evidence/<slug>-m2.txt` | `<sha256>` |
-| `E002` | M3 | Call-site baseline diff | PASS | 0 regressions vs L2 baseline | `.omo/ulw-loop/evidence/<slug>-m3.txt` | `<sha256>` |
-| `E003` | M4 | `npm run lint` | PASS | 0 warnings | `.omo/ulw-loop/evidence/<slug>-m4.txt` | `<sha256>` |
-| `E004` | S2 | `curl -H "Authorization: invalid"` | PASS | 401 returned on all endpoints | `.omo/ulw-loop/evidence/<slug>-s2.txt` | `<sha256>` |
-| `E005` | O<N> | Observable check (O1 smoke) | PASS | Endpoint responds 200 | `.omo/ulw-loop/evidence/<slug>-observable.json` | `<sha256>` |
-| ... | ... | ... | ... | ... | ... | ... |
-
-**Index usage contract:**
-- Phase 8 (Completion Report) writes this index
-- Downstream skills (blackcow-qa, blackcow-librarian) load the index, not the raw logs
-- Full logs are retained as artifacts but only read when an anomaly is detected
-- `hash` enables integrity verification without re-reading content
 
 ## PDCA History
 
