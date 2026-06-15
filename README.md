@@ -20,9 +20,7 @@
 <hr />
 
 > [!NOTE]
-> **BlackCow Ops is a set of 7 self-improving Reasonix skills** that form a complete govern→plan→execute→verify→evolve pipeline. It enforces BKIT — an 11-gate quality taxonomy with numeric thresholds — adapted for DeepSeek's cost advantage.
->
-> At DeepSeek pricing (~$0.14/1M flash, ~$0.435/1M pro), the pipeline uses progressive widening (3 stages), conditional gate selection, and 5 execution modes (FAST~ESCALATE) to optimize token spend. A FAST-mode typo fix costs ~$0.001; a FULL-mode multi-file feature costs ~$0.03.
+> **BlackCow Ops is a set of 7 self-improving Reasonix skills** forming a complete **govern → plan → execute → verify → evolve** pipeline. It enforces BKIT — an 11-gate quality taxonomy (M1-M5 implementation, S1-S3 security, P1-P3 performance) — tuned for DeepSeek's cost advantage (~$0.14/1M flash, ~$0.435/1M pro). A FAST-mode typo fix costs ~$0.001; a FULL-mode multi-file feature costs ~$0.03.
 
 ## Project Status
 
@@ -41,13 +39,13 @@ git clone https://github.com/blackcowmaster/blackcow-ops.git
 cp blackcow-ops/skills/*.md ~/.reasonix/skills/
 ```
 
-Restart Reasonix. The 6 `blackcow-*` skills are now available globally.
+Restart Reasonix. All 7 `blackcow-*` skills are now available globally.
 
 ## When to Use
 
 | Scenario | Recommendation |
 | --- | --- |
-| **You use Reasonix + DeepSeek** | **Native.** Every model tier, context budget, and PDCA cycle count is tuned for DeepSeek. Use all 6 skills with zero config. |
+| **You use Reasonix + DeepSeek** | **Native.** Every model tier, context budget, and PDCA cycle count is tuned for DeepSeek. Use all 7 skills with zero config. |
 | **You use Reasonix + another model** | **Untested.** Reasonix supports other providers via the AI SDK (Anthropic, OpenAI, Google, etc.), but BlackCow has only been tested with DeepSeek. If you try another model, edit `model_tiers` in each skill's YAML frontmatter and adjust context budgets for your model's window size. YMMV. |
 | **You use Claude Code, Codex CLI, OpenCode, or another harness** | **Needs porting.** The BKIT methodology is independent of any one harness. The current `.md` skill files are Reasonix-native — tool calls (`task`, `edit_file`, `multi_edit`) would need rewriting for your harness's equivalents. |
 | **You just want the 11-gate quality methodology** | **Free.** Read `docs/BKIT.md` — the taxonomy, thresholds, and audit agent design are documented. Adapt to any workflow. Apache 2.0. |
@@ -58,7 +56,7 @@ Restart Reasonix. The 6 `blackcow-*` skills are now available globally.
 | --- | --- |
 | `blackcow-governor` | Pipeline governor. Preflight mode/gate/O-level/PDCA budget selection. Loads failure-pattern memory and loop ROI history. Produces governance decision consumed by plan/loop/qa. |
 | `blackcow-plan` | Strategic planner. Progressive widening (3 stages), 10 discovery lanes, 3 architecture options, decision-complete plan with DAG dependencies. Governor-aware. Never writes product code. |
-| `blackcow-loop` | Execution engine. 5 modes (FAST~ESCALATE), TDD + Hashline verification, PDCA iterator with hard-stop rules, O0-O4 observable verification, evidence compaction index, loop ROI logging. |
+| `blackcow-loop` | Execution engine. 5 modes (FAST~ESCALATE), native review+security_review integration, Phase 2.2 Root Cause analysis, PDCA iterator with hard-stop rules, Findings Gate (Phase 7), O0-O4 observable verification, evidence compaction index. |
 | `blackcow-qa` | Quality assurance. Conditional gate selection (auto-detect via git diff), 11-gate evaluation, L1-L5 test pyramid, failure-pattern auto-population, evidence→memory pipeline. |
 | `blackcow-librarian` | Project memory. 7 commands (init-deep, scan, update, check, load, load-evidence, all). AGENTS.md generation, structure cache, failure-pattern memory, trend analysis, governor feed. |
 | `blackcow-skill-review` | Meta-auditor. Trend tracking, staleness detection, regression alerts. ⚠️ Known limitation: audit scores may oscillate — use for trend analysis only, not quality gating. Governor self-audit is the recommended alternative. |
@@ -132,6 +130,8 @@ If Reasonix has indexed the skills:
 | **Evidence Compaction Index** | Compact evidence index with SHA256 hashes. Downstream skills load index, not raw logs. Artifact retention + compression policy. |
 | **Failure-Pattern Memory** | Structured failure records with resolution effectiveness tracking. Auto-populated from QA history. Feeds governor for pre-emptive fixes. |
 | **Loop ROI Logging** | Token-spent vs score-gained tracking. Mode escalation/de-escalation based on ROI thresholds. Budget rebalancing. |
+| **Findings Gate** | Every gap discovered during PDCA is recorded as a tracked finding. Open/blocked findings prevent completion. Resolved with mandatory evidence + verification. Absorbed from FableCodex. |
+| **Native Tool Integration** | Loop Phase 5 uses Reasonix-native `review` + `security_review` tools for FAST/STANDARD modes — faster, cheaper, and more thorough than subagent-based QA. |
 | **Cross-Skill Evidence Contract** | Standardized artifact exchange between all 7 skills. Producer/consumer contracts with freshness checks. |
 | **Self-Audit Checklists** | Every skill has a structured self-audit checklist covering syntax, gates, parallelism, cost, cross-references, and anti-hallucination. |
 
@@ -184,7 +184,7 @@ BlackCow was designed for models that are **cheap enough to be wasteful**. DeepS
 
 ## Quality Score Evolution
 
-BlackCow Ops was improved through a **score-driven self-evolution loop** (70 rounds, 37 commits). Each round: score → identify weakness → apply minimal fix → re-score → accept only if improved.
+BlackCow Ops was improved through a **score-driven self-evolution loop** (73 rounds, 38 commits). Each round: score → identify weakness → apply minimal fix → re-score → accept only if improved.
 
 | Round | Score | Key Improvements |
 |---|---:|---:|---|
@@ -202,15 +202,11 @@ BlackCow Ops was improved through a **score-driven self-evolution loop** (70 rou
 | R66-R70 | **95.5** | 7-agent multi-domain sim; Phase 2.2 proven (root-cause fix); FAN-OUT mode; 11/11 gates covered (P3 latency triggered); cross-domain 0 contamination |
 | R71 | **96.0** | O4 observable verified — puppeteer screenshot + JS eval on live GitHub; capabilities.json corrected to O4 |
 | R72 | **96.2** | Findings Gate (FableCodex) — Phase 7.5 blocks completion; TOCTOU bug found+fixed via findings ledger |
+| R73 | **96.2** | Native review+security_review in Loop Phase 5; Phase 7/7.5 reordered (gate before commit); README professional cleanup |
 
-| Dimension | 57 | 96.2 |
+| Dimension | Baseline (57) | Current (96.2) |
 
-
-
-
-
-
-|---|---:|---:|
+|---|---:|---:|---:|
 | Reasonix-native | 52 | 91 |
 | DeepSeek fit | 78 | 92 |
 | Loop budget control | 48 | 92 |
@@ -223,7 +219,7 @@ BlackCow Ops was improved through a **score-driven self-evolution loop** (70 rou
 | Self-review integration | 65 | 93 |
 | Safety / anti-hallucination | 80 | 91 |
 
-**+60% improvement. Score rubric fixed at baseline — no moving goalposts.**
+**+69% improvement. Score rubric fixed at baseline — no moving goalposts.**
 
 ## What is this?
 

@@ -67,9 +67,9 @@ Parse `--mode=auto|fast|standard|full|siege|escalate` (default: auto, which sele
 | 4 Manual-QA | ❌ | Applicable channels | All channels | All channels | All channels |
 | 5 Adversarial QA | ❌ | 5 agents (no PoC) | 8 agents | 8+2 PoC | 10 agents |
 | 6 Cleanup | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 7 Git Commit | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 7.5 Findings Gate | ❌ | ✅ | ✅ | ✅ | ✅ |
-| 8 Completion | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 7 Findings Gate | ❌ | ✅ | ✅ | ✅ | ✅ |
+| 8 Git Commit | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 9 Completion | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **Mode → Token Budget (estimated per phase):**
 
@@ -81,7 +81,8 @@ Parse `--mode=auto|fast|standard|full|siege|escalate` (default: auto, which sele
 | 3 Verification | 3K | 10K | 15K | 15K | 20K |
 | 4 Manual-QA | 0 | 5K | 10K | 10K | 10K |
 | 5 Adversarial QA | 0 | 25K | 60K | 80K | 100K |
-| 6-7 Cleanup+Report | 2K | 5K | 10K | 10K | 10K |
+| 6 Cleanup | 1K | 3K | 5K | 5K | 5K |
+| 7-9 Findings+Commit+Report | 1K | 2K | 5K | 5K | 5K |
 | **TOTAL** | **~12K** | **~95K** | **~200K** | **~235K** | **~290K** |
 
 **Auto mode selection**: If no `--mode` specified, infer from IntentGate class:
@@ -966,9 +967,30 @@ RETURN EXACTLY: checked:bool, log_pattern_found:bool, new_errors:int
 - **Regression baseline**: For CLI/API changes, diff current output against stored baseline from Phase 1.1 characterization test
 - **→ Write checkpoint.json**
 
-## Phase 5 — Adversarial QA (10 task SUBAGENTS, 2 BATCHES)
+## Phase 5 — Code Review & Security Audit
 
-**Dispatch 8 `task` subagents with `run_in_background: true`. Each audits the changed code for one gate dimension (8 of 11 gates — M2/M3/M4 are verified in Phase 3). Routing: S1/S2/S3 use pro (security audits are analytical), M1/M5/P1/P2/P3 use budget (pattern-matching and spec-comparison are mechanical).**
+**Mode-conditional dispatch.** Native Reasonix tools are faster, cheaper, and more thorough than subagent-based QA for routine audits. Reserve full adversarial QA for high-risk modes.
+
+### FAST / STANDARD modes — Native tools only
+
+```
+1. review({ task: "General code review of the current diff" })
+2. security_review({ task: "Security audit of auth, injection, and data flow changes" })
+```
+
+These native tools cost ~$0.005-0.01 each, run in ~60s, and produce line-specific findings. They replace the 8-agent batch entirely for low/medium-risk tasks.
+
+### FULL / SIEGE / ESCALATE modes — Native tools + full adversarial QA
+
+```
+1. review({ task: "General code review of the current diff" })
+2. security_review({ task: "Security audit of auth, injection, and data flow changes" })
+3. THEN dispatch adversarial QA subagents (below) for deep audit
+```
+
+Native tools run first. Their findings feed into the adversarial QA batch as pre-discovered issues. This reduces adversarial QA token waste on already-known problems.
+
+**Dispatch 8 `task` subagents with `run_in_background: true` (FULL/SIEGE/ESCALATE only). Each audits the changed code for one gate dimension (8 of 11 gates — M2/M3/M4 are verified in Phase 3). Routing: S1/S2/S3 use pro (security audits are analytical), M1/M5/P1/P2/P3 use budget (pattern-matching and spec-comparison are mechanical).**
 
 Every QA subagent uses:
 - `tools`: `["read_file","search_content","search_files","glob","list_directory","directory_tree","run_command"]`
@@ -1234,7 +1256,34 @@ Wait for all 3 cleanup subagents to return. Verify:
 - 0 lint warnings (M4)
 - Evidence directory is clean
 
-## Phase 7 — Git Commit (Trust Level gated)
+## Phase 7 — Findings Gate (BLOCKS commit and completion)
+
+Before committing or writing the Completion Report, check `.omo/memory/findings.json`.
+
+**Gate logic:**
+```
+open_findings = [f for f in findings if f.status in ("OPEN", "BLOCKED")]
+if open_findings:
+    ❌ BLOCK COMMIT AND COMPLETION
+    Print findings summary, list each with id/title/severity
+    DO NOT proceed to Phase 8 (Commit) or Phase 9 (Report)
+    Action: resolve each finding or escalate
+else:
+    ✅ GATE PASSED → proceed to Phase 8 (Commit)
+```
+
+**Resolution requirements per finding:**
+- `evidence`: what changed to fix it (non-empty)
+- `verify_evidence`: proof the fix worked (non-empty)
+- `verify_cmd`: (optional) command that confirms the fix
+
+**Stale findings (from previous runs):**
+- If the current plan/slug has no matching active goals, old findings do NOT block
+- Archive old findings to `findings-archive.json` when a new plan is created with `--force`
+
+**Evidence**: `.omo/memory/findings.json` with all findings resolved or rejected
+
+## Phase 8 — Git Commit (Trust Level gated)
 
 Commit behavior depends on Trust Level:
 
@@ -1268,35 +1317,7 @@ Reviewed-by: blackcow-loop adversarial QA (8 agents)
 
 **Evidence**: git log entry for the commit
 
-### Phase 7.5 — Findings Gate (BLOCKS completion)
-
-Before writing the Completion Report, check `.omo/memory/findings.json`.
-
-**Gate logic:**
-```
-open_findings = [f for f in findings if f.status in ("open", "blocked")]
-if open_findings:
-    ❌ BLOCK COMPLETION
-    Print: "codex-fable5: findings gate failed; N blocking findings remain"
-    List each finding with id, title, severity, goal
-    DO NOT proceed to Phase 8
-    Action: resolve each finding or escalate
-else:
-    ✅ GATE PASSED → proceed to Phase 8
-```
-
-**Resolution requirements per finding:**
-- `evidence`: what changed to fix it (non-empty)
-- `verify_evidence`: proof the fix worked (non-empty)
-- `verify_cmd`: (optional) command that confirms the fix
-
-**Stale findings (from previous runs):**
-- If `goals.json` is recreated with `--force`, archive old findings to `findings-archive.json`
-- Old findings with no matching active goals do NOT block completion
-
-**Evidence**: `.omo/memory/findings.json` with all findings resolved or rejected
-
-## Phase 8 — Completion Report (BKIT report-generator)
+## Phase 9 — Completion Report (BKIT report-generator)
 
 Write `.omo/ulw-loop/completion-report.md`:
 
@@ -1355,7 +1376,7 @@ Each artifact produced during execution is indexed for compact downstream consum
 | ... | ... | ... | ... | ... | ... | ... |
 
 **Index usage contract:**
-- Phase 8 (Completion Report) writes this index
+- Phase 9 (Completion Report) writes this index
 - Downstream skills (blackcow-qa, blackcow-librarian) load the index, not the raw logs
 - Full logs are retained as artifacts but only read when an anomaly is detected
 - `hash` enables integrity verification without re-reading content
