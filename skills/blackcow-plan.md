@@ -253,12 +253,12 @@ Do NOT dispatch all selected lanes at once. Use staged widening to minimize toke
 
 ```
 uncertainty_score = (
-  0.25 * (unknown_symbols / total_symbols) +       # symbol coverage gap
-  0.20 * (untraced_call_paths / total_functions) +  # call graph coverage
-  0.20 * (uncovered_test_files / total_files) +      # test coverage
-  0.15 * (stale_dependency_count / total_deps) +     # dependency freshness
-  0.10 * (unchecked_entry_points / total_entries) +  # auth surface gap
-  0.10 * (unprofiled_hotspots / total_hotspots)       # perf surface gap
+  0.30 * min(unknown_symbols / max(total_symbols, 1), 1.0) +  # symbol coverage gap
+  0.25 * min(untraced_call_paths / max(total_functions, 1), 1.0) +  # call graph coverage
+  0.15 * min(uncovered_test_files / max(total_files, 1), 1.0) +  # test coverage
+  0.10 * min(stale_dependency_count / max(total_deps, 1), 1.0) +  # dependency freshness
+  0.10 * min(unchecked_entry_points / max(total_entries, 1), 1.0) +  # auth surface gap
+  0.10 * min(unprofiled_hotspots / max(total_hotspots, 1), 1.0)  # perf surface gap
 )
 
 # Normalize to 0-100

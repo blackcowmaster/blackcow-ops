@@ -158,6 +158,8 @@ Before emitting governance decision, verify:
 - [ ] Loop ROI history consulted for scope recommendation
 - [ ] Escalation rules defined with concrete actions
 - [ ] Governance document written to `.omo/governor/`
+- [ ] No invented diff signals or failure patterns
+- [ ] Mode escalation justified by evidence (not guessed)
 
 ## Cross-Skill Evidence Contract
 
