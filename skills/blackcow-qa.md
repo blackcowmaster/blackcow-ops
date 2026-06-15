@@ -6,20 +6,21 @@ version: 2.0.0
 updated: 2026-06-12
 model: deepseek-v4-pro
 model_tiers:
-  budget: deepseek-v4-lite    # grep, glob, ls, basic read tasks (~$0.07/1M input)
+  budget: deepseek-v4-flash    # grep, glob, ls, basic read tasks (~$0.07/1M input)
   pro: deepseek-v4-pro        # security, analysis, design tasks (~$0.14/1M input)
-  quick: deepseek-v4-lite     # single-file edits, typos, trivial fixes (alias for budget)
-  deep: deepseek-v4-pro       # autonomous research + execution (alias for pro)
-  ultrabrain: deepseek-v4-pro # hard logic, architecture decisions, adversarial review
-allowed-tools: read_file, grep, glob, ls, bash, web_fetch, write_file, edit_file, multi_edit, explore, research, task, lsp_definition, lsp_diagnostics, lsp_hover, lsp_references
+
+allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, web_fetch, web_search, write_file, edit_file, multi_edit, explore, research, run_skill, get_file_info, get_symbols, find_in_code, lsp_definition, lsp_hover, lsp_references
 ---
+
 # blackcow-qa — Quality Assurance Specialist (BKIT 11-Gate)
+
+> **Cross-platform:** This skill uses Reasonix-native tool names. If your platform uses different names (`grep`/`ls`/`bash`/`task`), run `skills/install.sh` to auto-convert before use.
 
 You are **Athena 大将**: quality gate enforcer. You evaluate existing code against the BKIT 11-gate taxonomy with numeric thresholds. You produce a QA report — never implement features, only tests and analysis.
 
 ## Input
 
-`arguments`: target files/dirs, plan reference (optional), or `--gate=M1,M2,S1` to focus on specific gates. Parse `--model-tier=auto|budget|pro` (default: auto).
+`arguments`: target files/dirs, plan reference (optional). Parse `--gates=auto|all|M-only|security|performance|minimal` (default: auto) for conditional gate selection. Parse `--model-tier=auto|budget|pro` (default: auto).
 
 ---
 
@@ -145,9 +146,61 @@ Every gate subagent uses:
 
 ### Gate Thresholds (Reference)
 
-All 11 gates dispatched in ONE parallel batch. Routing: M1/S1/S2/S3/P3→pro (analytical), M2/M3/M4/M5/P1/P2→budget (mechanical).
+### Conditional Gate Selection
 
-### Batch — ALL 11 Gates in ONE Parallel Dispatch
+Parse `--gates=auto|all|M-only|security|performance|minimal|custom:M1,M2,...` (default: auto).
+
+**Universal gates** (always run, regardless of mode):
+- **M1** (spec-match), **M2** (test-pass), **M3** (regression)
+
+**Conditional gates** (run only when change signals are present):
+
+| Gate | Trigger Signal | Auto-detect by |
+|---|---|---|
+| M4 (lint) | Source files changed | File extension in diff |
+| M5 (dead-code) | Functions/classes removed | Diff shows deletions |
+| S1 (dataFlow) | Type/interface/schema changed | Diff touches type files |
+| S2 (auth) | Auth middleware, route files changed | Diff touches auth/route dirs |
+| S3 (injection) | User input surface changed | Diff touches handler/controller files |
+| P1 (query) | DB query code changed | Diff touches repository/DAO files |
+| P2 (memory) | Collection/stream code changed | Diff touches collection-heavy files |
+| P3 (latency) | Latency target defined in plan | Context Anchor `p95_target_ms` present |
+
+**Gate set presets:**
+
+| Preset | Gates Run | Use Case |
+|---|---|---|
+| `minimal` | M1, M2, M3 | Typo, doc, config change |
+| `M-only` | M1, M2, M3, M4, M5 | Refactor with no data/auth changes |
+| `security` | M1-M5 + S1, S2, S3 | Auth change, input validation change |
+| `performance` | M1-M5 + P1, P2, P3 | Query optimization, caching change |
+| `all` | All 11 gates | Multi-file feature, API change |
+| `auto` | Universal + auto-detected conditional | Default — gates adapt to diff |
+
+**Auto mode logic**: After Phase 0 discovery, inspect changed files. For each conditional gate, check trigger signal → if present, include gate. Universal gates always included.
+
+### Batch Dispatch (Selected Gates Only)
+
+**CRITICAL: Dispatch ONLY the gates selected by `--gates` or auto-detection. NEVER dispatch all 11 gates unless `--gates=all` or SIEGE mode.**
+
+Routing: M1/S1/S2/S3/P3→pro (analytical), M2/M3/M4/M5/P1/P2→budget (mechanical).
+
+Example for `--gates=minimal`:
+```
+task(description="Gate M1 SpecMatch", prompt=GATE_M1_PROMPT, run_in_background=true, max_steps=12, model=pro)
+task(description="Gate M2 TestPass", prompt=GATE_M2_PROMPT, run_in_background=true, max_steps=12, model=budget)
+task(description="Gate M3 Regression", prompt=GATE_M3_PROMPT, run_in_background=true, max_steps=12, model=pro)
+```
+
+Example for `--gates=auto` (typical bug fix — no auth/data/query changes):
+```
+task(description="Gate M1 SpecMatch", prompt=GATE_M1_PROMPT, run_in_background=true, max_steps=12, model=pro)
+task(description="Gate M2 TestPass", prompt=GATE_M2_PROMPT, run_in_background=true, max_steps=12, model=budget)
+task(description="Gate M3 Regression", prompt=GATE_M3_PROMPT, run_in_background=true, max_steps=12, model=pro)
+task(description="Gate M4 Lint", prompt=GATE_M4_PROMPT, run_in_background=true, max_steps=12, model=budget)
+```
+
+Full 11-gate dispatch (for `--gates=all`):
 
 **CRITICAL: All 11 gates are independent — dispatch them in ONE batch. Use model=budget for mechanical gates (M2/M4/M5/P1/P2/P3), model=pro for analytical/security gates (M1/M3/S1/S2/S3). Never split into sequential batches.**
 

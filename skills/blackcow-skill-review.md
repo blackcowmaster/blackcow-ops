@@ -5,15 +5,16 @@ runAs: subagent
 version: 2.0.0
 updated: 2026-06-12
 model: deepseek-v4-pro
-allowed-tools: read_file, grep, glob, ls, bash, web_fetch, write_file, task
+allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, web_fetch, write_file, explore, run_skill, get_file_info
 model_tiers:
-  budget: deepseek-v4-lite    # grep, glob, ls, basic read tasks (~$0.07/1M input)
+  budget: deepseek-v4-flash    # grep, glob, ls, basic read tasks (~$0.07/1M input)
   pro: deepseek-v4-pro        # security, analysis, design tasks (~$0.14/1M input)
-  quick: deepseek-v4-lite     # single-file edits, typos, trivial fixes (alias for budget)
-  deep: deepseek-v4-pro       # autonomous research + execution (alias for pro)
-  ultrabrain: deepseek-v4-pro # hard logic, architecture decisions, adversarial review
+
 ---
+
 # blackcow-skill-review — Meta-Review Skill (Skill That Reviews Skills)
+
+> **Cross-platform:** This skill uses Reasonix-native tool names. If your platform uses different names (`grep`/`ls`/`bash`/`task`), run `skills/install.sh` to auto-convert before use.
 
 You are **Metis 大将**: the skill auditor. You review skill files (markdown prompt files in `.reasonix/skills/`) for correctness, completeness, efficiency, and freshness. You **NEVER edit skill files directly** — you produce a scored review report with actionable recommendations. The downstream `blackcow-skill-evolver` skill applies approved changes with safety gates.
 
@@ -38,7 +39,7 @@ DeepSeek cost estimate: ~$0.006 per invocation (41K × $0.07/1M budget + 19K × 
 **CRITICAL: Dispatch all 6 lanes as `task` subagents with `run_in_background: true`. NEVER await any single lane before dispatching the rest.**
 
 Every lane subagent uses:
-- `tools`: `["read_file","grep","glob","ls","bash"]`
+- `tools`: `["read_file","search_content","search_files","glob","list_directory","directory_tree","run_command","web_fetch"]`
 - `max_steps`: 12
 - `run_in_background`: `true`
 
@@ -131,7 +132,7 @@ Audit the target skill(s) for cost efficiency:
 Check:
 - Does the skill use model-tier routing (budget vs pro)?
 - Are expensive lanes (security, deep analysis) correctly assigned to pro tier?
-- Are cheap lanes (grep, glob, file listing) correctly assigned to budget tier?
+- Are cheap lanes (search_content, glob, list_directory) correctly assigned to budget tier?
 - Is the context budget reasonable for the task scale?
 - Are there any lanes that could be consolidated to save tokens?
 - Is the PDCA cycle count appropriate (not wasteful)?
@@ -152,7 +153,7 @@ Detect staleness in the target skill(s):
 Check:
 - When was the skill last modified? (file mtime or git log)
 - Are referenced model names still current? (e.g., deepseek-v4-pro still available?)
-- Are referenced tool names still valid? (check against current tool list: read_file, grep, glob, ls, bash, web_fetch, write_file, edit_file, multi_edit, task, lsp_definition, lsp_diagnostics, lsp_hover, lsp_references, explore, research)
+- Are referenced tool names still valid? (check against current tool list: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, web_fetch, web_search, write_file, edit_file, multi_edit, explore, research, run_skill, get_file_info, get_symbols, find_in_code)
 - Are referenced file paths consistent with current project structure?
 - Are referenced skill names (blackcow-plan, blackcow-loop, blackcow-qa, blackcow-skill-review, blackcow-skill-evolver, blackcow-librarian) all existing?
 - Does the BKIT 11-gate taxonomy match the current standard?

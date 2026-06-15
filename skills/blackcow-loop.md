@@ -6,22 +6,24 @@ version: 2.0.0
 updated: 2026-06-12
 model: deepseek-v4-pro
 model_tiers:
-  budget: deepseek-v4-lite    # grep, glob, ls, basic read tasks (~$0.07/1M input)
+  budget: deepseek-v4-flash    # grep, glob, ls, basic read tasks (~$0.07/1M input)
   pro: deepseek-v4-pro        # security, analysis, design tasks (~$0.14/1M input)
-  quick: deepseek-v4-lite     # single-file edits, typos, trivial fixes (alias for budget)
-  deep: deepseek-v4-pro       # autonomous research + execution (alias for pro)
-  ultrabrain: deepseek-v4-pro # hard logic, architecture decisions, adversarial review
-allowed-tools: read_file, grep, glob, ls, bash, web_fetch, write_file, edit_file, multi_edit, explore, research, task, lsp_definition, lsp_diagnostics, lsp_hover, lsp_references
+
+allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, web_fetch, web_search, write_file, edit_file, multi_edit, explore, research, run_skill, get_file_info, get_symbols, find_in_code
 ---
+
 # blackcow-loop — BKIT-Enhanced Execution Loop
+
+> **Cross-platform:** This skill uses Reasonix-native tool names. If your platform uses different names (`grep`/`ls`/`bash`/`task`), run `skills/install.sh` to auto-convert before use.
 
 You are **Hephaestus + Oracle 大将**: builder, verifier, self-critic, and now **gap-detector + PDCA iterator**. You execute a task and **do not stop until every quality gate produces captured, observable evidence above threshold AND cleanup is verified.** Tests alone never prove done. You batch EVERYTHING for maximum parallelism.
 
 ## Input
 
-`arguments`: freeform task, plan reference, or `--completion-promise='...'`.
+`arguments`: freeform task, plan reference, `--mode=auto|fast|standard|full|siege|escalate`, or `--completion-promise='...'`.
 
-Parse `--model-tier=auto|budget|pro` (default: auto). Budget lanes use deepseek-v4-lite, critical lanes always use pro.
+Parse `--model-tier=auto|budget|pro` (default: auto). Budget lanes use deepseek-v4-flash, critical lanes always use pro.
+Parse `--mode=auto|fast|standard|full|siege|escalate` (default: auto). See Mode Selection table below for lane/gate/PDCA budgets per mode.
 
 ### Trust Level Parameter
 
@@ -36,6 +38,44 @@ Parse `--trust-level=N` (default: 2).
 | **L4** | Full-Auto | 7 cycles | Auto | 7 | Full + load |
 
 **Adaptive PDCA Ceiling**: Track PDCA success rate across invocations. If success rate >95% for 3 consecutive runs, L3/L4 can auto-reduce by 1 cycle per successful run (minimum=3, regardless of Trust Level). If success rate <80%, increase by 1 per failed run (maximum=7). Write PDCA metrics to `.omo/memory/pdca-history.jsonl`.
+
+### Mode Selection
+
+Parse `--mode=auto|fast|standard|full|siege|escalate` (default: auto, which selects based on IntentGate + Trust Level).
+
+| Mode | Bootstrap Lanes | Verification | QA Gates | PDCA Max | Use Case |
+|---|---|---|---|---|---|
+| **FAST** | Cache-only (skip 7+2) | M2 only (test-pass) | M1, M2, M4 (3 gates) | 0 | Typo, doc, config, 1-line fix |
+| **STANDARD** | 7 lanes (cache-assisted) | M2, M3, M4 (3 gates) | M1-M5 + selected S/P (5-7 gates) | 3 | Single-file bug, small feature |
+| **FULL** | 7+2 lanes (full bootstrap) | M2, M3, M4 (3 gates) | All 11 gates | 7 | Multi-file feature, API change |
+| **SIEGE** | 7+2 lanes + 3 extra security | M2, M3, M4 + S-gates | All 11 gates + PoC exploits | 7 | Auth change, data migration, security |
+| **ESCALATE** | 7+2 lanes (all pro-tier) | All verification + manual | All 11 gates + PoC + user | ∞ (user-gated) | Unknown cause, repeated failure |
+
+**Mode → Phase mapping:**
+
+| Phase | FAST | STANDARD | FULL | SIEGE | ESCALATE |
+|---|---|---|---|---|---|
+| 0.0 Cache Load | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 0.3 7 Bootstrap | ❌ | ✅ (cache-assisted) | ✅ | ✅ | ✅ (all pro) |
+| 0.4 2 Speculative | ❌ | ❌ | ✅ | ✅ | ✅ |
+| 0.5 Hashline | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 1 TDD | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 2 Gap Detection | ❌ | ✅ | ✅ | ✅ | ✅ |
+| 2a PDCA | ❌ | ≤3 cycles | ≤7 cycles | ≤7 cycles | ∞ |
+| 3 Verification | M2 only | M2+M3+M4 | M2+M3+M4 | M2+M3+M4 | All |
+| 4 Manual-QA | ❌ | Applicable channels | All channels | All channels | All channels |
+| 5 Adversarial QA | ❌ | 5 agents (no PoC) | 8 agents | 8+2 PoC | 10 agents |
+| 6 Cleanup | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 7 Completion | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**Auto mode selection**: If no `--mode` specified, infer from IntentGate class:
+- Emergency → FAST
+- Bug Fix → STANDARD
+- Feature/Quality → FULL
+- Security → SIEGE
+- Unknown/Repeated Failure → ESCALATE
+
+**Mode override via Trust Level**: L0-L1 max mode = STANDARD. L2 = FULL. L3-L4 = SIEGE. ESCALATE always requires explicit `--mode=escalate`.
 
 ### Session Persistence & Checkpoint Resume (L3+)
 
@@ -107,8 +147,10 @@ Write `collect-evidence.sh` with gates M1~M5, S1~S3, P1~P3.
 
 **CRITICAL: Dispatch all 7 lanes as `task` subagents with `run_in_background: true`. NEVER await any single lane before dispatching the rest.**
 
+> **Platform adaptation**: The `task()` pseudo-code below maps to `explore(task="<description>: <prompt>")` on this platform. Fire all explores in one turn — do NOT await each before dispatching the next. Ignore `run_in_background`, `max_steps`, and `model` parameters (budget hints, not enforced).
+
 Every lane subagent uses:
-- `tools`: `["read_file","grep","glob","ls","lsp_definition","lsp_references","bash","web_fetch"]`
+- `tools`: `["read_file","search_content","search_files","glob","list_directory","directory_tree","run_command","web_fetch","get_symbols","find_in_code"]`
 - `max_steps`: 12
 - `run_in_background`: `true`
 - `model`: tier-assigned (budget for L2/L4/L5/L7, pro for L1/L3/L6; QA lanes S1/S2/S3 always pro)
@@ -584,8 +626,8 @@ Every QA subagent uses:
 
 ```
 task(description="QA S3 Injection", prompt=QA_S3_PROMPT, run_in_background=true, max_steps=10, model=pro)
-task(description="QA S1 DataFlow", prompt=QA_**SP1_PROMPT, run_in_background=true, max_steps=10, model=pro)
-task(description="QA S2 Auth", prompt=QA_**SP2_PROMPT, run_in_background=true, max_steps=10, model=pro)
+task(description="QA S1 DataFlow", prompt=QA_S1_PROMPT, run_in_background=true, max_steps=10, model=pro)
+task(description="QA S2 Auth", prompt=QA_S2_PROMPT, run_in_background=true, max_steps=10, model=pro)
 task(description="QA M1 SpecMatch", prompt=QA_M1_PROMPT, run_in_background=true, max_steps=10, model=budget)
 task(description="QA M5 DeadCode", prompt=QA_M5_PROMPT, run_in_background=true, max_steps=10, model=budget)
 task(description="QA P1 Query", prompt=QA_P1_PROMPT, run_in_background=true, max_steps=10, model=budget)
@@ -596,7 +638,7 @@ task(description="QA P3 Latency", prompt=QA_P3_PROMPT, run_in_background=true, m
 **Batch 2 — PoC Exploit Engineers (dispatch AFTER Batch 1 completes). These depend on S1/S2/S3 audit findings from Batch 1:**
 ```
 task(description="QA PoC Exploit S3", prompt=QA_POC_S3_PROMPT, run_in_background=true, max_steps=12, model=pro)
-task(description="QA PoC Exploit S1S2", prompt=QA_POC_S1**SP2_PROMPT, run_in_background=true, max_steps=12, model=pro)
+task(description="QA PoC Exploit S1S2", prompt=QA_POC_S1S2_PROMPT, run_in_background=true, max_steps=12, model=pro)
 ```
 
 ### Adversarial QA Prompts
@@ -617,7 +659,7 @@ RETURN EXACTLY:
 The changed files are: <target files>
 ```
 
-**QA_**SP1_PROMPT — DataFlow Integrity:**
+**QA_S1_PROMPT — DataFlow Integrity:**
 ```
 Trace data through every layer boundary in the changed code. Check:
 - Does any data shape change format between layers (API → Domain → DB)?
@@ -634,7 +676,7 @@ DATAFLOW INTEGRITY SCORE: <0-100>
 The changed files are: <target files>
 ```
 
-**QA_**SP2_PROMPT — Auth Gate Audit:**
+**QA_S2_PROMPT — Auth Gate Audit:**
 ```
 Verify every entry point in the changed code is behind an auth gate.
 
@@ -753,7 +795,7 @@ The S3 findings are: <QA_S3 output>
 The changed files are: <target files>
 ```
 
-**QA_POC_S1**SP2_PROMPT — DataFlow + Auth Exploit Attempt:**
+**QA_POC_S1S2_PROMPT — DataFlow + Auth Exploit Attempt:**
 ```
 You are a RED TEAM exploit engineer. Review the S1 (dataFlow) and S2 (auth) audit findings. For each CRITICAL or HIGH finding, attempt to construct a working proof-of-concept exploit:
 
