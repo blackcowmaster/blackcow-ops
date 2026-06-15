@@ -669,6 +669,14 @@ This enables `blackcow-qa` and `blackcow-governor` to skip already-passed gates.
 
 ## Phase 7 — Integration Hooks (for downstream skills)
 
+### 7.0 Governor Integration
+
+The librarian feeds `blackcow-governor` via:
+```
+run_skill({ name: "blackcow-governor", arguments: "--load-failure-patterns --load-roi-history <task>" })
+```
+Governor consumes `.omo/memory/failure-patterns.jsonl` and `.omo/memory/loop-roi.jsonl` during Phase 0 preflight.
+
 ### 7.1 blackcow-plan Phase 0 Patch
 
 Replace blackcow-plan Phase 0 glob-based pre-flight with cache-first approach:

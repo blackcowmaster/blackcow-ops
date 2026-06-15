@@ -158,6 +158,11 @@ Is task adversarial review (Phase 4)?         → pro (force)
 Default: budget for discovery, pro for analysis
 ```
 
+**Model fallback strategy**: If pro tier is unavailable or rate-limited:
+- Fall back to flash for mechanical lanes (L1, L4, L5, L7, L10)
+- Do NOT fall back for security lanes (L8, S1, S2, S3) — escalate to user instead
+- Record fallback events to `.omo/memory/model-fallback.jsonl`
+
 **Critical override**: L8 (Security) and adversarial reviewers ALWAYS use pro tier, regardless of `--model-tier`. Use `--force-pro` to force all lanes to pro.
 
 ### Context Budget Estimation (Dynamic)

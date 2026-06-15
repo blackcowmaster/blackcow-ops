@@ -593,6 +593,17 @@ When any hard stop rule triggers ESCALATE, execute these actions in order:
 - Rule 3 (budget near limit): 5 of 7 PDCA cycles used, matchRate still 82% → emit ESCALATE_REQUIRED, ask user whether to continue or accept partial
 - Rule 4 (scope creep): D2 flags "need new OAuth provider integration" which wasn't in original plan → STOP PDCA, return to planner with scope delta
 
+**Evidence quality score** (per cycle, 0-100):
+```
+evidence_quality = (
+  40 * (has_file_line_evidence ? 1 : 0) +     # concrete citations
+  30 * (has_tool_output ? 1 : 0) +             # captured tool results
+  20 * (has_before_after_comparison ? 1 : 0) +  # measurable delta
+  10 * (has_independent_verification ? 1 : 0)   # cross-checked by another lane
+)
+```
+Cycles with `evidence_quality < 50` are treated as "no new evidence" → trigger hard stop rule 1.
+
 **Evidence chain**: Each cycle's `before` record links to the previous cycle's `after` record. Broken chain → invalid PDCA.
 
 ### Loop ROI Logging
@@ -614,6 +625,8 @@ After each PDCA cycle (and at Completion Report time), log token efficiency to `
   "timestamp": "<ISO>"
 }
 ```
+
+**Budget rebalancing**: If any phase consumes >150% of its mode budget, reduce budget for remaining phases proportionally. Log rebalancing events.
 
 **ROI thresholds for mode escalation:**
 - `roi < 0.001` (score gain per 1K tokens) for 2 consecutive cycles → escalate mode (STANDARD→FULL, FULL→SIEGE)
@@ -1215,7 +1228,8 @@ Each artifact produced during execution is indexed for compact downstream consum
 - Keep all artifacts for active task (current slug)
 - After task completion, retain: evidence index + failed gate logs + completion report
 - Purge after 30 days: raw lane outputs, intermediate snapshots, duplicate artifacts
-- Max `.omo/ulw-loop/evidence/` size: 50MB per slug — warn if exceeded
+- Compress artifacts >1MB: gzip and store as `.gz`, update evidence index with compressed path
+- Max `.omo/ulw-loop/evidence/` size: 50MB per slug — warn if exceeded, auto-purge oldest if >50MB
 
 ## PDCA History
 
