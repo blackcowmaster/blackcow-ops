@@ -587,6 +587,16 @@ When any hard stop rule triggers ESCALATE, execute these actions in order:
 {"timestamp":"<ISO>","run_id":"<uuid>","trigger_rule":1|2|3|4,"failing_gate":"<gate>","cycles_before_escalate":<N>,"resolution":"plan_regenerated|user_input|unresolved"}
 ```
 
+**PDCA+ESCALATE scenario verification** (STATIC_EVAL, to be confirmed by execution):
+
+| Scenario | Trigger | Expected Behavior | Verified? |
+|---|---|---|---|
+| Typo fix, no gaps | M1 matchRate 100% after 1 cycle | PDCA stops after 1 cycle, no ESCALATE | PENDING |
+| Missing import, found+fixed | M1 85%→100% after 1 cycle | 1 cycle, evidence: "added import X at file:line" | PENDING |
+| Same M1 gap twice | M1 72%→72% after 2 cycles | ESCALATE rule 2 fires, escalation-log.jsonl written | PENDING |
+| Budget exhausted | 6 of 7 cycles used, M1 still 88% | ESCALATE rule 3 fires, asks user | PENDING |
+| Scope creep detected | D2 reports "need new library" | STOP, return to planner, no further cycles | PENDING |
+
 **Example ESCALATE scenarios:**
 - Rule 1 (no new evidence): M1 stuck at 72% after 3 PDCA cycles with same gaps → ESCALATE to `blackcow-plan` for architectural re-evaluation
 - Rule 2 (same gate ×2): S2 auth gate fails twice with "unguarded endpoint /api/health" → ESCALATE with specific file:line + suggested fix
@@ -634,6 +644,15 @@ After each PDCA cycle (and at Completion Report time), log token efficiency to `
 - `roi == 0` (no score gain) for 1 cycle → STOP (do not waste tokens)
 
 **Token counting**: When actual token counts are available from the Reasonix runtime (reported after each `explore`/`run_skill` call), use actual values. Fall back to estimates only when runtime doesn't report. Mark each ROI entry: `counted: true|false`.
+
+**EXECUTED_EVAL cost reference** (2026-06-15):
+| Task | Mode | Tokens | Cost | Notes |
+|---|---|---|---|---|
+| README verification | FAST | ~2K | $0.010 | 4 turns, read-only |
+| Librarian cache check | — | ~5K | $0.007 | 5 turns, empty cache |
+| Skill-review (plan audit) | — | ~50K | $0.030 | 13 turns, mixed flash/pro |
+
+Use these as calibration. Actual costs vary by task complexity and model tier mix.
 
 **Governor integration**: Before each blackcow-loop invocation, check loop-roi.jsonl for the same plan area. If historical ROI was low, start at higher trust level or suggest scope reduction.
 

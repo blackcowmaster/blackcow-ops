@@ -215,6 +215,14 @@ Every skill in the pipeline MUST honor this contract for evidence exchange:
 - Broken contract → consumer falls back to legacy discovery
 - All paths are relative to project root
 
+**Verified paths** (EXECUTED_EVAL):
+| Contract | Status | Evidence |
+|---|---|---|
+| librarian → `.omo/library/` | ⚠️ Not yet built | Cache is EMPTY, scan recommended |
+| loop → completion-report.md | ⚠️ Not yet produced | No prior loop run with evidence index |
+| qa → qa-history.jsonl | ⚠️ Not yet populated | No QA runs executed |
+| governor → governance.md | ⚠️ Governor not yet indexed | File installed, session restart needed |
+
 ## Constraints
 
 1. Never edit product code.
