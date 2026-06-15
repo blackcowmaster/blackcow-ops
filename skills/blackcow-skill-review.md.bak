@@ -7,8 +7,8 @@ updated: 2026-06-12
 model: deepseek-v4-pro
 allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, web_fetch, write_file, explore, run_skill, get_file_info
 model_tiers:
-  budget: deepseek-v4-flash    # mechanical tasks (~$0.14/1M input)
-  pro: deepseek-v4-pro        # analysis, security, design (~$0.435/1M input)
+  budget: deepseek-v4-flash    # grep, glob, ls, basic read tasks (~$0.07/1M input)
+  pro: deepseek-v4-pro        # security, analysis, design tasks (~$0.14/1M input)
 
 ---
 

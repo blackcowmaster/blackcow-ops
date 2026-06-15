@@ -6,8 +6,8 @@ version: 2.0.0
 updated: 2026-06-15
 model: deepseek-v4-pro
 model_tiers:
-  budget: deepseek-v4-flash    # mechanical tasks (~$0.14/1M input)
-  pro: deepseek-v4-pro        # analysis, security, design (~$0.435/1M input)
+  budget: deepseek-v4-flash    # grep, glob, ls, basic read tasks (~$0.07/1M input)
+  pro: deepseek-v4-pro        # security, analysis, design tasks (~$0.14/1M input)
 
 allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, web_fetch, web_search, write_file, explore, research, run_skill, get_file_info
 ---
@@ -139,8 +139,8 @@ Parse `--model-tier=auto|budget|pro` (default: auto).
 
 | Tier | Model | Cost/1M input | Use for |
 |---|---|---|---|
-| **budget** | deepseek-v4-flash | ~$0.14 | grep, glob, ls, basic read tasks (L1, L4, L5, L10) |
-| **pro** | deepseek-v4-pro | ~$0.435 | Security (L8), analysis (L2, L3), design (L6, L9) |
+| **budget** | deepseek-v4-flash | ~$0.07 | grep, glob, ls, basic read tasks (L1, L4, L5, L10) |
+| **pro** | deepseek-v4-pro | ~$0.14 | Security (L8), analysis (L2, L3), design (L6, L9) |
 
 **Auto mode**: budget tier for lanes L1, L4, L5, L7, L10. Pro tier for L2, L3, L6, L8, L9. All reviewers use pro tier.
 
