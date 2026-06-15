@@ -274,6 +274,11 @@ Append summary row to `.omo/meta-review/review-history.jsonl`:
 {"date":"<ISO>","skill":"<name>","total_score":<0-100>,"syntax":<N>,"gates":<N>,"parallelism":<N>,"cost":<N>,"staleness":<N>,"critical_count":<N>,"high_count":<N>,"recommendations_count":<N>}
 ```
 
+**Self-review trend alert**: After appending to review-history.jsonl, check:
+- If total_score drops >5 points vs previous review → flag as REGRESSION, trigger governor re-evaluation
+- If same CRITICAL finding appears in 3+ consecutive reviews → escalate to user
+- If score is stable (±3) for 5+ reviews → mark dimension as PLATEAU, stop reviewing it
+
 **Rotation**: cap at 100 entries. When exceeded, compress oldest 50 entries to `.omo/meta-review/review-history-archive.jsonl.gz` and remove from active file.
 
 ---

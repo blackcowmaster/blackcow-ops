@@ -131,11 +131,17 @@ After writing the governance decision, invoke the pipeline:
 # 1. Plan (skip for FAST mode or if plan already exists)
 run_skill({ name: "blackcow-plan", arguments: "<task> --mode=<mode> --govern=<slug>" })
 
-# 2. Execute
+# 2. Self-review plan (optional, for FULL/SIEGE modes)
+run_skill({ name: "blackcow-skill-review", arguments: "--skill=blackcow-plan" })
+
+# 3. Execute
 run_skill({ name: "blackcow-loop", arguments: "Execute plans/<slug>.md --mode=<mode> --trust-level=<N> --gates=<selected>" })
 
-# 3. Verify
+# 4. Verify
 run_skill({ name: "blackcow-qa", arguments: "<target> --gates=<selected> --govern=<slug>" })
+
+# 5. Post-mortem self-review (FULL/SIEGE modes)
+run_skill({ name: "blackcow-skill-review", arguments: "--all" })
 ```
 
 ## Integration Contract
@@ -168,6 +174,8 @@ Before emitting governance decision, verify:
 - [ ] Mode escalation justified by evidence (not guessed)
 - [ ] All downstream skills (plan/loop/qa) honor governance decisions
 - [ ] Governance document loaded by at least one downstream skill before execution
+- [ ] Skill-review triggered for FULL/SIEGE modes
+- [ ] Post-mortem review scheduled after pipeline completion
 
 ## Cross-Skill Evidence Contract
 
