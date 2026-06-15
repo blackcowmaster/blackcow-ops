@@ -662,6 +662,10 @@ Select the appropriate observable level based on what the change affects:
 
 **Residual risk handling:**
 - If browser/puppeteer tooling is **unavailable**, cap at O1 (use `curl` / `run_command` only)
+- If puppeteer MCP server is available (`puppeteer_navigate`, `puppeteer_screenshot`, `puppeteer_click`, `puppeteer_evaluate`), O2-O4 become feasible:
+  - O2: `puppeteer_navigate` + `puppeteer_click` for primary interaction
+  - O3: `puppeteer_screenshot` with `width`/`height` for viewport testing
+  - O4: multiple `puppeteer_screenshot` calls + visual diff
 - Record the capped level + reason in evidence: `OBSERVABLE_CAPPED: O<N> → O1 (no browser tooling)`
 - **NEVER claim O2+ verification without actual browser/render observation**
 - **NEVER fabricate screenshot, browser, or visual verification results**

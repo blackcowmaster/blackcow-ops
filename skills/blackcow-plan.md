@@ -875,3 +875,33 @@ blackcow-loop "Execute plans/<slug>.md" --completion-promise='<SUCCESS criteria>
 13. **All quality gates must have explicit numeric thresholds.**
 14. **Multi-feature mode**: when `--features=` detected, write master plan + per-feature plans.
 15. **task subagent budget**: Phase 1 = XS:5 lanes × ~20K, M:10 lanes × ~50K, XL:10 lanes × ~65K (all pro). Phase 4 = 3-5 tasks × ~5K = ~15-25K. Total subagent budget ≤ 115K tokens.
+
+## Self-Audit Checklist
+
+Before emitting the final plan, verify ALL of the following. If any check fails, fix before DONE.
+
+### Syntax & Structure
+- [ ] YAML frontmatter has `---` opening AND closing markers
+- [ ] All code fences (` ``` `, ` ```` `) are balanced (even count)
+- [ ] No bare code blocks — every fence has a language marker
+- [ ] Heading hierarchy: `##` → `###` → `####` (no skipped levels)
+- [ ] All `RETURN EXACTLY:` sections define clear output schema
+
+### Gate Completeness
+- [ ] All 11 BKIT gates appear in Risk Register (M1-M5, S1-S3, P1-P3)
+- [ ] Each gate has a numeric threshold (not "good enough" or "reasonable")
+- [ ] Context Anchor SUCCESS field references the RELEVANT gate subset (not all 11)
+- [ ] Intent-Based Dispatch table applied: correct lanes skipped per intent class
+
+### Parallelism & Cost
+- [ ] All lane dispatches use progressive widening (Stage 1→2→3)
+- [ ] Budget tier lanes (L1, L4, L5, L7, L10) use `model=budget`
+- [ ] Security/analysis lanes (L2, L3, L6, L8, L9) use `model=pro`
+- [ ] XS tasks skip Phase 4; M uses 3 reviewers; XL uses 5
+- [ ] Token budget estimate ≤ 115K; split plan if exceeds
+
+### Cross-Reference Integrity
+- [ ] Every file:line reference is verifiable (no phantom paths)
+- [ ] No reference to `lsp_*` tools (use `get_symbols`/`find_in_code`)
+- [ ] No reference to non-existent skills or files
+- [ ] DAG example is generic (not self-referential)
