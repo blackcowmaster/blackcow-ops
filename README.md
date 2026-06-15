@@ -184,7 +184,7 @@ BlackCow was designed for models that are **cheap enough to be wasteful**. DeepS
 
 ## Quality Score Evolution
 
-BlackCow Ops was improved through a **score-driven self-evolution loop** (74 rounds, 39 commits). Each round: score → identify weakness → apply minimal fix → re-score → accept only if improved.
+BlackCow Ops was improved through a **score-driven self-evolution loop** (89 rounds, 39 commits). Each round: score → identify weakness → apply minimal fix → re-score → accept only if improved.
 
 | Round | Score | Key Improvements |
 |---|---:|---:|---|
@@ -199,9 +199,10 @@ BlackCow Ops was improved through a **score-driven self-evolution loop** (74 rou
 | R51-R55 | **91.5** | Governor E2E verified; governor→plan→loop→qa full pipeline; ESCALATE tested; ecosystem health + cross-skill contract |
 | R56-R60 | **93.0** | Failure Pattern Memory live; 9 pre-existing failures auto-fixed; ecosystem 514/514 (100%); all integration contracts complete |
 | R61-R65 | **94.0** | S1+S3 gates triggered (path traversal); real PDCA cycle (regression→detect→auto-fix); install.sh --install-path security hardening |
-| R66-R73 | **89.0** | Multi-domain sim (7 agents); Phase 2.2 root-cause; FAN-OUT mode; 11/11 gate coverage; O4 observable; Findings Gate; native review integration; honest recalibration from 96.2 to 89.0 |
+| R66-R73 | ~~96.2~~ | Multi-domain sim; Phase 2.2 root-cause; FAN-OUT; 11/11 gates; O4; Findings Gate; native review; honest recalibration to 89.0 |
+| R74-R89 | **89.0** | 15-round self-study: widening verified (Stage 2), PDCA mechanism confirmed, timeout limit found (>20 files), 3 new governance decisions |
 
-| Dimension | Baseline (57) | Current (96.2) |
+| Dimension | Baseline (57) | Current (89) |
 
 |---|---:|---:|---:|
 | Reasonix-native | 52 | 91 |

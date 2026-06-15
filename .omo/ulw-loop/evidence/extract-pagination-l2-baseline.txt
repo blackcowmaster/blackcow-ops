@@ -1,0 +1,212 @@
+================================================================================
+PAGINATION EXTRACTION — L2 CALL SITE BASELINE (REGRESSION GATE)
+================================================================================
+Generated: 2025-04-14
+Scope: findAll / getAll / nextCursor / hasMore / _cursor / lastIndexOf / offset / paginated() / FindAllResult
+================================================================================
+
+1. CALL SITE TABLE
+==================
+
+| # | caller file:line | callee / symbol | context snippet | category |
+|---|------------------|-----------------|----------------|----------|
+| 1 | src/services/tasks.service.ts:8 | tasksRepository.findAll() | return tasksRepository.findAll(userId, pq); | direct |
+| 2 | src/controllers/tasks.controller.ts:12 | tasksService.getAll() | const { tasks, total, nextCursor } = await tasksService.getAll(userId, pq); | direct |
+| 3 | src/routes/tasks.routes.ts:14 | controller.getAll | taskRoutes.get('/', validateQuery(paginationSchema), controller.getAll); | indirect (Express route binding) |
+| 4 | __tests__/repositories/tasks.repository.test.ts:88 | repo.findAll() | const { tasks, total } = await repo.findAll(TEST_USER_ID, { page:1, limit:25, sort_by:'created_at', order:'desc', mode:'cursor' }); | direct (test) |
+| 5 | __tests__/repositories/tasks.repository.test.ts:97 | repo.findAll() | const { tasks } = await repo.findAll(TEST_USER_ID, { page:1, limit:25, sort_by:'created_at', order:'desc', mode:'cursor', priority:'high' }); | direct (test) |
+| 6 | __tests__/repositories/tasks.repository.test.ts:105 | repo.findAll() | const { tasks, total, nextCursor } = await repo.findAll(TEST_USER_ID, { page:1, limit:2, sort_by:'created_at', order:'desc', mode:'cursor' }); | direct (test) |
+| 7 | __tests__/repositories/tasks.repository.test.ts:115 | repo.findAll() | const page1 = await repo.findAll(TEST_USER_ID, { page:1, limit:2, sort_by:'created_at', order:'desc', mode:'cursor' }); | direct (test) |
+| 8 | __tests__/repositories/tasks.repository.test.ts:122 | repo.findAll() | const page2 = await repo.findAll(TEST_USER_ID, { page:1, limit:2, sort_by:'created_at', order:'desc', mode:'cursor', cursor: page1.nextCursor! }); | direct (test) |
+| 9 | __tests__/repositories/tasks.repository.test.ts:142 | repo.findAll() | const page1 = await repo.findAll(TEST_USER_ID, { page:1, limit:2, sort_by:'created_at', order:'desc', mode:'cursor' }); | direct (test) |
+|10 | __tests__/repositories/tasks.repository.test.ts:150 | repo.findAll() | const page2 = await repo.findAll(TEST_USER_ID, { page:1, limit:2, sort_by:'created_at', order:'desc', mode:'cursor', cursor: page1.nextCursor! }); | direct (test) |
+|11 | __tests__/repositories/tasks.repository.test.ts:171 | repo.findAll() | const { tasks, total, nextCursor } = await repo.findAll(TEST_USER_ID, { page:1, limit:4, sort_by:'created_at', order:'desc', mode:'offset' }); | direct (test) |
+|12 | __tests__/repositories/tasks.repository.test.ts:181 | repo.findAll() | const page1 = await repo.findAll(TEST_USER_ID, { page:1, limit:4, sort_by:'created_at', order:'desc', mode:'offset' }); | direct (test) |
+|13 | __tests__/repositories/tasks.repository.test.ts:184 | repo.findAll() | const page2 = await repo.findAll(TEST_USER_ID, { page:2, limit:4, sort_by:'created_at', order:'desc', mode:'offset' }); | direct (test) |
+|14 | __tests__/repositories/tasks.repository.test.ts:196 | repo.findAll() | const { tasks, total } = await repo.findAll(TEST_USER_ID, { page:3, limit:4, sort_by:'created_at', order:'desc', mode:'offset' }); | direct (test) |
+|15 | __tests__/repositories/tasks.repository.test.ts:204 | repo.findAll() | const { tasks, total } = await repo.findAll(TEST_USER_ID, { page:100, limit:25, sort_by:'created_at', order:'desc', mode:'offset' }); | direct (test) |
+|16 | __tests__/repositories/tasks.repository.test.ts:212 | repo.findAll() | const { tasks, total } = await repo.findAll(TEST_USER_ID, { page:1, limit:25, sort_by:'created_at', order:'desc', mode:'offset', priority:'high' }); | direct (test) |
+|17 | __tests__/repositories/tasks.repository.test.ts:221 | repo.findAll() | const { tasks } = await repo.findAll(TEST_USER_ID, { page:1, limit:3, sort_by:'title', order:'asc', mode:'offset' }); | direct (test) |
+|18 | __tests__/repositories/tasks.repository.test.ts:289 | repo.findAll() | const { total } = await repo.findAll(TEST_USER_ID, { page:1, limit:25, sort_by:'created_at', order:'desc', mode:'cursor' }); | direct (test) |
+|19 | src/repositories/tasks.repository.ts:41 | lastIndexOf('_') | const lastUnderscore = pq.cursor!.lastIndexOf('_'); | direct (cursor parse) |
+|20 | src/repositories/tasks.repository.ts:54 | _cursor (SQL alias) | SELECT t.*, t.created_at::text || '_' || t.id::text as _cursor | direct (SQL) |
+|21 | src/repositories/tasks.repository.ts:71 | _cursor (destructure) | const { _cursor, ...task } = row; | direct (strip) |
+|22 | src/repositories/tasks.repository.ts:77 | _cursor (access) | ? result.rows[result.rows.length - 1]._cursor | direct |
+|23 | src/repositories/tasks.repository.ts:83 | offset calculation | const offset = (pq.page - 1) * pq.limit; | direct |
+|24 | src/repositories/tasks.repository.ts:76 | nextCursor compute | const nextCursor = result.rows.length > 0 && result.rows.length >= pq.limit ? ..._cursor : null; | direct |
+|25 | src/repositories/tasks.repository.ts:80 | nextCursor return (cursor) | return { tasks, total, nextCursor }; | direct |
+|26 | src/repositories/tasks.repository.ts:102 | nextCursor null (offset) | const nextCursor = null; // OFFSET mode does not use cursors | direct |
+|27 | src/repositories/tasks.repository.ts:104 | nextCursor return (offset) | return { tasks: result.rows, total, nextCursor }; | direct |
+|28 | src/repositories/tasks.repository.ts:10 | nextCursor (interface) | nextCursor: string \| null; (in FindAllResult) | direct (declaration) |
+|29 | src/repositories/tasks.repository.ts:5 | FindAllResult (definition) | export interface FindAllResult { | direct (declaration) |
+|30 | src/repositories/tasks.repository.ts:17 | FindAllResult (return type) | ): Promise<FindAllResult> { | direct (type annotation) |
+|31 | src/controllers/tasks.controller.ts:14 | hasMore compute | const hasMore = pq.mode === 'cursor' ? nextCursor !== null : pq.page * pq.limit < total; | direct |
+|32 | src/controllers/tasks.controller.ts:15 | nextCursor !== null (hasMore) | ? nextCursor !== null | direct |
+|33 | src/controllers/tasks.controller.ts:16 | page*limit < total (hasMore) | : pq.page * pq.limit < total; | direct |
+|34 | src/controllers/tasks.controller.ts:18 | paginated() call | paginated(res, tasks.map(taskToResponse), { page, limit, total, hasMore, cursor }); | direct |
+|35 | src/controllers/tasks.controller.ts:25 | hasMore (meta arg) | hasMore, | direct |
+|36 | src/controllers/tasks.controller.ts:26 | cursor: nextCursor ?? undefined | cursor: nextCursor ?? undefined, | direct |
+|37 | src/lib/response.ts:39 | hasMore (type) | hasMore: boolean; (in PaginatedMeta type) | direct (declaration) |
+|38 | src/lib/response.ts:43 | paginated() definition | export function paginated<T>(res, data, meta) { | direct (definition) |
+|39 | src/lib/response.ts:47 | hasMore (mapping) | hasMore: meta.hasMore, | direct |
+|40 | src/types/api.ts:11 | hasMore (ApiMeta) | hasMore?: boolean; | direct (declaration) |
+
+TEST-ONLY hasMore/nextCursor assertions (not call sites, but regression-sensitive):
+  - __tests__/routes/tasks.routes.test.ts:142-146 — checks hasMore presence in meta
+  - __tests__/routes/tasks.routes.test.ts:253-256 — cursor mode: cursor defined + hasMore=true
+  - __tests__/routes/tasks.routes.test.ts:271 — hasMore===true on page1
+  - __tests__/routes/tasks.routes.test.ts:287-298 — last page: hasMore===false, cursor undefined
+  - __tests__/routes/tasks.routes.test.ts:324 — offset mode: hasMore===true
+  - __tests__/routes/tasks.routes.test.ts:336 — offset page2: hasMore===true
+  - __tests__/routes/tasks.routes.test.ts:339-346 — offset last page: hasMore===false
+  - __tests__/routes/tasks.routes.test.ts:355 — beyond range: hasMore===false
+  - __tests__/routes/tasks.routes.test.ts:365 — max limit: hasMore===false
+  - __tests__/repositories/tasks.repository.test.ts:105-111 — nextCursor destructured + asserted
+  - __tests__/repositories/tasks.repository.test.ts:119-123 — page1.nextCursor assert + pass to page2
+  - __tests__/repositories/tasks.repository.test.ts:146-151 — page1.nextCursor assert + pass to page2
+  - __tests__/repositories/tasks.repository.test.ts:171-177 — nextCursor destructured + assert null in offset
+
+================================================================================
+
+2. SYMBOL → CALLERS MAPPING (Inverted Index)
+=============================================
+
+findAll()
+  → PROD:
+    src/services/tasks.service.ts:8          tasksRepository.findAll(userId, pq)
+  → TEST (15 call sites):
+    __tests__/repositories/tasks.repository.test.ts:88   cursor: first page
+    __tests__/repositories/tasks.repository.test.ts:97   cursor: filter by priority
+    __tests__/repositories/tasks.repository.test.ts:105  cursor: paginate with limit
+    __tests__/repositories/tasks.repository.test.ts:115  cursor: keyset page 1
+    __tests__/repositories/tasks.repository.test.ts:122  cursor: keyset page 2
+    __tests__/repositories/tasks.repository.test.ts:142  cursor: microsecond precision page 1
+    __tests__/repositories/tasks.repository.test.ts:150  cursor: microsecond precision page 2
+    __tests__/repositories/tasks.repository.test.ts:171  offset: first page
+    __tests__/repositories/tasks.repository.test.ts:181  offset: second page 1
+    __tests__/repositories/tasks.repository.test.ts:184  offset: second page 2
+    __tests__/repositories/tasks.repository.test.ts:196  offset: last partial page
+    __tests__/repositories/tasks.repository.test.ts:204  offset: page beyond range
+    __tests__/repositories/tasks.repository.test.ts:212  offset: filter by priority
+    __tests__/repositories/tasks.repository.test.ts:221  offset: sort_by + order
+    __tests__/repositories/tasks.repository.test.ts:289  cursor: SQL injection total check
+
+getAll()
+  → PROD:
+    src/controllers/tasks.controller.ts:12    tasksService.getAll(userId, pq)
+    src/routes/tasks.routes.ts:14             controller.getAll  (Express route middleware)
+  → TEST: 0 direct getAll() calls (tested via supertest HTTP GET /api/tasks)
+
+nextCursor
+  → DEFINITION (1):
+    src/repositories/tasks.repository.ts:10   nextCursor: string | null  (FindAllResult field)
+  → COMPUTATION / ASSIGNMENT (4):
+    src/repositories/tasks.repository.ts:76   const nextCursor = ... ? rows[...]._cursor : null;
+    src/repositories/tasks.repository.ts:80   return { tasks, total, nextCursor };
+    src/repositories/tasks.repository.ts:102  const nextCursor = null;
+    src/repositories/tasks.repository.ts:104  return { tasks: result.rows, total, nextCursor };
+  → CONSUMPTION (3):
+    src/controllers/tasks.controller.ts:12    const { tasks, total, nextCursor } = await ...
+    src/controllers/tasks.controller.ts:15    nextCursor !== null  (hasMore cursor branch)
+    src/controllers/tasks.controller.ts:26    cursor: nextCursor ?? undefined
+
+hasMore
+  → DEFINITION / TYPE (3):
+    src/lib/response.ts:39                    hasMore: boolean;
+    src/types/api.ts:11                       hasMore?: boolean;
+  → COMPUTATION (3):
+    src/controllers/tasks.controller.ts:14    const hasMore = pq.mode === 'cursor' ? ...
+    src/controllers/tasks.controller.ts:15    ? nextCursor !== null
+    src/controllers/tasks.controller.ts:16    : pq.page * pq.limit < total
+  → CONSUMPTION (2):
+    src/controllers/tasks.controller.ts:25    hasMore,  (passed to paginated meta)
+    src/lib/response.ts:47                    hasMore: meta.hasMore  (mapped to ApiMeta)
+  → TEST ASSERTIONS (8 assertions on meta.hasMore):
+    __tests__/routes/tasks.routes.test.ts:146   typeof hasMore === 'boolean'
+    __tests__/routes/tasks.routes.test.ts:256   hasMore === true  (cursor, first page)
+    __tests__/routes/tasks.routes.test.ts:271   hasMore === true  (cursor, page1)
+    __tests__/routes/tasks.routes.test.ts:289   hasMore === true  (cursor, page1 of last)
+    __tests__/routes/tasks.routes.test.ts:297   hasMore === false (cursor, last page)
+    __tests__/routes/tasks.routes.test.ts:324   hasMore === true  (offset, first page)
+    __tests__/routes/tasks.routes.test.ts:336   hasMore === true  (offset, second page)
+    __tests__/routes/tasks.routes.test.ts:346   hasMore === false (offset, last page)
+    __tests__/routes/tasks.routes.test.ts:355   hasMore === false (offset, beyond range)
+    __tests__/routes/tasks.routes.test.ts:365   hasMore === false (offset, max limit)
+
+_cursor
+  → SQL GENERATION:
+    src/repositories/tasks.repository.ts:54    t.created_at::text || '_' || t.id::text as _cursor
+  → STRIP / DESTRUCTURE:
+    src/repositories/tasks.repository.ts:71    const { _cursor, ...task } = row;
+  → CONSUMPTION:
+    src/repositories/tasks.repository.ts:77    result.rows[result.rows.length - 1]._cursor
+
+lastIndexOf
+  → CALL SITE (1):
+    src/repositories/tasks.repository.ts:41    pq.cursor!.lastIndexOf('_')
+
+offset = (SQL offset calculation)
+  → CALL SITE (1):
+    src/repositories/tasks.repository.ts:83    const offset = (pq.page - 1) * pq.limit;
+
+paginated() function
+  → DEFINITION:
+    src/lib/response.ts:43                      export function paginated<T>(...) { ... }
+  → CALL SITE:
+    src/controllers/tasks.controller.ts:18      paginated(res, tasks.map(taskToResponse), {...});
+
+FindAllResult interface
+  → DEFINITION:
+    src/repositories/tasks.repository.ts:5-11   export interface FindAllResult { ... }
+  → TYPE ANNOTATION:
+    src/repositories/tasks.repository.ts:17     ): Promise<FindAllResult> {
+
+================================================================================
+
+3. COUNT: TOTAL CALL SITES (REGRESSION BASELINE)
+=================================================
+
+CALLEE                    | PROD | TEST | TOTAL | REGRESSION GATE
+--------------------------|------|------|-------|------------------
+findAll()                 |    1 |   15 |    16 | Must not decrease
+getAll()                  |    2 |    0 |     2 | Must not decrease
+nextCursor (assign/use)   |    7 |    0 |     7 | Must not decrease (def + compute + consume)
+hasMore (compute/consume) |    5 |    0 |     5 | Must not decrease (type defs + compute + consume)
+_cursor (SQL/destructure) |    3 |    0 |     3 | Must not decrease
+lastIndexOf('_')          |    1 |    0 |     1 | Must not decrease
+offset = (calc)           |    1 |    0 |     1 | Must not decrease
+paginated() definition    |    1 |    0 |     1 | Must not decrease
+paginated() call          |    1 |    0 |     1 | Must not decrease
+FindAllResult (definition)|    2 |    0 |     2 | Must not decrease
+--------------------------+------+------+-------+------------------
+GRAND TOTAL               |   24 |   15 |    39 | ← REGRESSION FLOOR
+                          |      |      |       |   (after changes, prod total must not drop below 24)
+
+NOTE: hasMore route-assertion call sites (10 assertions across __tests__/routes/tasks.routes.test.ts)
+are behavioral contracts — changes to hasMore semantics will break assertions even if call sites
+are preserved. Tracked in tests, not in prod call site count.
+
+================================================================================
+
+4. DEPLOYMENT MAP — Which files own which symbols
+==================================================
+
+Symbol             | Owner File                          | Lines
+-------------------|-------------------------------------|-------------
+FindAllResult      | src/repositories/tasks.repository.ts | 5-11
+findAll()          | src/repositories/tasks.repository.ts | 14-106
+_cursor SQL alias  | src/repositories/tasks.repository.ts | 54, 71, 77
+lastIndexOf parse  | src/repositories/tasks.repository.ts | 41-43
+offset calc        | src/repositories/tasks.repository.ts | 83
+getAll()           | src/controllers/tasks.controller.ts  | 8-29
+hasMore compute    | src/controllers/tasks.controller.ts  | 14-16
+paginated() call   | src/controllers/tasks.controller.ts  | 18-28
+paginated() def    | src/lib/response.ts                  | 43-57
+hasMore type       | src/lib/response.ts                  | 39
+hasMore ApiMeta    | src/types/api.ts                     | 11
+getAll route bind  | src/routes/tasks.routes.ts           | 14
+getAll service     | src/services/tasks.service.ts        | 7-9
+
+================================================================================
+END OF BASELINE
+================================================================================
