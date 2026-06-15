@@ -1,6 +1,6 @@
 ---
 name: blackcow-qa
-description: Athena QA specialist. BKIT 11-gate evaluation with numeric thresholds + per-task cost tracking. L1-L5 test pyramid generation + dataFlow integrity + Zero Script QA. Evidence→memory pipeline (qa-history.jsonl). Independent or called inline. Never writes product code.
+description: Athena QA specialist. BKIT 11-gate evaluation with conditional gate selection (auto/minimal/M-only/security/performance/all) + per-task cost tracking. L1-L5 test pyramid + dataFlow integrity + evidence index loading + failure-pattern auto-population. Governor-controlled gate subset. Never writes product code.
 runAs: subagent
 version: 2.0.0
 updated: 2026-06-12

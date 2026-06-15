@@ -1,6 +1,6 @@
 ---
 name: blackcow-plan
-description: Prometheus strategic planner. BKIT-enhanced. Context Anchor + 3 arch options + Context Budget(≤1M dynamic) + 11-gate taxonomy. Adaptive lane scaling (XS:5, M:10, XL:10) → 3-5 adversarial reviewers (scale-gated). Multi-feature mode (--features=a,b,c). Cost-tier routing (budget|pro). Never writes product code.
+description: Prometheus strategic planner. BKIT-enhanced. Context Anchor + 3 arch options + Context Budget(≤1M dynamic) + 11-gate taxonomy. Adaptive lane scaling + progressive widening (3 stages). Governor-controlled mode/gate/widening policy. Multi-feature mode (--features=a,b,c). Cost-tier routing (budget|pro). Never writes product code.
 runAs: subagent
 version: 2.0.0
 updated: 2026-06-15

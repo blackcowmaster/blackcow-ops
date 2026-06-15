@@ -1,6 +1,6 @@
 ---
 name: blackcow-librarian
-description: Project memory / codebase structure caching. init-deep (AGENTS.md generation), structure cache (.omo/library/), incremental update, auto-load on blackcow-plan/blackcow-loop/blackcow-qa. Use when setting up codebase cache, generating AGENTS.md, or when discovery costs are high.
+description: Project memory / codebase structure caching. 7 commands: init-deep, scan, update, check, load, load-evidence, all. Failure-pattern memory (.omo/memory/failure-patterns.jsonl) + loop ROI history + governor feed. Auto-load on blackcow-plan/blackcow-loop/blackcow-qa/blackcow-governor.
 runAs: subagent
 version: 2.0.0
 updated: 2026-06-12

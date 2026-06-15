@@ -95,6 +95,9 @@ SKILL_EXTRA_MAC["blackcow-skill-review.md"]="explore, run_skill, get_file_info"
 SKILL_EXTRA_WIN["blackcow-skill-evolver.md"]=""
 SKILL_EXTRA_MAC["blackcow-skill-evolver.md"]="explore, run_skill, get_file_info"
 
+SKILL_EXTRA_WIN["blackcow-governor.md"]="explore, research"
+SKILL_EXTRA_MAC["blackcow-governor.md"]="explore, research, run_skill, get_file_info"
+
 # =============================================================================
 # Install
 # =============================================================================
