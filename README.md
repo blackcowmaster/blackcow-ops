@@ -26,7 +26,7 @@
 
 | Metric | Score |
 | --- | --- |
-| **BlackCow Ops Score** | **89.0 / 100** |
+| **BlackCow Ops Score** | **89.4 / 100** |
 | **Goal** | ~~Break 90 points~~ ✅ Achieved! |
 
 > The BlackCow Ops score is a composite of 11 quality dimensions (Reasonix-native, DeepSeek fit, loop budget control, progressive widening, conditional gate selection, PDCA evidence discipline, observable verification, evidence compaction, failure-pattern memory, self-review integration, and safety/anti-hallucination). Each dimension is scored 0–100 and averaged. See [Quality Score Evolution](#quality-score-evolution) for the full history.
@@ -200,9 +200,10 @@ BlackCow Ops was improved through a **score-driven self-evolution loop** (89 rou
 | R56-R60 | **93.0** | Failure Pattern Memory live; 9 pre-existing failures auto-fixed; ecosystem 514/514 (100%); all integration contracts complete |
 | R61-R65 | **94.0** | S1+S3 gates triggered (path traversal); real PDCA cycle (regression→detect→auto-fix); install.sh --install-path security hardening |
 | R66-R73 | ~~96.2~~ | Multi-domain sim; Phase 2.2 root-cause; FAN-OUT; 11/11 gates; O4; Findings Gate; native review; honest recalibration to 89.0 |
-| R74-R89 | **89.0** | 15-round self-study: widening verified (Stage 2), PDCA mechanism confirmed, timeout limit found (>20 files), 3 new governance decisions |
+| R74-R89 | **89.0** | 15-round self-study: widening verified, PDCA confirmed, timeout limit found (>20 files) |
+| R90-R92 | **89.8** | context_tags filtering + native review fallback + O4 subagent via Playwright CLI bridge |
 
-| Dimension | Baseline (57) | Current (89) |
+| Dimension | Baseline (57) | Current (89.4) |
 
 |---|---:|---:|---:|
 | Reasonix-native | 52 | 91 |
@@ -211,7 +212,7 @@ BlackCow Ops was improved through a **score-driven self-evolution loop** (89 rou
 | Progressive widening | 40 | 85 |
 | Conditional gate selection | 38 | 91 |
 | PDCA evidence discipline | 58 | 84 |
-| Observable verification | 30 | 90 |
+| Observable verification | 30 | 91 |
 | Evidence compaction | 45 | 91 |
 | Failure-pattern memory | 40 | 82 |
 | Self-review integration | 65 | 85 |

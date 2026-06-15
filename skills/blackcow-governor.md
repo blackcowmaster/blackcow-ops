@@ -53,7 +53,27 @@ If git available: `git diff --name-only HEAD~1` to understand what files changed
 ### 0.3b Detect Infrastructure Capabilities
 Check `.omo/ulw-loop/capabilities.json` or run auto-detection. Determines max achievable O-level.
 
-### 0.4 Load Evidence Index
+### 0.3c Detect CLI Bridge Capabilities
+
+Subagents have `run_command` but NOT native puppeteer/cloud tools. However, many powerful CLIs are available via `run_command`:
+
+| CLI | Enables | Check |
+|---|---|---|
+| `npx playwright` | O4 browser screenshots, PDF generation | `npx playwright --version` |
+| `supabase` | Database management, edge functions | `supabase --version` |
+| `aws` | Cloud infrastructure, S3, Lambda | `aws --version` |
+| `firebase` | Deploy, auth, firestore | `firebase --version` |
+| `vercel` | Deploy previews, env management | `vercel --version` |
+| `docker` | Container builds, compose | `docker --version` |
+| `git` | Version control (always available) | `git --version` |
+
+**Safety rule — ALWAYS ask user before using authenticated CLIs:**
+- Any CLI that reads credentials (~/.aws, ~/.config, service account keys) → confirm with user first. The user may be logged into a different account than expected.
+- Read-only commands (version checks, status, list) → safe to run without confirmation.
+- Mutating commands (deploy, push, delete, create) → require user confirmation via `ask_choice`.
+- If a CLI is not installed, suggest installation but do NOT auto-install.
+
+Auto-detect which CLIs are available and record in the governance decision under a new "CLI Bridge" table. This expands the observable and verification surface beyond Reasonix-native tools.
 If `.omo/ulw-loop/completion-report.md` exists from a prior loop run, load the Evidence Compaction Index. Already-passed gates may be skipped.
 
 ## Phase 1 — Governance Decision
@@ -105,6 +125,20 @@ Produce `.omo/governor/<slug>-governance.md`:
 | **Capped?** | O<N> → O<N'> (reason) |
 | **Fallback Strategy** | <alternative verification if capped> |
 | **Residual Risk** | <description> |
+
+## CLI Bridge
+
+| CLI | Available? | Enables | Auth Required? | User Confirmed? |
+|---|---|---|---|---|
+| `npx playwright` | YES/NO | O4 browser screenshots | NO | N/A |
+| `supabase` | YES/NO | DB management, deploy | YES | ⬜ |
+| `aws` | YES/NO | Cloud infrastructure | YES | ⬜ |
+| _...detected CLIs..._ | | | | |
+
+**Rules:**
+- Read-only CLIs (playwright, git) → auto-use.
+- Authenticated CLIs (supabase, aws, firebase) → `ask_choice` before first use.
+- Mutating commands → always require user confirmation.
 
 ## Progressive Widening Policy
 
