@@ -1,17 +1,18 @@
 {
-  "run_id": "ecosystem-health-json-flag-001",
-  "trust_level": 3,
-  "started": "2025-07-16T00:00:00Z",
-  "last_checkpoint": "2025-07-16T00:05:00Z",
-  "phases_completed": ["0","1","2","3","6"],
-  "current_phase": "7",
+  "run_id": "install-path-security-20260627",
+  "trust_level": 2,
+  "started": "2026-06-27T00:00:00Z",
+  "last_checkpoint": "2026-06-27T00:02:00Z",
+  "phases_completed": ["0","1","2","3","4","5"],
+  "current_phase": "6",
   "phase_results": {
-    "0": {"bootstrap_lanes": 0, "cache_hit": false, "mode": "FAST", "pre_edit_lines": 520},
-    "1": {"tests_passing": true, "hashline_edits": 4, "hashline_failures": 0, "post_edit_lines": 550, "bash_syntax": "OK"},
-    "2": {"gap_match_rate": 100, "pdca_cycles": 0},
-    "3": {"m1_spec_match": "100%", "m2_test_pass": true, "m3_regression": 0, "m4_lint": "shellcheck-unavailable"},
-    "6": {"cleanup_complete": true}
+    "0": {"bootstrap_lanes": 0, "cache_hit": false, "plan_provided": true},
+    "1": {"tests_passing": true, "hashline_edits": 5, "hashline_failures": 1, "tests_total": 21, "tests_passed": 21, "tests_failed": 0, "score_pct": 100},
+    "2": {"gap_match_rate": 100, "pdca_cycles": 0, "s3_bypass_found": true, "s3_bypass_fixed": true},
+    "3": {"m3_regression": 0, "m4_lint": 0, "m2_test_pass": 100},
+    "4": {"cli_verified": true},
+    "5": {"s1_dataFlow": "clean", "s3_injection": "6 vectors blocked + prefix bypass fixed"}
   },
-  "files_touched": ["skills/tests/validate-blackcow-ecosystem-health.sh"],
+  "files_touched": ["skills/install.sh", "skills/tests/test-l1-unit-install-security.sh"],
   "git_snapshot": "HEAD"
 }

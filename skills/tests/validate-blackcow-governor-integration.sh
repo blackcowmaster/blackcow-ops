@@ -76,21 +76,43 @@ fi
 DISPATCH_COUNT=$(echo "$DISPATCHED_SKILLS" | grep -c . || true)
 info "Unique skills dispatched: ${DISPATCH_COUNT}"
 
-# Verify each dispatched skill also has an install.sh SKILL_EXTRA entry
+# Verify each dispatched skill has a get_skill_extra entry in install.sh
+# (install.sh refactored from associative arrays to case functions — commit 3f4086a)
 echo ""
-echo "  Checking install.sh SKILL_EXTRA entries for dispatched skills:"
+echo "  Checking install.sh get_skill_extra entries for dispatched skills:"
+
+# Extract function definitions once
+GET_SKILL_EXTRA_WIN_DEF=$(sed -n '/^get_skill_extra_win()/,/^}/p' "${INSTALL_SH}" 2>/dev/null)
+GET_SKILL_EXTRA_MAC_DEF=$(sed -n '/^get_skill_extra_mac()/,/^}/p' "${INSTALL_SH}" 2>/dev/null)
+
 while IFS= read -r name; do
   [[ -z "$name" ]] && continue
   basename="${name}.md"
-  if grep -q "SKILL_EXTRA_WIN\[\"${basename}\"\]=" "${INSTALL_SH}" 2>/dev/null; then
-    pass "install.sh has SKILL_EXTRA_WIN for ${basename}"
+  
+  # Check win function
+  if [[ -n "$GET_SKILL_EXTRA_WIN_DEF" ]]; then
+    eval "$GET_SKILL_EXTRA_WIN_DEF" 2>/dev/null
+    WIN_RESULT=$(get_skill_extra_win "${basename}" 2>/dev/null || echo "")
+    if [[ -n "$WIN_RESULT" ]]; then
+      pass "install.sh get_skill_extra_win returns '${WIN_RESULT}' for ${basename}"
+    else
+      fail "install.sh get_skill_extra_win returns empty for ${basename} (needed for Windows platform)"
+    fi
   else
-    fail "install.sh is MISSING SKILL_EXTRA_WIN for ${basename} (needed for Windows platform)"
+    fail "install.sh is MISSING get_skill_extra_win function"
   fi
-  if grep -q "SKILL_EXTRA_MAC\[\"${basename}\"\]=" "${INSTALL_SH}" 2>/dev/null; then
-    pass "install.sh has SKILL_EXTRA_MAC for ${basename}"
+  
+  # Check mac function
+  if [[ -n "$GET_SKILL_EXTRA_MAC_DEF" ]]; then
+    eval "$GET_SKILL_EXTRA_MAC_DEF" 2>/dev/null
+    MAC_RESULT=$(get_skill_extra_mac "${basename}" 2>/dev/null || echo "")
+    if [[ -n "$MAC_RESULT" ]]; then
+      pass "install.sh get_skill_extra_mac returns '${MAC_RESULT}' for ${basename}"
+    else
+      fail "install.sh get_skill_extra_mac returns empty for ${basename} (needed for macOS/Linux platform)"
+    fi
   else
-    fail "install.sh is MISSING SKILL_EXTRA_MAC for ${basename} (needed for macOS/Linux platform)"
+    fail "install.sh is MISSING get_skill_extra_mac function"
   fi
 done <<< "$DISPATCHED_SKILLS"
 

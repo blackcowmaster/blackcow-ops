@@ -1,0 +1,35 @@
+=== L1 Unit Tests: install.sh path validation functions ===
+
+--- resolve_path ---
+  ✅ PASS: resolve_path: returns non-empty for existing dir
+  ✅ PASS: resolve_path: returns non-empty for nonexistent path (realpath -m)
+  ✅ PASS: resolve_path: resolves /tmp correctly (got: /private/tmp)
+
+--- Attack Vectors (must FAIL) ---
+  ✅ PASS: T1: .. traversal blocked
+  ✅ PASS: T2: .. anywhere blocked
+  ✅ PASS: T3: double-slash blocked
+  ✅ PASS: T4: null byte blocked
+  ✅ PASS: T5: symlink TOCTOU blocked
+  ✅ PASS: T6: home-relative confusion blocked
+
+--- Benign Paths (must PASS) ---
+  ✅ PASS: T7: default path resolves
+  ✅ PASS: T8: subdirectory under .reasonix resolves
+  ✅ PASS: T9: ~ expansion resolves correctly
+  ✅ PASS: T10: subdirectory v2 resolves
+
+--- Edge Cases ---
+  ✅ PASS: T11: empty string blocked
+  ✅ PASS: T12: trailing .. blocked
+  ✅ PASS: T13: triple slash blocked
+  ✅ PASS: T14: already-resolved safe path passes
+  ✅ PASS: T15: path with spaces resolves
+  ✅ PASS: T16: nonexistent path resolves (realpath -m)
+  ✅ PASS: T17: .reasonixfoo prefix bypass blocked
+  ✅ PASS: T18: exact prefix path allowed
+
+========================================
+Results: 21 passed, 0 failed, 0 skipped (total 21 checks)
+Score: 100%
+========================================

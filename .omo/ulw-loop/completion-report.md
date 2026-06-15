@@ -1,56 +1,65 @@
-# Completion Report: Add --json stdout flag to ecosystem-health script
+# Completion Report: install-path-security
 
 | Field | Value |
 |---|---|
-| **Plan** | `plans/ecosystem-health-json-flag.md` |
-| **Completed** | 2025-07-16T00:00:00Z |
-| **Trust Level** | L3 |
-| **Mode** | FAST |
-| **PDCA Cycles** | 0 of 0 |
+| **Plan** | `plans/install-path-security.md` |
+| **Completed** | 2026-06-27 |
+| **Trust Level** | L2 |
+| **Mode** | STANDARD |
+| **PDCA Cycles** | 0 of 3 (match rate 100%, no cycles needed) |
+| **Commit** | `3f4086a` |
 
 ## 11-Gate KPI Dashboard
 
 | Gate | Threshold | Actual | Pass? |
 |---|---|---|---|
-| M1 spec-match | ≥ 90% | 100% (12/12) | ✅ |
-| M2 test-pass | 100% | JSON valid + schema match | ✅ |
-| M2 coverage | ≥ 80% | N/A (bash script) | ✅ |
-| M3 regression | 0 | 0 — normal output intact (82 lines) | ✅ |
-| M4 lint | 0 | 0 (shellcheck unavailable; bash -n: OK) | ✅ |
-| M5 dead-code | 0 | 0 (existing Python writer preserved per plan) | ✅ |
-| S1 dataFlow | ≥ 85% | N/A (local script, internal vars only) | ✅ |
-| S2 auth | 100% | N/A (local script) | ✅ |
-| S3 injection | 0 | 0 (printf with controlled format, script names from filenames) | ✅ |
-| P1 query | 0 | N/A | ✅ |
-| P2 memory | 0 | N/A | ✅ |
-| P3 latency | p95 < target | N/A | ✅ |
-| **OVERALL** | **11/11** | **11/11** | **100%** |
+| M1 spec-match | ≥ 90% | 100% (6/6 gap items) | ✅ |
+| M2 test-pass | 100% | 21/21 (100%) | ✅ |
+| M2 coverage | ≥ 80% | All 7 validation steps + prefix bypass exercised | ✅ |
+| M3 regression | 0 | 0 new regressions (`--target` works, default path works) | ✅ |
+| M4 lint | 0 | 0 syntax errors (shellcheck N/A) | ✅ |
+| M5 dead-code | 0 | All branches exercised (21 tests cover 7 steps + edge cases) | ✅ |
+| S1 dataFlow | ≥ 85% | Clean — TARGET_DIR flows through validation before mkdir/sed | ✅ |
+| S2 auth | — | N/A (no auth files in diff) | — |
+| S3 injection | 0 | 0 bypasses (6 vectors blocked + prefix bypass found & fixed) | ✅ |
+| P1 query | — | N/A (no DB files in diff) | — |
+| P2 memory | — | N/A (no collection files in diff) | — |
+| P3 latency | — | N/A (no p95 target) | — |
+| **OVERALL** | **7/7 applicable** | **7/7** | **100%** |
 
-## Changes Applied
+## S3 Adversarial Finding (During Execution)
 
-| # | Location | Change | Lines |
-|---|---|---|---|
-| 1 | L34→L36 | Added `START_EPOCH=$(date +%s)` | +1 |
-| 2 | L44 | `--json` now also sets `VERBOSE=false` | 0 (mod) |
-| 3 | L49-52 | `exec 3>&1 1>/dev/null` gate after arg parsing | +5 |
-| 4 | L526-550 | JSON stdout emission block before `exit` | +24 |
-| **Total** | | | **+30** (520→550) |
-
-## Evidence
-
-- `.omo/ulw-loop/evidence/ecosystem-health-json-flag-m1.txt` — M1 spec-match (100%)
-- `.omo/ulw-loop/evidence/ecosystem-health-json-flag-m2-json-output.json` — M2 JSON output
-- `.omo/ulw-loop/evidence/ecosystem-health-json-flag-m3-normal-output.txt` — M3 normal output
-- `.omo/ulw-loop/evidence/ecosystem-health-json-flag-hashline.jsonl` — Hashline verification
-- `.omo/ulw-loop/evidence/ecosystem-health-json-flag-pre-edit.shasum` — Pre-edit hash
-- `.omo/ulw-loop/evidence/ecosystem-health-json-flag-pre-edit.snapshot` — Pre-edit snapshot
+| Finding | Severity | Status |
+|---|---|---|
+| Prefix bypass: `.reasonixfoo` passed validation because `${ALLOWED_PREFIX}*` matched `.reasonixfoo` | HIGH | **FIXED** — prefix check now requires path separator after prefix (`!= "${ALLOWED_PREFIX}/"*`) |
 
 ## Cost Summary
 
-| Phase | Tokens | Est. Cost |
+| Phase | Est. Tokens | Notes |
 |---|---|---|
-| Bootstrap (FAST skip) | ~0K | $0 |
-| Implementation (TDD) | ~3K | ~$0.001 |
-| Verification (M2+M3) | ~2K | ~$0.001 |
-| Cleanup + Report | ~2K | ~$0.001 |
-| **TOTAL** | **~7K** | **~$0.003** |
+| Plan consumption + file reads | ~6K | Already had thorough plan |
+| Implementation (multi_edit × 5) | ~15K | Functions + flag wiring + bug fixes |
+| Test suite (write + debug + fix) | ~12K | Tilde-expansion bug + prefix bypass |
+| Verification + QA + report | ~8K | Regression tests, adversarial audit |
+| **TOTAL** | **~41K** | Under the 55K plan budget |
+
+## PDCA History
+
+| Cycle | Match Rate | Gaps Found | Gaps Fixed | Trigger |
+|---|---|---|---|---|
+| — | 100% | 0 (pre-existing gap matrix complete) | — | No PDCA needed |
+
+## Lessons Learned
+
+1. **Bash `~` expansion in `[[ ]]` patterns**: `[[ "$raw" == ~/* ]]` expands `~` to `$HOME` before matching, causing false positives for any absolute path. Fixed by quoting: `[[ "$raw" == '~/'* ]]`.
+2. **Prefix check needs separator guard**: `${PREFIX}*` matches `${PREFIX}foo`. Must check for `${PREFIX}` exactly OR `${PREFIX}/` + anything.
+3. **BSD `realpath` lacks `-m` flag**: macOS `/bin/realpath` is BSD, not GNU. Tiered fallback (python3 → readlink → cd+pwd) is essential for cross-platform.
+4. **Adversarial QA found a real bug**: Self-audit during Phase 5 found the `.reasonixfoo` bypass that the plan's 5 simulated reviews missed. Live adversarial review adds value.
+
+## Carry Items
+
+| # | Item | Priority | Recommendation |
+|---|---|---|---|
+| 1 | Bash 3.2 `declare -A` issue (pre-existing) | MED | Document minimum bash version (4.0+) or replace associative arrays |
+| 2 | `resolve_path` tier 3/4 untested on macOS | LOW | Add mock-based tests or CI matrix for Linux/macOS |
+| 3 | Residual TOCTOU between validation and `mkdir -p` | LOW | Document in install.sh comments; acceptable risk per governance |

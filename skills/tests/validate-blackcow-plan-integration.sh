@@ -7,8 +7,8 @@
 # Checks three cross-file integration invariants:
 #   1. Cross-Reference Integrity — every blackcow-* skill name referenced in
 #      blackcow-plan.md must exist as skills/blackcow-<name>.md
-#   2. install.sh SKILL_EXTRA Alignment — the tools listed in
-#      SKILL_EXTRA_{WIN,MAC}["blackcow-plan.md"] must match what the skill
+#   2. install.sh get_skill_extra Alignment — the tools returned by
+#      get_skill_extra_{win,mac}("blackcow-plan.md") must match what the skill
 #      actually uses (not redundant, not missing)
 #   3. Allowed-Tools Completeness — every tool in the Phase 1 dispatch
 #      protocol's `tools` array must appear in the frontmatter allowed-tools
@@ -83,97 +83,101 @@ info "Total blackcow-*.md files on disk: ${SKILL_FILES_ON_DISK}"
 # =============================================================================
 # 2. install.sh SKILL_EXTRA Alignment
 # =============================================================================
-header "2 — install.sh SKILL_EXTRA Alignment"
+header "2 — install.sh get_skill_extra Alignment"
 
-# Extract the SKILL_EXTRA lines for blackcow-plan from install.sh
-EXTRA_WIN=$(grep -E '^SKILL_EXTRA_WIN\["blackcow-plan\.md"\]=' "${INSTALL_SH}" || echo "NOT_FOUND")
-EXTRA_MAC=$(grep -E '^SKILL_EXTRA_MAC\["blackcow-plan\.md"\]=' "${INSTALL_SH}" || echo "NOT_FOUND")
+# Extract the get_skill_extra functions from install.sh and invoke them
+# (install.sh refactored from associative arrays to case functions — commit 3f4086a)
+# Source the function definitions without executing the full installer
+GET_SKILL_EXTRA_WIN_DEF=$(sed -n '/^get_skill_extra_win()/,/^}/p' "${INSTALL_SH}" 2>/dev/null)
+GET_SKILL_EXTRA_MAC_DEF=$(sed -n '/^get_skill_extra_mac()/,/^}/p' "${INSTALL_SH}" 2>/dev/null)
 
-echo "  Found in install.sh:"
-echo "    SKILL_EXTRA_WIN: ${EXTRA_WIN}"
-echo "    SKILL_EXTRA_MAC: ${EXTRA_MAC}"
+if [[ -z "$GET_SKILL_EXTRA_WIN_DEF" ]]; then
+  EXTRA_WIN="NOT_FOUND"
+  fail "get_skill_extra_win() function is MISSING from install.sh"
+else
+  eval "$GET_SKILL_EXTRA_WIN_DEF" 2>/dev/null
+  EXTRA_WIN=$(get_skill_extra_win 'blackcow-plan.md' 2>/dev/null || echo "NOT_FOUND")
+fi
+
+if [[ -z "$GET_SKILL_EXTRA_MAC_DEF" ]]; then
+  EXTRA_MAC="NOT_FOUND"
+  fail "get_skill_extra_mac() function is MISSING from install.sh"
+else
+  eval "$GET_SKILL_EXTRA_MAC_DEF" 2>/dev/null
+  EXTRA_MAC=$(get_skill_extra_mac 'blackcow-plan.md' 2>/dev/null || echo "NOT_FOUND")
+fi
+
+echo "  Found in install.sh (function-based lookup):"
+echo "    get_skill_extra_win: ${EXTRA_WIN}"
+echo "    get_skill_extra_mac: ${EXTRA_MAC}"
 
 if [[ "$EXTRA_WIN" == "NOT_FOUND" ]]; then
-  fail "SKILL_EXTRA_WIN[\"blackcow-plan.md\"] is MISSING from install.sh"
+  fail "get_skill_extra_win for blackcow-plan.md returned NOT_FOUND"
 fi
 if [[ "$EXTRA_MAC" == "NOT_FOUND" ]]; then
-  fail "SKILL_EXTRA_MAC[\"blackcow-plan.md\"] is MISSING from install.sh"
+  fail "get_skill_extra_mac for blackcow-plan.md returned NOT_FOUND"
 fi
 
-# Parse the tool lists out of the assignments
+# Parse the comma-separated tool list from function output
 parse_tool_list() {
   local line="$1"
-  # Extract value between the quotes after the =
-  echo "$line" | sed -E 's/^[^=]+="(.*)"$/\1/'
+  # Function output is already comma-separated: "explore, research" or "get_symbols, find_in_code"
+  echo "$line" | tr ',' '\n' | sed 's/^ *//;s/ *$//'
 }
 
-if [[ "$EXTRA_WIN" != "NOT_FOUND" ]]; then
-  WIN_TOOLS_STR=$(parse_tool_list "$EXTRA_WIN")
-  IFS=', ' read -ra WIN_TOOLS <<< "$WIN_TOOLS_STR"
-  info "WIN extra tools: ${WIN_TOOLS[*]}"
+if [[ "$EXTRA_WIN" != "NOT_FOUND" && -n "$EXTRA_WIN" ]]; then
+  info "WIN extra tools: ${EXTRA_WIN}"
 
   # Check for lsp_* tools — the plan explicitly says "No reference to lsp_* tools" (line 970)
-  for tool in "${WIN_TOOLS[@]}"; do
-    if [[ "$tool" == lsp_* ]]; then
-      fail "WIN SKILL_EXTRA contains legacy '${tool}' — plan skill says 'No reference to lsp_* tools' (line 970)"
-    fi
-  done
+  if echo "$EXTRA_WIN" | grep -q "lsp_"; then
+    fail "get_skill_extra_win contains legacy lsp_* tool reference"
+  fi
 
-  # Check that explore and research are present for Win dispatch
-  has_explore=false; has_research=false
-  for tool in "${WIN_TOOLS[@]}"; do
-    [[ "$tool" == "explore" ]] && has_explore=true
-    [[ "$tool" == "research" ]] && has_research=true
-  done
-  $has_explore || fail "WIN SKILL_EXTRA missing 'explore' — needed for lane dispatch (platform adaptation maps task→explore)"
-  $has_research || fail "WIN SKILL_EXTRA missing 'research' — needed for lane dispatch"
+  # Check that explore and research are present for Win dispatch (use grep on raw output)
+  if echo "$EXTRA_WIN" | grep -q "explore"; then
+    :
+  else
+    fail "get_skill_extra_win missing 'explore' — needed for lane dispatch (platform adaptation maps task->explore)"
+  fi
+  if echo "$EXTRA_WIN" | grep -q "research"; then
+    :
+  else
+    fail "get_skill_extra_win missing 'research' — needed for lane dispatch"
+  fi
 fi
 
-if [[ "$EXTRA_MAC" != "NOT_FOUND" ]]; then
-  MAC_TOOLS_STR=$(parse_tool_list "$EXTRA_MAC")
-  IFS=', ' read -ra MAC_TOOLS <<< "$MAC_TOOLS_STR"
-  info "MAC extra tools: ${MAC_TOOLS[*]}"
+if [[ "$EXTRA_MAC" != "NOT_FOUND" && -n "$EXTRA_MAC" ]]; then
+  info "MAC extra tools: ${EXTRA_MAC}"
 
   # Check for redundancy: these tools are already in MAC_TOOLS in install.sh
   # MAC_TOOLS = "search_content, search_files, list_directory, directory_tree, run_command, web_search, explore, research, run_skill, get_file_info"
-  # So explore, research, run_skill, get_file_info in SKILL_EXTRA_MAC are redundant
+  # So explore, research, run_skill, get_file_info in get_skill_extra_mac are redundant
   REDUNDANT=0
-  for tool in "${MAC_TOOLS[@]}"; do
-    case "$tool" in
-      explore|research|run_skill|get_file_info)
-        info "Tool '${tool}' in SKILL_EXTRA_MAC is REDUNDANT (already in COMMON_TOOLS + MAC_TOOLS base)"
-        REDUNDANT=$((REDUNDANT+1))
-        ;;
-    esac
+  for redundant_tool in explore research run_skill get_file_info; do
+    if echo "$EXTRA_MAC" | grep -qw "$redundant_tool"; then
+      info "Tool '${redundant_tool}' in get_skill_extra_mac is REDUNDANT (already in COMMON_TOOLS + MAC_TOOLS base)"
+      REDUNDANT=$((REDUNDANT+1))
+    fi
   done
   if [[ $REDUNDANT -gt 0 ]]; then
-    fail "${REDUNDANT} tool(s) in SKILL_EXTRA_MAC are redundant — already part of MAC_TOOLS base set"
+    fail "${REDUNDANT} tool(s) in get_skill_extra_mac are redundant — already part of MAC_TOOLS base set"
   else
-    pass "No redundant tools in SKILL_EXTRA_MAC"
+    pass "No redundant tools in get_skill_extra_mac"
   fi
 
   # Check for missing tools: dispatch protocol uses get_symbols and find_in_code
-  # but neither MAC_TOOLS nor SKILL_EXTRA_MAC includes them
   HAS_GET_SYMBOLS=false; HAS_FIND_IN_CODE=false
-  for tool in "${MAC_TOOLS[@]}"; do
-    [[ "$tool" == "get_symbols" ]] && HAS_GET_SYMBOLS=true
-    [[ "$tool" == "find_in_code" ]] && HAS_FIND_IN_CODE=true
-  done
-  # Also check in full MAC_TOOLS base
-  BASE_MAC_TOOLS="search_content search_files list_directory directory_tree run_command web_search explore research run_skill get_file_info"
-  for bt in $BASE_MAC_TOOLS; do
-    [[ "$bt" == "get_symbols" ]] && HAS_GET_SYMBOLS=true
-    [[ "$bt" == "find_in_code" ]] && HAS_FIND_IN_CODE=true
-  done
+  if echo "$EXTRA_MAC" | grep -qw "get_symbols"; then HAS_GET_SYMBOLS=true; fi
+  if echo "$EXTRA_MAC" | grep -qw "find_in_code"; then HAS_FIND_IN_CODE=true; fi
 
   if ! $HAS_GET_SYMBOLS; then
-    fail "Dispatch protocol uses 'get_symbols' but it's NOT in SKILL_EXTRA_MAC or MAC_TOOLS base"
+    fail "Dispatch protocol uses 'get_symbols' but it's NOT in get_skill_extra_mac output"
   fi
   if ! $HAS_FIND_IN_CODE; then
-    fail "Dispatch protocol uses 'find_in_code' but it's NOT in SKILL_EXTRA_MAC or MAC_TOOLS base"
+    fail "Dispatch protocol uses 'find_in_code' but it's NOT in get_skill_extra_mac output"
   fi
   if $HAS_GET_SYMBOLS && $HAS_FIND_IN_CODE; then
-    pass "Both dispatch-protocol tools (get_symbols, find_in_code) found in Mac tool chain"
+    pass "Both dispatch-protocol tools (get_symbols, find_in_code) found in Mac tool chain (get_skill_extra_mac)"
   fi
 fi
 

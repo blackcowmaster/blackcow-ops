@@ -720,18 +720,33 @@ else
   # The install.sh constructs the final allowed-tools line from COMMON_TOOLS + MAC_TOOLS + SKILL_EXTRA
   INSTALL_SCRIPT="${SKILLS_DIR}/install.sh"
   if [[ -f "$INSTALL_SCRIPT" ]]; then
-    # Check that the governor's skill extra tools are defined in install.sh
-    if grep -q "SKILL_EXTRA_MAC\[\"blackcow-governor.md\"\]" "$INSTALL_SCRIPT" 2>/dev/null; then
-      EXTRA_LINE=$(grep "SKILL_EXTRA_MAC\[\"blackcow-governor.md\"\]" "$INSTALL_SCRIPT" 2>/dev/null)
-      pass_msg "T5e — install.sh has SKILL_EXTRA_MAC entry for blackcow-governor.md: $EXTRA_LINE"
+    # Check that the governor's skill extra tools are returned by the functions
+    # (install.sh refactored from associative arrays to case functions — commit 3f4086a)
+    GET_SKILL_EXTRA_MAC_DEF=$(sed -n '/^get_skill_extra_mac()/,/^}/p' "$INSTALL_SCRIPT" 2>/dev/null)
+    GET_SKILL_EXTRA_WIN_DEF=$(sed -n '/^get_skill_extra_win()/,/^}/p' "$INSTALL_SCRIPT" 2>/dev/null)
+
+    if [[ -n "$GET_SKILL_EXTRA_MAC_DEF" ]]; then
+      eval "$GET_SKILL_EXTRA_MAC_DEF" 2>/dev/null
+      MAC_RESULT=$(get_skill_extra_mac 'blackcow-governor.md' 2>/dev/null || echo "")
+      if [[ -n "$MAC_RESULT" ]]; then
+        pass_msg "T5e — install.sh get_skill_extra_mac returns '${MAC_RESULT}' for blackcow-governor.md"
+      else
+        fail_msg "T5e — install.sh get_skill_extra_mac returns empty for blackcow-governor.md"
+      fi
     else
-      fail_msg "T5e — install.sh MISSING SKILL_EXTRA_MAC entry for blackcow-governor.md"
+      fail_msg "T5e — install.sh MISSING get_skill_extra_mac function"
     fi
-    if grep -q "SKILL_EXTRA_WIN\[\"blackcow-governor.md\"\]" "$INSTALL_SCRIPT" 2>/dev/null; then
-      EXTRA_LINE=$(grep "SKILL_EXTRA_WIN\[\"blackcow-governor.md\"\]" "$INSTALL_SCRIPT" 2>/dev/null)
-      pass_msg "T5f — install.sh has SKILL_EXTRA_WIN entry for blackcow-governor.md: $EXTRA_LINE"
+
+    if [[ -n "$GET_SKILL_EXTRA_WIN_DEF" ]]; then
+      eval "$GET_SKILL_EXTRA_WIN_DEF" 2>/dev/null
+      WIN_RESULT=$(get_skill_extra_win 'blackcow-governor.md' 2>/dev/null || echo "")
+      if [[ -n "$WIN_RESULT" ]]; then
+        pass_msg "T5f — install.sh get_skill_extra_win returns '${WIN_RESULT}' for blackcow-governor.md"
+      else
+        fail_msg "T5f — install.sh get_skill_extra_win returns empty for blackcow-governor.md"
+      fi
     else
-      fail_msg "T5f — install.sh MISSING SKILL_EXTRA_WIN entry for blackcow-governor.md"
+      fail_msg "T5f — install.sh MISSING get_skill_extra_win function"
     fi
   else
     skip_msg "T5e — install.sh not found at $INSTALL_SCRIPT"
