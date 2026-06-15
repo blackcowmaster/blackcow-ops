@@ -573,7 +573,38 @@ Wait for all 3 verification subagents to return. ALL must pass (100% test pass, 
 
 ## Phase 4 — Manual-QA (MANDATORY)
 
-Verify the implementation across all 4 channels. Each channel must produce captured evidence.
+Verify the implementation across all 4 channels + observable verification. Each channel must produce captured evidence.
+
+### Observable Verification Level (O0–O4)
+
+Select the appropriate observable level based on what the change affects:
+
+| Level | Name | What It Checks | Required Tooling | When to Apply |
+|---|---|---|---|---|
+| **O0** | None | No observable check needed | None | Backend-only, DB migration, config, CI |
+| **O1** | Smoke render | App starts, page loads without crash | `curl` or `run_command` | Any change with a visible entry point |
+| **O2** | Primary interaction | Core user action succeeds (click, submit, navigate) | `curl` for API; browser/puppeteer for UI | Button, form, link, route changes |
+| **O3** | Responsive / state | Interaction across viewports; state transitions work | Browser/puppeteer with viewport control | Responsive UI, tab switch, modal, animation |
+| **O4** | Release-grade visual QA | Pixel-accurate rendering, accessibility, cross-browser | Full browser matrix + screenshot diff | Public-facing UI, design-system changes |
+
+**Level selection rules:**
+- API/CLI/DB changes → O1 (smoke: endpoint responds / command runs)
+- UI label/text change → O2 if browser available, O1 otherwise
+- UI interaction change (button, form, nav) → O2 minimum, O3 if responsive
+- Visual/layout change → O3 minimum, O4 if public-facing
+- Backend-only (no user-facing surface) → O0
+
+**Residual risk handling:**
+- If browser/puppeteer tooling is **unavailable**, cap at O1 (use `curl` / `run_command` only)
+- Record the capped level + reason in evidence: `OBSERVABLE_CAPPED: O<N> → O1 (no browser tooling)`
+- **NEVER claim O2+ verification without actual browser/render observation**
+- **NEVER fabricate screenshot, browser, or visual verification results**
+
+**Evidence format:**
+```json
+{"phase":"4","observable_level":"O<N>","capped_from":"O<N>|null","browser_available":true|false,"residual_risk":"<description if capped>"}
+```
+Write to `.omo/ulw-loop/evidence/<slug>-observable.json`.
 
 ### Channel 1 — HTTP
 If the change affects an HTTP endpoint:
@@ -958,6 +989,25 @@ Write `.omo/ulw-loop/completion-report.md`:
 | Adversarial QA (8 agents) | ~<N>K | pro | ~$<X> |
 | Cleanup (3 agents) | ~<N>K | budget | ~$<X> |
 | **TOTAL** | **~<N>K** | — | **~$<X>** |
+
+## Evidence Compaction Index
+
+Each artifact produced during execution is indexed for compact downstream consumption. Later phases read this index instead of re-reading full logs.
+
+| evidence_id | gate | command/check | status | summary | artifact_path | hash |
+|---|---|---|---|---|---|---|
+| `E001` | M2 | `npm test -- --coverage` | PASS | 142/142 tests, 87% coverage | `.omo/ulw-loop/evidence/<slug>-m2.txt` | `<sha256>` |
+| `E002` | M3 | Call-site baseline diff | PASS | 0 regressions vs L2 baseline | `.omo/ulw-loop/evidence/<slug>-m3.txt` | `<sha256>` |
+| `E003` | M4 | `npm run lint` | PASS | 0 warnings | `.omo/ulw-loop/evidence/<slug>-m4.txt` | `<sha256>` |
+| `E004` | S2 | `curl -H "Authorization: invalid"` | PASS | 401 returned on all endpoints | `.omo/ulw-loop/evidence/<slug>-s2.txt` | `<sha256>` |
+| `E005` | O<N> | Observable check (O1 smoke) | PASS | Endpoint responds 200 | `.omo/ulw-loop/evidence/<slug>-observable.json` | `<sha256>` |
+| ... | ... | ... | ... | ... | ... | ... |
+
+**Index usage contract:**
+- Phase 8 (Completion Report) writes this index
+- Downstream skills (blackcow-qa, blackcow-librarian) load the index, not the raw logs
+- Full logs are retained as artifacts but only read when an anomaly is detected
+- `hash` enables integrity verification without re-reading content
 
 ## PDCA History
 

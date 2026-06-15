@@ -761,6 +761,41 @@ Applicable gates: 7/11. Covered: 7/7.
 | Duplicate file entries in cache | Deduplicate by file path, keep newest scanned_at |
 | Cache size > 10MB | Warn, suggest rotation (archive old entries) |
 
+## Failure-Pattern Memory (`.omo/memory/failure-patterns.jsonl`)
+
+The librarian stores structured failure records to inform future governor decisions. When a gate repeatedly fails or a fix pattern succeeds, record it.
+
+### Schema
+
+```json
+{
+  "failure_id": "<uuid>",
+  "stack": "<area/module>",
+  "area": "<file or domain>",
+  "failure_gate": "M1|M2|M3|M4|M5|S1|S2|S3|P1|P2|P3",
+  "symptom": "<concise description>",
+  "root_cause": "<diagnosis from PDCA D1>",
+  "successful_fix": "<what resolved it>",
+  "fix_file_line": "<file:line of the fix>",
+  "verification": "<how fix was confirmed>",
+  "occurrence_count": <N>,
+  "first_seen": "<ISO>",
+  "last_seen": "<ISO>",
+  "resolved": true|false
+}
+```
+
+### Integration with Governor
+
+Before each `blackcow-plan` or `blackcow-loop` invocation, check `.omo/memory/failure-patterns.jsonl`:
+- If current task area matches a known failure pattern → escalate gate priority
+- If pattern resolved >3 times → suggest automated fix template
+- Feed unresolved patterns into IntentGate for severity escalation
+
+### Rotation
+- Cap at 200 entries
+- Archive entries with `resolved: true` and `last_seen > 90 days` to `.omo/memory/failure-patterns-archive.jsonl.gz`
+
 ## Constraints
 
 1. **NEVER overwrite user content** in AGENTS.md — only content between GUARD markers
