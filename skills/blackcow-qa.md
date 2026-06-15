@@ -158,6 +158,17 @@ Every gate subagent uses:
 
 Parse `--gates=auto|all|M-only|security|performance|minimal|custom:M1,M2,...` (default: auto).
 
+**Gate dispatch priority** (dispatch in this order; stop early if budget exhausted):
+
+| Priority | Gates | Reason |
+|---|---|---|
+| P0 (always) | M1, M2, M3 | Universal — must pass |
+| P1 (high) | S2, S3 | Security — stop if critical found |
+| P2 (medium) | S1, P1 | Data/query integrity |
+| P3 (low) | M4, M5, P2, P3 | Lint, dead-code, memory, latency |
+
+If token budget for QA is limited, gates dispatch in priority order. Gates at lower priority may be skipped if higher-priority gates consume the budget.
+
 **Universal gates** (always run, regardless of mode):
 - **M1** (spec-match), **M2** (test-pass), **M3** (regression)
 

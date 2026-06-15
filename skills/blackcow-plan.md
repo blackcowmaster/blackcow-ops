@@ -148,6 +148,16 @@ Parse `--model-tier=auto|budget|pro` (default: auto).
 
 **Auto mode**: budget tier for lanes L1, L4, L5, L7, L10. Pro tier for L2, L3, L6, L8, L9. All reviewers use pro tier.
 
+**Model selection decision tree**:
+```
+Is task security-critical (S1/S2/S3 gates)? → pro (force)
+Is task architecture/design (L2, L3, L6)?     → pro
+Is task mechanical scan (L1, L4, L5, L7)?    → budget (flash)
+Is task pattern-matching (L10, M5, M4)?      → budget (flash)
+Is task adversarial review (Phase 4)?         → pro (force)
+Default: budget for discovery, pro for analysis
+```
+
 **Critical override**: L8 (Security) and adversarial reviewers ALWAYS use pro tier, regardless of `--model-tier`. Use `--force-pro` to force all lanes to pro.
 
 ### Context Budget Estimation (Dynamic)
@@ -272,6 +282,11 @@ uncertainty_score = clamp(uncertainty_score * 100, 0, 100)
 - Force FULL widening: `uncertainty_score > 85` OR `SECURITY intent detected` → skip stages, dispatch all lanes immediately
 
 **Widening budget cap**: Total tokens across all stages ≤ 40% of context budget. If Stage 2 alone exceeds 40%, stop and use best available evidence. Log cap events to widening-history.
+
+**Widening quality gate**: Before accepting widened evidence, verify:
+- New evidence from Stage N must resolve ≥ 30% of uncertainties from Stage N-1
+- If resolution rate < 30% → widening was ineffective → STOP, do not widen further
+- Log ineffective widening to prevent same mistake on similar tasks
 
 **Widening Decision Log**: After each task, append to `.omo/memory/widening-history.jsonl`:
 ```json

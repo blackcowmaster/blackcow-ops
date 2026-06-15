@@ -651,7 +651,8 @@ Load the Evidence Compaction Index from a prior blackcow-loop completion report:
 1. Check `.omo/ulw-loop/completion-report.md` exists
 2. Extract Evidence Compaction Index table
 3. Verify artifact hashes match (re-compute sha256 of each artifact)
-4. Return compact summary: which gates passed, which failed, artifact paths
+4. If hash mismatch → flag artifact as CORRUPT, do not trust the gate result
+5. Return compact summary: which gates passed, which failed, artifact paths, hash validity
 
 **Output format:**
 ```markdown
@@ -821,6 +822,15 @@ Before feeding patterns to governor, compute:
 - **Recurrence rate**: occurrences per 30 days → if >3, escalate from HIGH to CRITICAL
 - **Mean time to resolve**: avg days from first_seen to resolved → if >14 days, flag for architectural review
 - **Gate hotspot**: which gate appears most in unresolved patterns → suggest permanent gate hardening
+- **Auto-fix suggestion**: if any resolved pattern has `occurrence_count ≥ 3` and same `symptom`, generate a fix template:
+  ```
+  # Auto-fix template for <failure_gate>
+  # Based on <N> successful resolutions
+  # Symptom: <symptom>
+  # Apply: <successful_fix>
+  # Verify: <verification>
+  ```
+  Feed this template to blackcow-loop as a pre-emptive fix before PDCA starts.
 
 Write trend summary to `.omo/memory/failure-trends.json`:
 ```json

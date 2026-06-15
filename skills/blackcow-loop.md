@@ -553,6 +553,8 @@ Max cycles = trust level (L0=0, L1=1, L2=3, L3=7, L4=7). After each cycle, re-ru
 }
 ```
 
+**PDCA cycle timeout**: If a single PDCA cycle exceeds 5 minutes wall time (or 50K tokens), abort the cycle and record a TIMEOUT escalation. Long cycles rarely produce proportional value.
+
 **Hard stop rules (enforced at runtime):**
 1. **No new evidence → STOP.** If a cycle produces zero new evidence (same gaps, same scores, no file changes), do NOT proceed to next cycle. ESCALATE.
 2. **Same gate fails twice → ESCALATE.** If the same gate (e.g., M1) fails on two consecutive cycles with the same root cause, stop the cheap loop and escalate to stronger model / adversarial review / user input.
@@ -697,6 +699,22 @@ Select the appropriate observable level based on what the change affects:
 | **O2** | Primary interaction | Core user action succeeds (click, submit, navigate) | `curl` for API; browser/puppeteer for UI | Button, form, link, route changes |
 | **O3** | Responsive / state | Interaction across viewports; state transitions work | Browser/puppeteer with viewport control | Responsive UI, tab switch, modal, animation |
 | **O4** | Release-grade visual QA | Pixel-accurate rendering, accessibility, cross-browser | Full browser matrix + screenshot diff | Public-facing UI, design-system changes |
+
+**O-Level decision matrix:**
+
+| Change Type | Min O-Level | Ideal O-Level | If No Browser |
+|---|---|---|---|
+| Doc/comment/typo | O0 | O0 | O0 |
+| Config/env var | O0 | O1 (restart smoke) | O1 (curl) |
+| Backend logic (no API change) | O1 | O1 | O1 |
+| API endpoint (new/modified) | O1 | O2 (body verify) | O1 |
+| CLI command (new/modified) | O1 | O2 (output diff) | O2 |
+| DB schema migration | O1 | O2 (query verify) | O2 |
+| UI text/label | O2 | O2 | O1 (capped) |
+| UI button/form | O2 | O3 (state verify) | O1 (capped) |
+| UI layout/responsive | O3 | O4 (cross-size) | O1 (capped) |
+| Auth/security UI | O3 | O4 (full QA) | O1 (capped) |
+| Public-facing page | O4 | O4 | O1 (capped, HIGH risk) |
 
 **Level selection rules:**
 - API/CLI/DB changes → O1 (smoke: endpoint responds / command runs)
@@ -1170,6 +1188,12 @@ Each artifact produced during execution is indexed for compact downstream consum
 - Full logs are retained as artifacts but only read when an anomaly is detected
 - `hash` enables integrity verification without re-reading content
 
+**Artifact retention policy:**
+- Keep all artifacts for active task (current slug)
+- After task completion, retain: evidence index + failed gate logs + completion report
+- Purge after 30 days: raw lane outputs, intermediate snapshots, duplicate artifacts
+- Max `.omo/ulw-loop/evidence/` size: 50MB per slug — warn if exceeded
+
 ## PDCA History
 
 | Cycle | Match Rate | Gaps Found | Gaps Fixed | Time |
@@ -1289,3 +1313,9 @@ Before emitting DONE, verify:
 - Mark gate as `UNVERIFIED` with reason
 - Record residual risk
 - Do NOT fabricate a passing result
+
+**Self-consistency check** (after Completion Report, before DONE):
+- Count gates claimed PASS → verify each has evidence artifact
+- Count gates claimed FAIL → verify each has gap documentation
+- If PASS count + FAIL count + UNVERIFIED count ≠ total selected gates → report INCONSISTENCY, re-audit
+- If evidence index hash mismatches found → re-run affected gate evaluations

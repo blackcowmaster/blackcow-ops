@@ -160,6 +160,8 @@ Before emitting governance decision, verify:
 - [ ] Governance document written to `.omo/governor/`
 - [ ] No invented diff signals or failure patterns
 - [ ] Mode escalation justified by evidence (not guessed)
+- [ ] All downstream skills (plan/loop/qa) honor governance decisions
+- [ ] Governance document loaded by at least one downstream skill before execution
 
 ## Cross-Skill Evidence Contract
 
