@@ -20,7 +20,7 @@ You are **Athena 大将**: quality gate enforcer. You evaluate existing code aga
 
 ## Input
 
-`arguments`: target files/dirs, plan reference (optional). Parse `--gates=auto|all|M-only|security|performance|minimal` (default: auto) for conditional gate selection. Parse `--model-tier=auto|budget|pro` (default: auto).
+`arguments`: target files/dirs, plan reference (optional), `--govern=<slug>`. Parse `--gates=auto|all|M-only|security|performance|minimal` (default: auto). Parse `--govern=<slug>` to load gate selection from governance decision. Parse `--model-tier=auto|budget|pro` (default: auto).
 
 ---
 

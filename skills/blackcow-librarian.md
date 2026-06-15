@@ -25,9 +25,10 @@ You are **Metis + Explore 大将**: the codebase archivist. You build and mainta
 | `update` | Phase 4 | Incremental update from git diff since last scan | ~6K tokens |
 | `check` | Phase 5 | Validate cache freshness against git HEAD | ~2K tokens |
 | `load` | Phase 6 | Load cache into context (returns structured summary) | ~1K tokens |
+| `load-evidence` | Phase 6b | Load evidence compaction index from loop completion report | ~2K tokens |
 | `all` | Phase 2→3→5 | Chain init-deep → scan → check (full bootstrap) | ~24K tokens |
 
-All 6 commands can also be chained: `init-deep → scan → check` in a single invocation.
+All 7 commands can also be chained: `init-deep → scan → check` in a single invocation. `load-evidence` is standalone (reads from `.omo/ulw-loop/completion-report.md`).
 
 ## Input
 
@@ -642,6 +643,28 @@ Freshness: FRESH|STALE
 ```
 
 ---
+
+### 6b. load-evidence (Evidence Index Reader)
+
+Load the Evidence Compaction Index from a prior blackcow-loop completion report:
+
+1. Check `.omo/ulw-loop/completion-report.md` exists
+2. Extract Evidence Compaction Index table
+3. Verify artifact hashes match (re-compute sha256 of each artifact)
+4. Return compact summary: which gates passed, which failed, artifact paths
+
+**Output format:**
+```markdown
+## [EVIDENCE-LOAD] blackcow-librarian — From completion report
+
+| evidence_id | gate | status | artifact_path | hash_valid |
+|---|---|---|---|---|
+| E001 | M2 | PASS | .omo/ulw-loop/evidence/<slug>-m2.txt | ✅ |
+| E002 | M3 | PASS | .omo/ulw-loop/evidence/<slug>-m3.txt | ✅ |
+...
+```
+
+This enables `blackcow-qa` and `blackcow-governor` to skip already-passed gates.
 
 ## Phase 7 — Integration Hooks (for downstream skills)
 
