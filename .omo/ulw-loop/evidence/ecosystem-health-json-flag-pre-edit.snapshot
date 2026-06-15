@@ -33,7 +33,6 @@ VERBOSE=false
 QUIET=false
 TIMEOUT_SEC=120  # per-script timeout
 START_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-START_EPOCH=$(date +%s)
 
 # Scripts run from PROJECT_ROOT because many validate-*.sh use relative paths
 # like "skills/blackcow-governor.md" that resolve from the project root.
@@ -41,16 +40,11 @@ cd "$PROJECT_ROOT"
 
 for arg in "$@"; do
   case "$arg" in
-    --json)    JSON_OUT=true; VERBOSE=false ;;
+    --json)    JSON_OUT=true ;;
     --verbose) VERBOSE=true ;;
     --quiet)   QUIET=true ;;
   esac
 done
-
-# --- JSON mode: suppress all normal stdout ---
-if $JSON_OUT; then
-  exec 3>&1 1>/dev/null
-fi
 
 # --- Color helpers -----------------------------------------------------------
 RED='\033[0;31m'
@@ -522,29 +516,5 @@ echo ""
 echo "============================================================"
 echo -e "  ${BOLD}${TRAFFIC_LABEL}${NC}"
 echo "============================================================"
-
-# --- JSON stdout emission ---
-if $JSON_OUT; then
-  exec 1>&3 3>&-                    # restore original stdout
-  ELAPSED_S=$(( $(date +%s) - START_EPOCH ))
-
-  printf '{'
-  printf '"scripts":['
-  first=true
-  for i in "${!SCRIPT_NAMES[@]}"; do
-    $first || printf ','
-    first=false
-    if [[ "${SCRIPT_FAIL[$i]}" -gt 0 ]]; then status="FAIL"; else status="PASS"; fi
-    printf '{"name":"%s","pass":%d,"fail":%d,"skip":%d,"score":%d,"status":"%s"}' \
-      "${SCRIPT_NAMES[$i]}" "${SCRIPT_PASS[$i]}" "${SCRIPT_FAIL[$i]}" \
-      "${SCRIPT_SKIP[$i]}" "${SCRIPT_SCORE[$i]}" "$status"
-  done
-  printf '],'
-  printf '"aggregate":{"pass":%d,"fail":%d,"skip":%d,"score":%d},' \
-    "$OVERALL_PASS" "$OVERALL_FAIL" "$OVERALL_SKIP" "$AGGREGATE_SCORE"
-  printf '"traffic_light":"%s",' "$TRAFFIC"
-  printf '"elapsed_s":%d' "$ELAPSED_S"
-  printf '}\n'
-fi
 
 exit $EXIT_CODE

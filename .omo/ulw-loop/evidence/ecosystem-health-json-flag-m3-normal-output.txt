@@ -1,0 +1,82 @@
+╔══════════════════════════════════════════════════════════════════╗
+║       BlackCow Ecosystem Health Report                          ║
+║       2026-06-15 07:57:53 UTC                              ║
+║       Project: blackcow-ops                                          ║
+╚══════════════════════════════════════════════════════════════════╝
+
+[1m━━━ Running 9 Validation Scripts ━━━[0m
+  [0;36mℹ[0m  Running: validate-blackcow-ecosystem.sh ...
+  [0;31m❌[0m validate-blackcow-ecosystem.sh — 97% (114/117, 3 failed) — 1s
+  [0;36mℹ[0m  Running: validate-blackcow-governor-contract.sh ...
+  [0;32m✅[0m validate-blackcow-governor-contract.sh — 100% (75/75) — 1s
+  [0;36mℹ[0m  Running: validate-blackcow-governor-integration.sh ...
+  [0;32m✅[0m validate-blackcow-governor-integration.sh — 100% (5/5) — 0s
+  [0;36mℹ[0m  Running: validate-blackcow-governor-system.sh ...
+  [0;32m✅[0m validate-blackcow-governor-system.sh — 100% (55/55) — 0s
+  [0;36mℹ[0m  Running: validate-blackcow-governor.sh ...
+  [0;32m✅[0m validate-blackcow-governor.sh — 100% (77/77) — 1s
+  [0;36mℹ[0m  Running: validate-blackcow-plan-contract.sh ...
+  [0;32m✅[0m validate-blackcow-plan-contract.sh — 100% (35/35) — 0s
+  [0;36mℹ[0m  Running: validate-blackcow-plan-integration.sh ...
+  [0;32m✅[0m validate-blackcow-plan-integration.sh — 100% (7/7) — 0s
+  [0;36mℹ[0m  Running: validate-blackcow-plan.sh ...
+  [0;32m✅[0m validate-blackcow-plan.sh — 100% (33/33) — 1s
+  [0;36mℹ[0m  Running: validate-cross-skill-contract.sh ...
+  [0;32m✅[0m validate-cross-skill-contract.sh — 100% (79/79) — 0s
+
+[1m━━━ Per-Script Scores ━━━[0m
+  SCRIPT                                               PASS   FAIL   SKIP   SCORE  TIME(s)  STATUS
+  ────────────────────────────────────────────────── ────── ────── ────── ─────── ────────  ──────
+  validate-blackcow-ecosystem.sh                        114      3      0     97%       1s  🔴 FAIL
+  validate-blackcow-governor-contract.sh                 75      0      0    100%       1s  🟢 PASS
+  validate-blackcow-governor-integration.sh               5      0      0    100%       0s  🟢 PASS
+  validate-blackcow-governor-system.sh                   55      0      0    100%       0s  🟢 PASS
+  validate-blackcow-governor.sh                          77      0      0    100%       1s  🟢 PASS
+  validate-blackcow-plan-contract.sh                     35      0      0    100%       0s  🟢 PASS
+  validate-blackcow-plan-integration.sh                   7      0      0    100%       0s  🟢 PASS
+  validate-blackcow-plan.sh                              33      0      0    100%       1s  🟢 PASS
+  validate-cross-skill-contract.sh                       79      0      0    100%       0s  🟢 PASS
+
+  AGGREGATE                                             480      3      0     99%
+
+[1m━━━ Traffic Light Summary ━━━[0m
+  [0;31m[1m╔════════════════════════════════════════╗[0m
+  [0;31m[1m║  🔴  ECOSYSTEM FAILURES                ║[0m
+  [0;31m[1m║  1/9 scripts have failures.              ║[0m
+  [0;31m[1m╚════════════════════════════════════════╝[0m
+
+  Traffic light:  RED
+  Scripts run:    9
+  Scripts passed: 8
+  Scripts failed: 1
+  Total checks:   483
+  Passed:         480
+  Failed:         3
+  Skipped:        0
+  Aggregate:      99%
+  Runtime:        2026-06-15T07:57:58Z (started 2026-06-15T07:57:53Z)
+
+[1m━━━ Failure Details ━━━[0m
+
+  [0;31m[1mvalidate-blackcow-ecosystem.sh[0m — 3 failure(s):
+      FAIL S09 — blackcow-plan.md only references 2/6 other skills
+      FAIL S09 — blackcow-qa.md only references 3/6 other skills
+      FAIL S09 — blackcow-skill-review.md only references 3/6 other skills
+
+[1m━━━ Health Score Breakdown ━━━[0m
+  Scoring methodology:
+    • Script score = passed_checks / total_checks × 100
+    • Aggregate = sum(passed) / sum(total) × 100
+
+  ── Per-Skill Grouping ──
+
+  [0;32m🟢[0m governor: 100% (4 script(s))
+  [0;32m🟢[0m plan: 100% (3 script(s))
+  [0;32m🟢[0m cross-skill: 100% (1 script(s))
+  [1;33m🟡[0m ecosystem: 97% (1 script(s))
+
+  [0;36mℹ[0m  Text report written to: /Users/jeong-yugyeong/Project/blackcow-ops/.omo/governor/ecosystem-health-report.txt
+
+============================================================
+  [1m🔴 RED — Failures Detected[0m
+============================================================
