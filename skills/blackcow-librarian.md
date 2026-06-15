@@ -834,6 +834,18 @@ Before each `blackcow-plan` or `blackcow-loop` invocation, check `.omo/memory/fa
 - If pattern resolved >3 times → suggest automated fix template
 - Feed unresolved patterns into IntentGate for severity escalation
 
+### Known Patterns (SEED data, STATIC_EVAL)
+
+These patterns were observed during BlackCow's own development and serve as calibration:
+
+| Pattern | Gate | Symptom | Fix |
+|---|---|---|---|
+| `task()` tool mismatch | M1 | Subagent dispatch fails with "tool not registered" | Use `explore()` + platform adaptation note |
+| `lsp_*` phantom tools | M1 | allowed-tools references non-existent tools | Replace with `get_symbols`/`find_in_code` |
+| Model name drift | M1 | `deepseek-v4-lite` invalid → API errors | Use current model name (`deepseek-v4-flash`) |
+| Nested code blocks | M4 | Markdown parser breaks on ` ``` ` inside ` ``` ` | Use 4-backtick fences for outer blocks |
+| Stale global install | M3 | `~/.reasonix/skills/` differs from project `skills/` | Run `install.sh` after every skill edit |
+
 ### Trend Analysis
 
 Before feeding patterns to governor, compute:

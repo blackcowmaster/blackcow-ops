@@ -132,6 +132,16 @@ Produce `.omo/governor/<slug>-governance.md`:
 | **Recommendation** | PROCEED / REDUCE SCOPE / USER_REVIEW |
 ```
 
+## Post-Governance Self-Audit
+
+After pipeline completes, compare results against governance decisions:
+
+- Did loop use the selected mode? (check completion report → mode field)
+- Did qa run the selected gates? (check qa-history.jsonl → gate_scores keys)
+- Was observable level achieved? (check observable.json → observable_level vs governance O-Level)
+- Did any ESCALATE event fire? (check escalation-log.jsonl)
+- **Audit verdict**: All match → governance effective. Any mismatch → flag for review.
+
 ## Phase 2 — Dispatch
 
 After writing the governance decision, invoke the pipeline:
