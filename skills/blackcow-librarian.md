@@ -3,7 +3,7 @@ name: blackcow-librarian
 description: Project memory / codebase structure caching. 7 commands: init-deep, scan, update, check, load, load-evidence, all. Failure-pattern memory (.omo/memory/failure-patterns.jsonl) + loop ROI history + governor feed. Auto-load on blackcow-plan/blackcow-loop/blackcow-qa/blackcow-governor.
 runAs: subagent
 version: 2.0.0
-updated: 2026-06-12
+updated: 2026-06-15
 model: deepseek-v4-pro
 model_tiers:
   budget: deepseek-v4-flash    # mechanical tasks (~$0.14/1M input)

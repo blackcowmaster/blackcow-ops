@@ -3,7 +3,7 @@ name: blackcow-skill-evolver
 description: Skill evolution engine. Reads blackcow-skill-review reports OR governor score-loop decisions, proposes concrete edits to skill files. Triple safety: (1) only edits .reasonix/skills/*.md, (2) creates backup before any edit, (3) requires --approve flag to apply. Integrates with governor for score-gated evolution. Writes evolution log with before/after diffs.
 runAs: subagent
 version: 2.0.0
-updated: 2026-06-12
+updated: 2026-06-15
 model: deepseek-v4-pro
 allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, write_file, edit_file, multi_edit, explore, run_skill, get_file_info, get_symbols, find_in_code
 model_tiers:

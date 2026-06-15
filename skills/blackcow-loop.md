@@ -3,7 +3,7 @@ name: blackcow-loop
 description: Hephaestus+Oracle execution loop. BKIT-enhanced. Trust Level(0-4) + 5-mode selection (FAST~ESCALATE) + gap-detector + PDCA iterator(≤7) + 11-gate thresholds + O0-O4 observable verification + evidence compaction index + loop ROI logging + Completion Report(KPI+lessons). Governor-controlled mode/gate/PDCA budget. Cost-tier routing (budget|pro).
 runAs: subagent
 version: 2.0.0
-updated: 2026-06-12
+updated: 2026-06-15
 model: deepseek-v4-pro
 model_tiers:
   budget: deepseek-v4-flash    # mechanical tasks (~$0.14/1M input)
