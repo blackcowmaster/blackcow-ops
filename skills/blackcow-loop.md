@@ -67,7 +67,9 @@ Parse `--mode=auto|fast|standard|full|siege|escalate` (default: auto, which sele
 | 4 Manual-QA | ❌ | Applicable channels | All channels | All channels | All channels |
 | 5 Adversarial QA | ❌ | 5 agents (no PoC) | 8 agents | 8+2 PoC | 10 agents |
 | 6 Cleanup | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 7 Completion | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 7 Git Commit | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 7.5 Findings Gate | ❌ | ✅ | ✅ | ✅ | ✅ |
+| 8 Completion | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **Mode → Token Budget (estimated per phase):**
 
@@ -581,6 +583,39 @@ After D1 and D2 return, BEFORE applying any fix:
 ```
 
 **PDCA cycle timeout**: If a single PDCA cycle exceeds 5 minutes wall time (or 50K tokens), abort the cycle and record a TIMEOUT escalation. Long cycles rarely produce proportional value.
+
+### Findings Ledger (MANDATORY — record every gap as a finding)
+
+Every gap discovered in Phase 2 MUST be recorded in `.omo/memory/findings.json` before any PDCA fix is applied. This ensures no issue is silently resolved or forgotten.
+
+**Finding structure:**
+```json
+{
+  "id": "F<NNN>",
+  "goal": "<slug>:<phase>",
+  "title": "<one-line gap description>",
+  "severity": "critical|high|medium|low",
+  "source": "gap-detector|adversarial|qa|user|review",
+  "status": "open",
+  "location": "<file:line>",
+  "evidence": "<what the gap-detector reported>",
+  "resolution": "",
+  "verify_cmd": "",
+  "verify_evidence": "",
+  "created": "<ISO>",
+  "updated": ""
+}
+```
+
+**When a PDCA cycle resolves a gap:**
+1. Update finding: `status = "resolved"`, `resolution = "<what changed>"`, `verify_evidence = "<proof>"`, `updated = <ISO>`
+2. If fix fails and gap persists → `status = "blocked"` → triggers ESCALATE
+3. If gap is determined non-applicable → `status = "rejected"` with reason
+
+**Blocking rules:**
+- Any finding with `status = "open"` or `status = "blocked"` blocks final completion
+- Escalated findings remain `blocked` until user or plan resolves them
+- Reopen is allowed: `blocked → open` when new plan provides fresh approach
 
 **Hard stop rules (enforced at runtime):**
 1. **No new evidence → STOP.** If a cycle produces zero new evidence (same gaps, same scores, no file changes), do NOT proceed to next cycle. ESCALATE.
@@ -1232,6 +1267,34 @@ Reviewed-by: blackcow-loop adversarial QA (8 agents)
 - Footer: BKIT gate scores + evidence path + reviewer attribution
 
 **Evidence**: git log entry for the commit
+
+### Phase 7.5 — Findings Gate (BLOCKS completion)
+
+Before writing the Completion Report, check `.omo/memory/findings.json`.
+
+**Gate logic:**
+```
+open_findings = [f for f in findings if f.status in ("open", "blocked")]
+if open_findings:
+    ❌ BLOCK COMPLETION
+    Print: "codex-fable5: findings gate failed; N blocking findings remain"
+    List each finding with id, title, severity, goal
+    DO NOT proceed to Phase 8
+    Action: resolve each finding or escalate
+else:
+    ✅ GATE PASSED → proceed to Phase 8
+```
+
+**Resolution requirements per finding:**
+- `evidence`: what changed to fix it (non-empty)
+- `verify_evidence`: proof the fix worked (non-empty)
+- `verify_cmd`: (optional) command that confirms the fix
+
+**Stale findings (from previous runs):**
+- If `goals.json` is recreated with `--force`, archive old findings to `findings-archive.json`
+- Old findings with no matching active goals do NOT block completion
+
+**Evidence**: `.omo/memory/findings.json` with all findings resolved or rejected
 
 ## Phase 8 — Completion Report (BKIT report-generator)
 
