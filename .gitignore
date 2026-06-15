@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Temp files from pipeline runs
+*.tmp
+*.tmp;
+*-out.txt;
+summary-out.txt;
+json_combined.txt
+eco-out.txt
+
+# User home dir reference (not part of project)
+~/
+
+# Reasonix runtime artifacts (session-specific)
+.reasonix/truncated-results/

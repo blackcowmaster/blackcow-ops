@@ -157,6 +157,34 @@ for skill_file in "${SOURCE_DIR}"/*.md; do
   echo "  ✅ Installed to: ${dest}"
 done
 
+# =============================================================================
+# Test Suite Registration
+# =============================================================================
+# Make all validate-*.sh scripts executable and register the ecosystem
+# health runner as the single entry point for full-suite validation.
+TEST_DIR="${SOURCE_DIR}/tests"
+if [[ -d "$TEST_DIR" ]]; then
+  echo ""
+  echo "── Test Suite ──"
+
+  # Make all test scripts executable
+  chmod +x "$TEST_DIR"/validate-*.sh 2>/dev/null || true
+  echo "  ✅ All validate-*.sh scripts made executable"
+
+  # Register the ecosystem health runner as the unified entry point
+  HEALTH_RUNNER="$TEST_DIR/validate-blackcow-ecosystem-health.sh"
+  if [[ -f "$HEALTH_RUNNER" ]]; then
+    echo "  ✅ Ecosystem health runner registered: validate-blackcow-ecosystem-health.sh"
+    echo "     Usage: bash skills/tests/validate-blackcow-ecosystem-health.sh"
+    echo "            bash skills/tests/validate-blackcow-ecosystem-health.sh --json"
+    echo "            bash skills/tests/validate-blackcow-ecosystem-health.sh --verbose"
+  else
+    echo "  ⚠️  Ecosystem health runner NOT FOUND at $HEALTH_RUNNER"
+  fi
+else
+  echo "  ⚠️  Test directory NOT FOUND at $TEST_DIR"
+fi
+
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "✅ Installation complete for platform: ${PLATFORM}"

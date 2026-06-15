@@ -20,7 +20,60 @@ You are **Prometheus 大将**. You produce decision-complete plans that a downst
 
 ## Input
 
-Parse `--govern=<slug>` to load governance decision from `.omo/governor/<slug>-governance.md`. If present, skip Phase -1 IntentGate and use governor's mode/gate/widening policy. Otherwise, run full detection below.
+Parse `--govern=<slug>` to load governance decision from `.omo/governor/<slug>-governance.md`. If present, skip Phase -1 IntentGate and use governor's mode/gate/widening policy. Otherwise, run full detection below. For staleness behavior (7-day window, --stale-ok, fallback), see the next section.
+
+## --govern Flag: Staleness & Fallback
+
+The `--govern=<slug>` flag loads a pre-existing governance decision from `.omo/governor/<slug>-governance.md`. Governance decisions have a **7-day freshness window**. After that, they are considered stale and require re-evaluation.
+
+### Staleness Check
+
+When `--govern=<slug>` is provided, the planner MUST check freshness before using the governance decision:
+
+1. **Load** `.omo/governor/<slug>-governance.md`
+2. **Parse** the `Governed at` field (ISO-8601 timestamp)
+3. **Compute** days elapsed: `(now - governed_at) / 86400`
+4. **Decision:**
+   - **≤ 7 days** → FRESH. Use governance decision as-is. Skip Phase -1 IntentGate. Apply governor's mode, gate subset, and widening policy.
+   - **> 7 days** → STALE. Governance decision is out of date. Behavior depends on `--stale-ok` flag.
+
+### `--stale-ok` Flag
+
+| Scenario | Flag | Behavior |
+|---|---|---|
+| Governance ≤ 7 days | (any) | FRESH — use as-is |
+| Governance > 7 days | `--stale-ok` | ACCEPT stale governance. Emit warning: `⚠️ Governance decision is <N> days old (stale threshold: 7d). Proceeding with --stale-ok.` Use governance values but re-run Phase 0 discovery (cache may also be stale). |
+| Governance > 7 days | (no `--stale-ok`) | REJECT stale governance. Emit: `⚠️ Governance decision is <N> days old (>7d threshold). Run blackcow-governor to produce a fresh decision, or pass --stale-ok to proceed with stale data.` Fall back to full detection (Phase -1 IntentGate + Phase 0 discovery). |
+| Governance file missing | (any) | Emit: `⚠️ Governance file .omo/governor/<slug>-governance.md not found. Falling back to full detection.` Run full Phase -1 + Phase 0. |
+
+### Fallback: No `--govern` Given
+
+When `--govern` is not provided at all:
+
+1. Run **Phase -1 IntentGate** (full intent classification from user request)
+2. Run **Phase 0 Pre-flight** (cache load or legacy discovery)
+3. Proceed to **Phase 1 Collect** with auto-detected mode/gates
+4. No governance constraints apply — planner has full autonomy on lane count, gate selection, and widening policy
+
+This is the **standard autonomous path**. It is normal and expected — governance is optional and provided only when the pipeline is orchestrated by `blackcow-governor`.
+
+### Decision Flow
+
+```
+--govern=<slug> given?
+  ├─ NO  → Full autonomy (Phase -1 + Phase 0 + Phase 1)
+  └─ YES → File exists?
+            ├─ NO  → Warn + fallback to full autonomy
+            └─ YES → Parse governed_at timestamp
+                      ├─ ≤7d old → FRESH: use governance, skip IntentGate
+                      └─ >7d old → --stale-ok?
+                                    ├─ YES → Warn + use governance, re-run Phase 0
+                                    └─ NO  → Reject + fallback to full autonomy
+```
+
+### Cross-Skill Contract
+
+Governance decisions are produced by `blackcow-governor` and consumed by `blackcow-plan`, `blackcow-loop`, and `blackcow-qa`. The staleness threshold (7 days) is defined by the **Cross-Skill Evidence Contract** in `blackcow-governor`. All consumers MUST honor the same threshold. If a consumer detects staleness, it MUST NOT silently use stale data — it must either warn (with `--stale-ok`) or reject and fall back.
 
 ## Mode Detection
 

@@ -35,7 +35,7 @@ ERRORS=()
 header()   { echo ""; echo "━━━ $* ━━━"; }
 pass()     { PASS=$((PASS+1)); echo "  ✅ PASS: $*"; }
 fail()     { FAIL=$((FAIL+1)); echo "  ❌ FAIL: $*"; ERRORS+=("$*"); }
-info()     { $VERBOSE && echo "  ℹ️  $*"; }
+info()     { $VERBOSE && echo "  ℹ️  $*" || true; }
 
 # =============================================================================
 # 1. Cross-Reference Integrity
@@ -266,6 +266,79 @@ if [[ ${#UNUSED_IN_DISPATCH[@]} -gt 0 ]]; then
   for tool in "${UNUSED_IN_DISPATCH[@]}"; do
     echo "    • ${tool}"
   done
+fi
+
+# =============================================================================
+# 4. --govern Staleness Documentation
+# =============================================================================
+header "4 — --govern Staleness Documentation"
+
+# Verify the --govern staleness section header exists in blackcow-plan.md
+if grep -q "^## --govern Flag: Staleness & Fallback" "${PLAN_FILE}"; then
+  pass "--govern staleness section header found in plan"
+else
+  fail "--govern staleness section header MISSING from plan"
+fi
+
+# Verify staleness key terms are present
+STALENESS_TERMS=(
+  "> 7 days"
+  "--stale-ok"
+  "fallback"
+  "FRESH"
+  "Governed at"
+  "7-day freshness window"
+)
+
+for term in "${STALENESS_TERMS[@]}"; do
+  if grep -qF -e "$term" "${PLAN_FILE}"; then
+    pass "Staleness term '${term}' found in plan"
+  else
+    fail "Staleness term '${term}' MISSING from plan"
+  fi
+done
+
+# Verify the decision flow diagram exists in the --govern section
+if grep -q "Decision Flow" "${PLAN_FILE}"; then
+  pass "Decision flow diagram found in --govern section"
+else
+  fail "Decision flow diagram MISSING from --govern section"
+fi
+
+# Verify the Cross-Skill Contract subsection in --govern section
+if grep -q "Cross-Skill Contract" "${PLAN_FILE}"; then
+  pass "Cross-Skill Contract subsection found in --govern section"
+else
+  fail "Cross-Skill Contract subsection MISSING from --govern section"
+fi
+
+# Verify the section is positioned after Input and before Mode Detection
+INPUT_LINE=$(grep -n "^## Input$" "${PLAN_FILE}" | head -1 | cut -d: -f1)
+GOVERN_LINE=$(grep -n "^## --govern Flag: Staleness" "${PLAN_FILE}" | head -1 | cut -d: -f1)
+MODE_LINE=$(grep -n "^## Mode Detection$" "${PLAN_FILE}" | head -1 | cut -d: -f1)
+
+if [ -n "$INPUT_LINE" ] && [ -n "$GOVERN_LINE" ] && [ -n "$MODE_LINE" ]; then
+  if [ "$INPUT_LINE" -lt "$GOVERN_LINE" ] && [ "$GOVERN_LINE" -lt "$MODE_LINE" ]; then
+    pass "--govern section positioned correctly (Input < --govern < Mode Detection)"
+  else
+    fail "--govern section positioning" "Expected: Input($INPUT_LINE) < Govern($GOVERN_LINE) < Mode($MODE_LINE)"
+  fi
+else
+  fail "--govern section positioning" "Could not locate all section anchors (Input=${INPUT_LINE:-missing}, Govern=${GOVERN_LINE:-missing}, Mode=${MODE_LINE:-missing})"
+fi
+
+# Verify the --stale-ok scenario table exists in the plan
+if grep -q "no \`--stale-ok\`" "${PLAN_FILE}"; then
+  pass "--stale-ok rejection scenario documented (no --stale-ok → reject)"
+else
+  fail "--stale-ok rejection scenario MISSING"
+fi
+
+# Verify fallback for missing --govern is documented
+if grep -q "No governance constraints apply" "${PLAN_FILE}"; then
+  pass "Fallback path for missing --govern flag documented"
+else
+  fail "Fallback path for missing --govern flag MISSING"
 fi
 
 # =============================================================================

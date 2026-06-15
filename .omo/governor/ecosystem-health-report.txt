@@ -1,0 +1,16 @@
+# BlackCow Ecosystem Health Report
+Generated: 2026-06-15T08:32:59Z
+Traffic light: RED
+Scripts run: 9 | Passed: 7 | Failed: 2
+Aggregate score: 98%
+
+## Per-Script Results
+- validate-blackcow-ecosystem.sh: 98% (P:115 F:2 S:0)
+- validate-blackcow-governor-contract.sh: 100% (P:75 F:0 S:0)
+- validate-blackcow-governor-integration.sh: 100% (P:5 F:0 S:0)
+- validate-blackcow-governor-system.sh: 100% (P:55 F:0 S:0)
+- validate-blackcow-governor.sh: 100% (P:77 F:0 S:0)
+- validate-blackcow-plan-contract.sh: 100% (P:45 F:0 S:0)
+- validate-blackcow-plan-integration.sh: 74% (P:20 F:7 S:0)
+- validate-blackcow-plan.sh: 100% (P:33 F:0 S:0)
+- validate-cross-skill-contract.sh: 100% (P:79 F:0 S:0)

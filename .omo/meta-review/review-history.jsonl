@@ -1,0 +1,17 @@
+{"date":"2026-06-14T22:35:42Z","skill":"blackcow-plan","total_score":76.65,"syntax":85,"gates":78,"parallelism":78,"cost":80,"staleness":60,"critical_count":2,"high_count":3,"recommendations_count":15}
+{"date":"2025-07-14T23:15:00Z","skill":"blackcow-plan","total_score":66.65,"syntax":65,"gates":72,"parallelism":65,"cost":72,"staleness":55,"critical_count":3,"high_count":5,"recommendations_count":18}
+{"date":"2026-06-16T00:00:00Z","skill":"blackcow-plan","total_score":69,"syntax":55,"gates":78,"parallelism":72,"cost":68,"staleness":60,"critical_count":3,"high_count":5,"recommendations_count":15}
+{"date":"2026-06-17T00:00:00Z","skill":"blackcow-plan","total_score":71.5,"syntax":88,"gates":72,"parallelism":70,"cost":70,"staleness":58,"critical_count":3,"high_count":5,"recommendations_count":19}
+{"date":"2026-06-17T23:30:00Z","skill":"blackcow-plan","total_score":70.9,"syntax":78,"gates":78,"parallelism":65,"cost":75,"staleness":55,"critical_count":3,"high_count":5,"recommendations_count":17}
+{"date":"2026-06-14T23:30:47Z","skill":"blackcow-plan","total_score":72.80,"syntax":80,"gates":80,"parallelism":65,"cost":75,"staleness":62,"critical_count":2,"high_count":5,"recommendations_count":18}
+{"date":"2026-06-18T00:00:00Z","skill":"blackcow-plan","total_score":63,"syntax":68,"gates":72,"parallelism":55,"cost":60,"staleness":58,"critical_count":4,"high_count":6,"recommendations_count":20}
+{"date":"2026-06-18T22:00:00Z","skill":"blackcow-loop","total_score":69.30,"syntax":62,"gates":68,"parallelism":78,"cost":72,"staleness":62,"critical_count":5,"high_count":7,"recommendations_count":17}
+{"date":"2026-06-18T23:45:00Z","skill":"blackcow-loop","total_score":52.45,"syntax":48,"gates":55,"parallelism":67,"cost":55,"staleness":25,"critical_count":5,"high_count":7,"recommendations_count":22}
+{"date":"2026-06-18T23:59:00Z","skill":"blackcow-plan","total_score":64.00,"syntax":67,"gates":72,"parallelism":55,"cost":62,"staleness":62,"critical_count":4,"high_count":7,"recommendations_count":22}
+{"date":"2026-06-19T08:15:00Z","skill":"blackcow-plan","total_score":72.80,"syntax":84,"gates":74,"parallelism":66,"cost":65,"staleness":78,"critical_count":2,"high_count":3,"recommendations_count":17}
+{"date":"2026-06-19T10:30:00Z","skill":"blackcow-plan","total_score":66.5,"syntax":78,"gates":65,"parallelism":60,"cost":55,"staleness":80,"critical_count":3,"high_count":5,"recommendations_count":17}
+{"date":"2026-06-15T00:35:00Z","skill":"blackcow-plan","total_score":62.4,"syntax":74,"gates":66,"parallelism":55,"cost":48,"staleness":70,"critical_count":3,"high_count":5,"recommendations_count":21}
+{"date":"2026-06-19T12:30:00Z","skill":"blackcow-plan","total_score":63.6,"syntax":72,"gates":65,"parallelism":60,"cost":52,"staleness":70,"critical_count":2,"high_count":4,"recommendations_count":17}
+{"date":"2026-06-20T01:00:00Z","skill":"blackcow-plan","total_score":73.60,"syntax":78,"gates":85,"parallelism":70,"cost":68,"staleness":58,"critical_count":3,"high_count":4,"recommendations_count":14}
+{"date":"2026-06-15T00:48:22Z","skill":"blackcow-plan","total_score":58.15,"syntax":85,"gates":62,"parallelism":55,"cost":45,"staleness":42,"critical_count":3,"high_count":5,"recommendations_count":21}
+{"date":"2026-06-20T02:00:00Z","skill":"blackcow-plan","total_score":64.30,"syntax":72,"gates":64,"parallelism":67,"cost":62,"staleness":55,"critical_count":4,"high_count":5,"recommendations_count":17}

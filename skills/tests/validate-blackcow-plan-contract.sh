@@ -271,6 +271,80 @@ else
     fail "Context Anchor section anchor (### 3a.)" "Could not locate §3a"
 fi
 
+# -------- 7. --govern STALENESS DOCUMENTATION --------
+heading "7. --govern Staleness Documentation"
+
+# Verify the --govern staleness documentation section header exists
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+if grep -q "^## --govern Flag: Staleness & Fallback" "$SKILL_FILE"; then
+    pass "--govern staleness documentation section exists"
+else
+    fail "--govern staleness documentation section exists" \
+         "Section '## --govern Flag: Staleness & Fallback' not found in $SKILL_FILE"
+fi
+
+# Verify staleness-specific sub-sections are present
+STALENESS_SUBSECTIONS=(
+    "Staleness Check"
+    "--stale-ok"
+    "Fallback: No"
+    "Decision Flow"
+    "Cross-Skill Contract"
+)
+
+for subsection in "${STALENESS_SUBSECTIONS[@]}"; do
+    TOTAL_TESTS=$((TOTAL_TESTS + 1))
+    if grep -qF -e "${subsection}" "$SKILL_FILE"; then
+        pass "--govern subsection '${subsection}' present"
+    else
+        fail "--govern subsection '${subsection}' MISSING" \
+             "Expected '${subsection}' subheading in --govern staleness section"
+    fi
+done
+
+# Verify the 7-day threshold is explicitly documented
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+if grep -q "7-day" "$SKILL_FILE"; then
+    pass "7-day staleness threshold documented"
+else
+    fail "7-day staleness threshold documented" "Expected explicit '7-day' reference in staleness docs"
+fi
+
+# Verify the section comes after Input and before Mode Detection (structural integrity)
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+INPUT_LINE=$(grep -n "^## Input$" "$SKILL_FILE" | head -1 | cut -d: -f1)
+GOVERN_LINE=$(grep -n "^## --govern Flag: Staleness" "$SKILL_FILE" | head -1 | cut -d: -f1)
+MODE_LINE=$(grep -n "^## Mode Detection$" "$SKILL_FILE" | head -1 | cut -d: -f1)
+
+if [ -n "$INPUT_LINE" ] && [ -n "$GOVERN_LINE" ] && [ -n "$MODE_LINE" ]; then
+    if [ "$INPUT_LINE" -lt "$GOVERN_LINE" ] && [ "$GOVERN_LINE" -lt "$MODE_LINE" ]; then
+        pass "--govern section correctly positioned (Input < --govern < Mode Detection)"
+    else
+        fail "--govern section positioning" \
+             "Expected: Input($INPUT_LINE) < Govern($GOVERN_LINE) < Mode($MODE_LINE)"
+    fi
+else
+    fail "--govern section positioning" \
+         "Could not locate all section anchors (Input=${INPUT_LINE:-missing}, Govern=${GOVERN_LINE:-missing}, Mode=${MODE_LINE:-missing})"
+fi
+
+# Verify the --stale-ok flag behavior table exists
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+if grep -q "| Governance > 7 days | (no \`--stale-ok\`)" "$SKILL_FILE"; then
+    pass "--stale-ok rejection scenario table row exists"
+else
+    fail "--stale-ok rejection scenario table row" \
+         "Expected table row: '| Governance > 7 days | (no --stale-ok) | REJECT ...'"
+fi
+
+# Verify fallback documentation for when --govern is not provided
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+if grep -q "standard autonomous path" "$SKILL_FILE"; then
+    pass "Fallback documentation: 'standard autonomous path' referenced"
+else
+    fail "Fallback documentation" "Expected 'standard autonomous path' phrase in --govern section"
+fi
+
 
 # -------- SUMMARY --------
 heading "TEST SUMMARY"
