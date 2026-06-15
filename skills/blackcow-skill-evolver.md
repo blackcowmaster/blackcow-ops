@@ -5,7 +5,7 @@ runAs: subagent
 version: 2.0.0
 updated: 2026-06-12
 model: deepseek-v4-pro
-allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, write_file, edit_file, multi_edit, explore, run_skill, get_file_info
+allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, write_file, edit_file, multi_edit, explore, run_skill, get_file_info, get_symbols, find_in_code
 model_tiers:
   budget: deepseek-v4-flash    # mechanical tasks (~$0.14/1M input)
   pro: deepseek-v4-pro        # analysis, security, design (~$0.435/1M input)

@@ -659,3 +659,5 @@ Before emitting QA report, verify:
 - [ ] No claimed test pass without actual execution evidence
 - [ ] No invented gate scores or verification results
 - [ ] Residual risk documented when full verification unavailable
+- [ ] Gate selection matches actual diff signals (not default-all)
+- [ ] Failure-pattern auto-population triggered for qualifying gates

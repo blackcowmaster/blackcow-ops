@@ -585,6 +585,12 @@ When any hard stop rule triggers ESCALATE, execute these actions in order:
 {"timestamp":"<ISO>","run_id":"<uuid>","trigger_rule":1|2|3|4,"failing_gate":"<gate>","cycles_before_escalate":<N>,"resolution":"plan_regenerated|user_input|unresolved"}
 ```
 
+**Example ESCALATE scenarios:**
+- Rule 1 (no new evidence): M1 stuck at 72% after 3 PDCA cycles with same gaps → ESCALATE to `blackcow-plan` for architectural re-evaluation
+- Rule 2 (same gate ×2): S2 auth gate fails twice with "unguarded endpoint /api/health" → ESCALATE with specific file:line + suggested fix
+- Rule 3 (budget near limit): 5 of 7 PDCA cycles used, matchRate still 82% → emit ESCALATE_REQUIRED, ask user whether to continue or accept partial
+- Rule 4 (scope creep): D2 flags "need new OAuth provider integration" which wasn't in original plan → STOP PDCA, return to planner with scope delta
+
 **Evidence chain**: Each cycle's `before` record links to the previous cycle's `after` record. Broken chain → invalid PDCA.
 
 ### Loop ROI Logging
@@ -735,6 +741,10 @@ puppeteer_click --selector "<tab-selector>" && puppeteer_screenshot --name "<slu
 for size in "375x812" "768x1024" "1440x900"; do puppeteer_screenshot --name "<slug>-o4-${size}" --width ${size%x*} --height ${size#*x}; done
 # Accessibility audit
 puppeteer_evaluate --script "document.querySelectorAll('[aria-label]').length"
+# Color contrast check
+puppeteer_evaluate --script "Array.from(document.querySelectorAll('*')).filter(el => { const style = getComputedStyle(el); return style.color && style.backgroundColor; }).length"
+# Keyboard navigation
+puppeteer_evaluate --script "document.querySelectorAll('[tabindex]').length"
 ```
 
 **Evidence format:**
@@ -1249,3 +1259,5 @@ Before emitting DONE, verify:
 - [ ] No claimed visual/browser verification without actual observation
 - [ ] No invented test results, scores, or evidence
 - [ ] All token/cost numbers are estimates unless measured
+- [ ] Evidence Compaction Index has valid hashes for all entries
+- [ ] ESCALATE log written if any hard stop rule triggered

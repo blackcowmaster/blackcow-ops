@@ -267,8 +267,9 @@ uncertainty_score = clamp(uncertainty_score * 100, 0, 100)
 
 **Auto-trigger thresholds** (no human decision needed):
 - Stage 1→2: Trigger if `uncertainty_score > 30` OR ANY of: `files_touched > 3`, `unknown_symbols > 10%`, `no test files found`, `cache stale >7d`
-- Stage 2→3: Trigger if `uncertainty_score > 60` OR ANY of: `auth_middleware_detected`, `db_queries_detected`, `external_api_calls > 0`, `security_surface_score > 50`
+- Stage 2→3: Trigger if `uncertainty_score > 60` OR ANY of: `auth_middleware_detected`, `db_queries_detected`, `external_api_calls > 0`, `security_surface_score > 50`, `multi_team_ownership` (files span ≥3 distinct owners in git blame), `recent_security_incident` (CVE or GHSA in last 90 days for any dep)
 - Stop widening: `uncertainty_score < 15` (sufficient evidence for any task)
+- Force FULL widening: `uncertainty_score > 85` OR `SECURITY intent detected` → skip stages, dispatch all lanes immediately
 
 **Evidence requirement per stage**: After each stage, record:
 - `remaining_uncertainty`: what is still unknown (quantify: N unknown symbols, M uncovered call paths)
@@ -928,3 +929,5 @@ Before emitting the final plan, verify ALL of the following. If any check fails,
 - [ ] DAG example is generic (not self-referential)
 - [ ] No invented file paths, commands, or verification results
 - [ ] All estimates marked as estimates (not measurements)
+- [ ] All 7 blackcow-* skill references valid (plan/loop/qa/librarian/review/evolver/governor)
+- [ ] Progressive widening stages recorded with evidence at each
