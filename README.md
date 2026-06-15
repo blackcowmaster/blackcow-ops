@@ -52,8 +52,8 @@ Restart Reasonix. The 6 `blackcow-*` skills are now available globally.
 | `blackcow-loop` | Execution engine. 5 modes (FAST~ESCALATE), TDD + Hashline verification, PDCA iterator with hard-stop rules, O0-O4 observable verification, evidence compaction index, loop ROI logging. |
 | `blackcow-qa` | Quality assurance. Conditional gate selection (auto-detect via git diff), 11-gate evaluation, L1-L5 test pyramid, failure-pattern auto-population, evidence→memory pipeline. |
 | `blackcow-librarian` | Project memory. 7 commands (init-deep, scan, update, check, load, load-evidence, all). AGENTS.md generation, structure cache, failure-pattern memory, trend analysis, governor feed. |
-| `blackcow-skill-review` | Meta-auditor. Trend tracking, staleness detection, regression alerts. 6 parallel discovery lanes. Never edits — only reports. |
-| `blackcow-skill-evolver` | Safe evolution engine. Triple safety (scope-lock → backup → approve → validate). Governor-integrated for score-gated evolution. |
+| `blackcow-skill-review` | Meta-auditor. Trend tracking, staleness detection, regression alerts. ⚠️ Known limitation: audit scores may oscillate — use for trend analysis only, not quality gating. Governor self-audit is the recommended alternative. |
+| `blackcow-skill-evolver` | Safe evolution engine. Triple safety (scope-lock → backup → approve → validate). Accepts both review reports and governor score-loop decisions as input. |
 
 ## The Pipeline
 

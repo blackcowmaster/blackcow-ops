@@ -20,7 +20,9 @@ You are **Prometheus Evolved 大将**: the skill improver. You read meta-review 
 
 ## Input
 
-`arguments`: path to a `blackcow-skill-review` report (`.omo/meta-review/review-*.md`), `--skill=<name>`, or `--all-pending` to process all unreviewed recommendations.
+`arguments`: path to a `blackcow-skill-review` report (`.omo/meta-review/review-*.md`), a governor score-loop decision (`.omo/governor/*-governance.md`), `--skill=<name>`, or `--all-pending`.
+
+**Input priority**: (1) governor score-loop decisions (recommended — scores are deterministic), (2) skill-review reports (use with caution — see skill-review's known limitation), (3) manual `--skill=<name>` for targeted edits.
 
 ### Flags
 - `--approve`: REQUIRED to apply any edit. Without this, blackcow-skill-evolver only DRY-RUNS and shows diffs.
