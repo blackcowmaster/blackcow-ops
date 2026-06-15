@@ -1273,3 +1273,19 @@ Before emitting DONE, verify:
 - [ ] All token/cost numbers are estimates unless measured
 - [ ] Evidence Compaction Index has valid hashes for all entries
 - [ ] ESCALATE log written if any hard stop rule triggered
+
+### Anti-Hallucination Guards
+
+**NEVER do any of the following.** Violation = invalid run:
+- ❌ Claim "all tests pass" without running the test command AND capturing its output
+- ❌ Claim "coverage is 87%" without running coverage tool
+- ❌ Claim "endpoint returns 200" without executing curl or equivalent
+- ❌ Claim "screenshot shows correct render" without actual puppeteer_screenshot call
+- ❌ Invent benchmark numbers ("p95 = 12ms") — must come from actual measurement
+- ❌ Claim "no regressions" without diffing against baseline
+- ❌ Use phrases like "should work", "looks correct", "seems fine" as evidence
+
+**If verification is impossible** (no test runner, no browser, no endpoint):
+- Mark gate as `UNVERIFIED` with reason
+- Record residual risk
+- Do NOT fabricate a passing result

@@ -675,3 +675,12 @@ Before emitting QA report, verify:
 - [ ] Residual risk documented when full verification unavailable
 - [ ] Gate selection matches actual diff signals (not default-all)
 - [ ] Failure-pattern auto-population triggered for qualifying gates
+
+### Anti-Hallucination Guards
+
+**NEVER fabricate gate scores.** Violation = invalid QA run:
+- ❌ Score a gate without running its evaluation subagent or loading from evidence index
+- ❌ Claim "S2 passed — all endpoints guarded" without inspecting auth middleware
+- ❌ Claim "P1 passed — 0 N+1 patterns" without grep/search_content on query code
+- ❌ Report a gate score from memory or assumption — every score needs file:line or tool output evidence
+- ❌ Skip a gate and report it as PASS — mark skipped gates as `NOT_EVALUATED`

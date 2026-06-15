@@ -271,6 +271,14 @@ uncertainty_score = clamp(uncertainty_score * 100, 0, 100)
 - Stop widening: `uncertainty_score < 15` (sufficient evidence for any task)
 - Force FULL widening: `uncertainty_score > 85` OR `SECURITY intent detected` → skip stages, dispatch all lanes immediately
 
+**Widening budget cap**: Total tokens across all stages ≤ 40% of context budget. If Stage 2 alone exceeds 40%, stop and use best available evidence. Log cap events to widening-history.
+
+**Widening Decision Log**: After each task, append to `.omo/memory/widening-history.jsonl`:
+```json
+{"task_slug":"<slug>","intent":"<class>","initial_uncertainty":<0-100>,"stage1_cost":<N>,"stage2_triggered":true|false,"stage3_triggered":true|false,"total_lanes_dispatched":<N>,"sufficient_at_stage":1|2|3,"total_tokens":<N>}
+```
+Future tasks in the same area use this history: if similar tasks consistently stopped at Stage 2, start there.
+
 **Evidence requirement per stage**: After each stage, record:
 - `remaining_uncertainty`: what is still unknown (quantify: N unknown symbols, M uncovered call paths)
 - `why_wider`: which auto-trigger threshold was met (or "NONE — stopping")
