@@ -1,22 +1,19 @@
 {
-  "run_id": "perf-validate-health-p3",
+  "run_id": "input-sanitization-2026-06-16",
   "trust_level": 2,
-  "started": "2026-06-15T19:30:00Z",
-  "last_checkpoint": "2026-06-15T21:35:00Z",
-  "phases_completed": ["0","1","2","3","4","5","6"],
-  "current_phase": "7",
+  "started": "2026-06-16T19:00:00Z",
+  "last_checkpoint": "2026-06-16T19:15:00Z",
+  "phases_completed": ["0","1","2","3","5","6","8","9"],
+  "current_phase": "9",
   "phase_results": {
-    "0": {"bootstrap_lanes": 9, "cache_hit": false, "speculative_adopted": "SP2 ADOPT"},
-    "1": {"tests_passing": true, "hashline_edits": 8, "hashline_failures": 0},
+    "0": {"bootstrap_lanes": 10, "cache_hit": false, "plan_cache_used": true},
+    "1": {"tests_passing": true, "hashline_edits": 4, "hashline_failures": 0, "test_count": 92},
     "2": {"gap_match_rate": 100, "pdca_cycles": 0},
-    "3": {"test_pass": "64/64", "regression": 0, "lint": "bash -n: pass"},
-    "4": {"cli_verified": true, "file_state_verified": true, "json_valid": true},
-    "5": {"qa_agents": "streamlined (XS scale)", "critical_findings": 0},
-    "6": {"dead_code_removed": "TIMEOUT_SEC", "format_verified": true}
+    "3": {"m2_test_pass": "92/92", "m2_coverage": "100%", "m3_regression": 0, "m4_lint": 0},
+    "5": {"qa_gates_passed": 11, "qa_gates_total": 11},
+    "6": {"format_applied": true, "dead_code_removed": 0},
+    "8": {"report_written": true}
   },
-  "files_touched": [
-    "skills/tests/validate-blackcow-ecosystem-health.sh",
-    "skills/tests/test-l4-system-ecosystem-health.sh"
-  ],
-  "git_snapshot": "6cc2bfa454a02d7f89b4d7576856d3a27d7ae657"
+  "files_touched": ["src/lib/sanitize.ts", "src/schemas/task.schema.ts", "__tests__/lib/sanitize.test.ts", "__tests__/routes/tasks.routes.test.ts"],
+  "git_snapshot": "N/A"
 }

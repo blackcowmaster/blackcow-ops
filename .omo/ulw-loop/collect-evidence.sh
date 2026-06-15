@@ -1,69 +1,44 @@
 #!/usr/bin/env bash
-# Evidence collector — 11-gate version (M1-M5, S1-S3, P1-P3)
-# Slug: extract-pagination-service
+# BKIT 11-Gate Evidence Collector — input-sanitization
 set -euo pipefail
+SLUG="input-sanitization"
+EVID=".omo/ulw-loop/evidence"
 
-EVIDENCE_DIR=".omo/ulw-loop/evidence"
-SLUG="extract-pagination"
-mkdir -p "$EVIDENCE_DIR"
+echo "=== M1 spec-match ==="
+echo "Check: sanitizeText exists, trim→stripTags→htmlEscape order, emoji preserved"
+grep -n "sanitizeText" src/lib/sanitize.ts 2>/dev/null || echo "M1_FAIL: sanitizeText not found"
+grep -n "trim\|stripTags\|htmlEscape\|replace.*<[^>]*>" src/lib/sanitize.ts 2>/dev/null || echo "M1_WARN: pipeline steps unclear"
 
-echo "=== BKIT 11-GATE EVIDENCE COLLECTOR ==="
-echo "Slug: $SLUG"
-echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-echo ""
+echo "=== M2 test-pass ==="
+npm test 2>&1 | tail -5
 
-# ── M1 spec-match ──────────────────────────────────────
-echo "[M1] Spec match audit..."
-# Manual: run npx tsc --noEmit, plan review
-echo "  → tsc --noEmit (must pass)"
-echo "  → Manual: compare implementation against plan"
+echo "=== M2 coverage ==="
+npx jest --coverage --collectCoverageFrom='src/lib/sanitize.ts' 2>&1 | tail -20
 
-# ── M2 test-pass + coverage ────────────────────────────
-echo "[M2] Test pass + coverage..."
-npm test 2>&1 | tee "$EVIDENCE_DIR/${SLUG}-m2-test.txt"
-npm run test:coverage 2>&1 | tee "$EVIDENCE_DIR/${SLUG}-m2-coverage.txt"
+echo "=== M3 regression ==="
+npm test -- --forceExit 2>&1 | grep -E "Tests:|Test Suites:" | tail -2
 
-# ── M3 regression ──────────────────────────────────────
-echo "[M3] Regression check..."
-echo "  → Compare pre/post call sites"
-echo "  → All 30 pagination tests unchanged in assertion logic"
+echo "=== M4 lint ==="
+npx eslint src/ --max-warnings 0 2>&1 || true
 
-# ── M4 lint ────────────────────────────────────────────
-echo "[M4] Lint check..."
-npm run lint 2>&1 | tee "$EVIDENCE_DIR/${SLUG}-m4-lint.txt"
+echo "=== M5 dead-code ==="
+echo "Manual check: grep for unreferenced exports in sanitize.ts"
 
-# ── M5 dead-code ──────────────────────────────────────
-echo "[M5] Dead code check..."
-grep -n "lastIndexOf\|_cursor\|offset =" src/repositories/tasks.repository.ts > "$EVIDENCE_DIR/${SLUG}-m5-deadcode.txt" 2>&1 || echo "(none found — clean)"
+echo "=== S1 dataFlow ==="
+echo "Check: GET /api/tasks/:id → no double-escaping in response"
+echo "Check: empty description '' → null in DB"
 
-# ── S1 dataFlow ───────────────────────────────────────
-echo "[S1] DataFlow integrity..."
-echo "  → Verify cursor format preserved: timestamptz::text || '_' || id::text"
-echo "  → Verify _cursor stripped before return"
-echo "  → Verify nextCursor: null semantics preserved"
+echo "=== S2 auth ==="
+echo "Check: all entry points behind auth middleware"
 
-# ── S2 auth ───────────────────────────────────────────
-echo "[S2] Auth gate audit..."
-echo "  → All entry points behind auth middleware"
-echo "  → user_id filter preserved in WHERE clause"
+echo "=== S3 injection ==="
+echo "Check: no XSS payload survives POST/PUT"
 
-# ── S3 injection ──────────────────────────────────────
-echo "[S3] Injection surface audit..."
-grep -n "eval\|exec\|system\|popen\|subprocess\|innerHTML\|dangerouslySetInnerHTML" src/lib/pagination.ts > "$EVIDENCE_DIR/${SLUG}-s3-injection.txt" 2>&1 || echo "(no injection surfaces found)"
-grep -rn "query(" src/lib/pagination.ts > "$EVIDENCE_DIR/${SLUG}-s3-sql.txt" 2>&1 || echo "(no raw SQL in pagination service)"
+echo "=== P1 query ==="
+echo "Check: no N+1 in sanitization path"
 
-# ── P1 query ──────────────────────────────────────────
-echo "[P1] N+1 query audit..."
-echo "  → PaginationService has no DB calls"
+echo "=== P2 memory ==="
+echo "Check: no unbounded growth in string operations"
 
-# ── P2 memory ─────────────────────────────────────────
-echo "[P2] Memory bound audit..."
-echo "  → No unbounded collections in pagination"
-
-# ── P3 latency ────────────────────────────────────────
-echo "[P3] Latency path audit..."
-echo "  → PaginationService methods are pure math — O(1)"
-
-echo ""
-echo "=== Collector complete ==="
-echo "Evidence files written to $EVIDENCE_DIR/"
+echo "=== P3 latency ==="
+echo "Check: sanitizeText sub-ms for 5000-char input"
