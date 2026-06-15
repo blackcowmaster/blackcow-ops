@@ -846,15 +846,41 @@ RETURN EXACTLY: checked:bool, files_expected:list, files_found:list
 ### Channel 4 — DB
 If the change affects database state:
 ```bash
-# Query to verify expected DB state
-<db-query> > .omo/ulw-loop/evidence/<slug>-manual-db.txt
+# O1 smoke: can connect and query
+<db-query> "SELECT 1" > .omo/ulw-loop/evidence/<slug>-manual-db-connect.txt 2>&1
+# O2 primary: expected data exists after migration
+<db-query> "SELECT COUNT(*) FROM <table>" > .omo/ulw-loop/evidence/<slug>-manual-db-count.txt
+# O3 state: schema matches expected (column names, types)
+<db-query> "DESCRIBE <table>" > .omo/ulw-loop/evidence/<slug>-manual-db-schema.txt
+diff .omo/ulw-loop/evidence/<slug>-db-schema-baseline.txt .omo/ulw-loop/evidence/<slug>-manual-db-schema.txt
 ```
-RETURN EXACTLY: checked:bool, tables_checked:list, row_count:int
+RETURN EXACTLY: checked:bool, tables_checked:list, row_count:int, schema_matches_baseline:bool
+
+### Channel 5 — Structured Output
+If the change affects JSON/API responses:
+```bash
+# O2: response matches expected JSON schema
+curl -s <endpoint> | python3 -c "import json,sys; d=json.load(sys.stdin); assert '<key>' in d" && echo "SCHEMA_OK"
+# O3: response types are correct
+curl -s <endpoint> | python3 -c "import json,sys; d=json.load(sys.stdin); assert isinstance(d['<key>'], <type>)" && echo "TYPES_OK"
+```
+RETURN EXACTLY: checked:bool, schema_valid:bool, types_correct:bool
+
+### Channel 6 — Logs
+If the change affects logging output:
+```bash
+# O2: expected log line appears after action
+<trigger-action> && tail -50 /var/log/app.log | grep -q "<expected-log-pattern>" && echo "LOG_OK"
+# O3: no error/panic lines introduced
+<trigger-action> && tail -50 /var/log/app.log | grep -cE '(ERROR|PANIC|FATAL)' > .omo/ulw-loop/evidence/<slug>-manual-log-errors.txt
+```
+RETURN EXACTLY: checked:bool, log_pattern_found:bool, new_errors:int
 
 ### Phase 4 Gate
 - ALL applicable channels checked → advance to Phase 5
 - Any channel fails → return to Phase 1.3 (GREEN) or trigger Phase 2a (PDCA)
 - **Observable evidence captured**: O1 minimum for any change; O2+ if tooling available
+- **Capability routing**: Route to correct channel based on change type (HTTP→Ch1, CLI→Ch2, File→Ch3, DB→Ch4, JSON→Ch5, Logs→Ch6)
 - **Regression baseline**: For CLI/API changes, diff current output against stored baseline from Phase 1.1 characterization test
 - **→ Write checkpoint.json**
 
