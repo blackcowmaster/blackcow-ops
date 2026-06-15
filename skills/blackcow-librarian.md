@@ -9,7 +9,7 @@ model_tiers:
   budget: deepseek-v4-flash    # mechanical tasks (~$0.14/1M input)
   pro: deepseek-v4-pro        # analysis, security, design (~$0.435/1M input)
 
-allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, write_file, edit_file, multi_edit, explore, run_skill, get_file_info, lsp_definition, lsp_hover, lsp_references
+allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, write_file, edit_file, multi_edit, explore, run_skill, get_file_info
 ---
 
 # blackcow-librarian — Project Librarian / Archivist
