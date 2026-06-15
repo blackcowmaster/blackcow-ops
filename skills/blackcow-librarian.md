@@ -36,6 +36,8 @@ All 7 commands can also be chained: `init-deep → scan → check` in a single i
 
 Parse `--model-tier=auto|budget|pro` (default: auto). Scan lanes use budget, analysis lanes use pro.
 
+**First-run guidance**: If cache is EMPTY (no prior scan), run `--command=all` once to bootstrap. This chains `init-deep → scan → check` and costs ~$0.002. Subsequent runs use `--command=update` for incremental refresh (~$0.001).
+
 **Verified cost reference** (EXECUTED_EVAL, 2026-06-15): blackcow-skill-review on blackcow-plan consumed ~$0.03 per invocation (mixed flash/pro). Structure cache scan: ~$0.01 (flash-only). Use these as calibration for token estimates.
 
 ---
