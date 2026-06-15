@@ -210,3 +210,4 @@ Every skill in the pipeline MUST honor this contract for evidence exchange:
 5. Never skip universal gates (M1, M2, M3).
 6. Never claim O2+ observable verification without browser tooling.
 7. Governance decisions are advisory — downstream skills MAY override with justification.
+8. Check skill version consistency: all `blackcow-*` skills should report same `version` in frontmatter. Mismatch → warn.

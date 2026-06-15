@@ -1,6 +1,6 @@
 ---
 name: blackcow-skill-evolver
-description: Skill evolution engine. Reads blackcow-skill-review reports, proposes concrete edits to skill files. Triple safety: (1) only edits .reasonix/skills/*.md, (2) creates backup before any edit, (3) requires --approve flag to apply. Writes evolution log with before/after diffs.
+description: Skill evolution engine. Reads blackcow-skill-review reports OR governor score-loop decisions, proposes concrete edits to skill files. Triple safety: (1) only edits .reasonix/skills/*.md, (2) creates backup before any edit, (3) requires --approve flag to apply. Integrates with governor for score-gated evolution. Writes evolution log with before/after diffs.
 runAs: subagent
 version: 2.0.0
 updated: 2026-06-12

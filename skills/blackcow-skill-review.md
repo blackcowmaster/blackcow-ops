@@ -155,7 +155,7 @@ Check:
 - Are referenced model names still current? (e.g., deepseek-v4-pro still available?)
 - Are referenced tool names still valid? (check against current tool list: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, web_fetch, web_search, write_file, edit_file, multi_edit, explore, research, run_skill, get_file_info, get_symbols, find_in_code)
 - Are referenced file paths consistent with current project structure?
-- Are referenced skill names (blackcow-plan, blackcow-loop, blackcow-qa, blackcow-skill-review, blackcow-skill-evolver, blackcow-librarian) all existing?
+- Are all 7 blackcow-* skills referenced correctly (plan, loop, qa, librarian, skill-review, skill-evolver, governor)?
 - Does the BKIT 11-gate taxonomy match the current standard?
 - Any TODO/FIXME/HACK markers indicating incomplete sections?
 
