@@ -34,7 +34,13 @@ Ask four questions. If ANY answer is "no", widen discovery scope before proceedi
 **Rule**: Never proceed to gate selection with incomplete context. Insufficient context → widen Phase 0 exploration → re-assess. This prevents the most common governance failure: selecting wrong mode because the task wasn't understood.
 
 ### 0.1 Load Failure-Pattern Memory
-Check `.omo/memory/failure-patterns.jsonl`. If the task area matches any unresolved pattern, escalate priority.
+Check `.omo/memory/failure-patterns.jsonl`. Filter by `context_tags` matching the detected tech stack from Phase 0.0:
+- **Exact tag match** → auto-fix enabled (effectiveness ≥ 80)
+- **Partial match** (e.g., same language, different framework) → suggest fix, require confirmation
+- **No tag match** → load as reference only, disable auto-fix
+- **No context_tags on pattern** → treat as universal, apply normally
+
+If no context_tags are present in the task profile, fall back to universal matching (all patterns considered). Record which patterns were filtered and why in the governance decision.
 
 ### 0.2 Load Loop ROI History
 Check `.omo/memory/loop-roi.jsonl`. If historical ROI for this area was low, suggest higher trust level or scope reduction.
@@ -247,6 +253,8 @@ Before emitting governance decision, verify:
 - [ ] All downstream skills (plan/loop/qa) honor governance decisions
 - [ ] Governance document loaded by at least one downstream skill before execution
 - [ ] Skill-review triggered for FULL/SIEGE modes
+- [ ] Native review fallback: if skill-review fails/times out, use native `review` tool as complement
+- [ ] Context tags from Phase 0.0 applied to failure-pattern filtering in Phase 0.1
 - [ ] Post-mortem review scheduled after pipeline completion
 
 ## Cross-Skill Evidence Contract
