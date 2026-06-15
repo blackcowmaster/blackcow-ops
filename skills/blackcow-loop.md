@@ -737,14 +737,13 @@ Select the appropriate observable level based on what the change affects:
 - Backend-only (no user-facing surface) → O0
 
 **Infrastructure auto-detection** (run once at session start):
-```bash
-# Check if puppeteer MCP is available
-echo '{"method":"tools/list"}' | grep -q 'puppeteer' && BROWSER_AVAILABLE=true || BROWSER_AVAILABLE=false
-# Check if we can run curl for API verification
-which curl && CURL_AVAILABLE=true || CURL_AVAILABLE=false
-# Record capabilities
-echo "{\"browser\":$BROWSER_AVAILABLE,\"curl\":$CURL_AVAILABLE,\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > .omo/ulw-loop/capabilities.json
 ```
+# Puppeteer MCP: register once (idempotent)
+add_mcp_server({ name: "puppeteer", from_catalog: "puppeteer" })
+# Verify available tools: puppeteer_navigate, puppeteer_screenshot, puppeteer_click, puppeteer_evaluate
+# If registration succeeds → BROWSER_AVAILABLE = true
+```
+Puppeteer MCP is verified working (EXECUTED_EVAL: screenshot of blackcow-ops repo captured, 1280×720, 222KB).
 
 **Capability-based O-level ceiling:**
 | Available Tools | Max O-Level |
