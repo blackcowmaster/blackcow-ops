@@ -31,6 +31,9 @@ Check `.omo/memory/loop-roi.jsonl`. If historical ROI for this area was low, sug
 ### 0.3 Detect Change Surface
 If git available: `git diff --name-only HEAD~1` to understand what files changed. This feeds gate selection.
 
+### 0.3b Detect Infrastructure Capabilities
+Check `.omo/ulw-loop/capabilities.json` or run auto-detection. Determines max achievable O-level.
+
 ### 0.4 Load Evidence Index
 If `.omo/ulw-loop/completion-report.md` exists from a prior loop run, load the Evidence Compaction Index. Already-passed gates may be skipped.
 
@@ -78,8 +81,10 @@ Produce `.omo/governor/<slug>-governance.md`:
 | Decision | Value |
 |---|---|
 | **O-Level** | O0 / O1 / O2 / O3 / O4 |
+| **Max Capability** | O0-O4 (from capabilities.json) |
 | **Browser Available?** | YES / NO |
-| **Capped?** | O<N> → O<N> (reason) |
+| **Capped?** | O<N> → O<N'> (reason) |
+| **Fallback Strategy** | <alternative verification if capped> |
 | **Residual Risk** | <description> |
 
 ## Progressive Widening Policy

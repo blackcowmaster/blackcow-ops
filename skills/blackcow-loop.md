@@ -723,6 +723,24 @@ Select the appropriate observable level based on what the change affects:
 - Visual/layout change → O3 minimum, O4 if public-facing
 - Backend-only (no user-facing surface) → O0
 
+**Infrastructure auto-detection** (run once at session start):
+```bash
+# Check if puppeteer MCP is available
+echo '{"method":"tools/list"}' | grep -q 'puppeteer' && BROWSER_AVAILABLE=true || BROWSER_AVAILABLE=false
+# Check if we can run curl for API verification
+which curl && CURL_AVAILABLE=true || CURL_AVAILABLE=false
+# Record capabilities
+echo "{\"browser\":$BROWSER_AVAILABLE,\"curl\":$CURL_AVAILABLE,\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > .omo/ulw-loop/capabilities.json
+```
+
+**Capability-based O-level ceiling:**
+| Available Tools | Max O-Level |
+|---|---|
+| None (text-only) | O0 |
+| `curl` only | O1 |
+| `curl` + `run_command` | O2 (API/CLI only) |
+| `curl` + `run_command` + puppeteer | O4 |
+
 **Residual risk handling:**
 - If browser/puppeteer tooling is **unavailable**, cap at O1 (use `curl` / `run_command` only)
 - If puppeteer MCP server is available, register it first:
@@ -733,7 +751,12 @@ Select the appropriate observable level based on what the change affects:
   - O2: `puppeteer_navigate` + `puppeteer_click` for primary interaction
   - O3: `puppeteer_screenshot` with `width`/`height` for viewport testing
   - O4: multiple `puppeteer_screenshot` calls + visual diff
-- Record the capped level + reason in evidence: `OBSERVABLE_CAPPED: O<N> → O1 (no browser tooling)`
+- Record the capped level + reason in evidence: `OBSERVABLE_CAPPED: O<N> → O<N'> (<reason>)`
+- **Fallback strategy**: When capped, supplement with alternative verification:
+  - UI change capped at O1 → add DOM snapshot via `curl | grep` for expected strings
+  - Interaction change capped at O1 → add API-level state verification (POST then GET)
+  - Visual change capped at O1 → add CSS/layout unit tests as proxy
+  - Always document: "O<N> verification deferred — requires browser tooling. Residual risk: <description>"
 - **NEVER claim O2+ verification without actual browser/render observation**
 - **NEVER fabricate screenshot, browser, or visual verification results**
 
