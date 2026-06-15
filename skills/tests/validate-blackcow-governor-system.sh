@@ -27,6 +27,7 @@ PROJECT_ROOT="$(cd "$SKILLS_DIR/.." && pwd)"
 OMO_DIR="${PROJECT_ROOT}/.omo"
 GOVERNOR_DIR="${OMO_DIR}/governor"
 GOVERNOR_FILE="${SKILLS_DIR}/blackcow-governor.md"
+[[ -f "$GOVERNOR_FILE" ]] || { echo "FATAL: Target file not found: $GOVERNOR_FILE" >&2; exit 1; }
 
 VERBOSE=false
 QUIET=false

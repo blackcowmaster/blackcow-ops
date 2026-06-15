@@ -46,11 +46,8 @@ heading() {
 heading "1. File Existence & Invokability"
 TOTAL_TESTS=$((TOTAL_TESTS + 1))
 
-if [ -f "$SKILL_FILE" ]; then
-    pass "Skill file exists at $SKILL_FILE"
-else
-    fail "Skill file exists at $SKILL_FILE"
-fi
+[[ -f "$SKILL_FILE" ]] || { echo "FATAL: Target file not found: $SKILL_FILE" >&2; exit 1; }
+pass "Skill file exists at $SKILL_FILE"
 
 # The ~/.reasonix/skills/ copy is where the runtime actually reads from.
 # Check it exists too (run_skill resolves from the skills index).

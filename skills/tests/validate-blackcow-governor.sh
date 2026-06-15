@@ -24,6 +24,7 @@ if [[ "$(basename "$SCRIPT_DIR")" != "tests" ]]; then
   PROJECT_ROOT="$SCRIPT_DIR"
 fi
 TARGET="${1:-$PROJECT_ROOT/skills/blackcow-governor.md}"
+[[ -f "$TARGET" ]] || { echo "FATAL: Target file not found: $TARGET" >&2; exit 1; }
 
 PASS=0
 FAIL=0

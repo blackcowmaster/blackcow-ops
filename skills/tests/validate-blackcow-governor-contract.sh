@@ -56,11 +56,8 @@ extract_template() {
 heading "1. File Existence & Invokability"
 
 TOTAL_TESTS=$((TOTAL_TESTS + 1))
-if [ -f "$SKILL_FILE" ]; then
-    pass "Skill file exists at $SKILL_FILE"
-else
-    fail "Skill file exists at $SKILL_FILE"
-fi
+[[ -f "$SKILL_FILE" ]] || { echo "FATAL: Target file not found: $SKILL_FILE" >&2; exit 1; }
+pass "Skill file exists at $SKILL_FILE"
 
 TOTAL_TESTS=$((TOTAL_TESTS + 1))
 if [ -f "$HOMEDIR_SKILL" ]; then

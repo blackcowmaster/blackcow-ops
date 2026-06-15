@@ -176,6 +176,16 @@ ALL_SKILLS=(
   "blackcow-governor.md"
 )
 
+MISSING_COUNT=0; MISSING_LIST=""
+for skill in "${ALL_SKILLS[@]}"; do
+  [[ -f "${SKILLS_DIR}/${skill}" ]] || { MISSING_COUNT=$((MISSING_COUNT+1)); MISSING_LIST="$MISSING_LIST  ${SKILLS_DIR}/${skill}"$'\n'; }
+done
+if [[ "$MISSING_COUNT" -ge 2 ]]; then
+  echo "FATAL: $MISSING_COUNT target skill files not found:"$'\n'"$MISSING_LIST" >&2; exit 1
+elif [[ "$MISSING_COUNT" -eq 1 ]]; then
+  echo "WARNING: 1 target skill file not found (continuing with partial validation):"$'\n'"$MISSING_LIST" >&2
+fi
+
 echo "  Expected skills (7):"
 for skill in "${ALL_SKILLS[@]}"; do
   echo "    • ${skill}"

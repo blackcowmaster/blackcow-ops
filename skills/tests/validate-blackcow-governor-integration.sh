@@ -30,6 +30,7 @@ VERBOSE=false
 
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 GOVERNOR_FILE="${SKILL_DIR}/blackcow-governor.md"
+[[ -f "$GOVERNOR_FILE" ]] || { echo "FATAL: Target file not found: $GOVERNOR_FILE" >&2; exit 1; }
 INSTALL_SH="${SKILL_DIR}/install.sh"
 
 PASS=0

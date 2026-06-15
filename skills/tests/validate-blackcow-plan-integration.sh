@@ -25,6 +25,7 @@ VERBOSE=false
 
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 PLAN_FILE="${SKILL_DIR}/blackcow-plan.md"
+[[ -f "$PLAN_FILE" ]] || { echo "FATAL: Target file not found: $PLAN_FILE" >&2; exit 1; }
 INSTALL_SH="${SKILL_DIR}/install.sh"
 
 PASS=0
