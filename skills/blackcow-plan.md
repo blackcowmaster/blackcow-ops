@@ -9,7 +9,7 @@ model_tiers:
   budget: deepseek-v4-flash    # mechanical tasks (~$0.14/1M input)
   pro: deepseek-v4-pro        # analysis, security, design (~$0.435/1M input)
 
-allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, web_fetch, web_search, write_file, explore, research, run_skill, get_file_info
+allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, web_fetch, web_search, write_file, explore, research, run_skill, get_file_info, get_symbols, find_in_code
 ---
 
 # blackcow-plan — Strategic Planner (BKIT Enhanced)
@@ -105,18 +105,39 @@ The detected intent class MUST change Phase 1 lane dispatch:
 
 ### 0.0 Cache Load (blackcow-librarian integration)
 
-**BEFORE any glob/grep discovery, attempt cache load:**
+**BEFORE any glob/grep discovery, attempt cache load.** Use ONE batch of read_file/run_command calls:
 
-1. If `.omo/library/structure-cache.jsonl` exists, run staleness check:
-   - Read `.omo/library/head.sha256` → `CACHED_HEAD`
-   - Get current HEAD: `git rev-parse HEAD 2>/dev/null || echo "NO_GIT"`
-   - Read `.omo/library/scanned-at.txt` → compute days since scan
-   - If HEAD matches AND ≤7 days old: **LOAD cache, skip glob discovery**
-   - If STALE: fall through to legacy discovery
-2. Cache load provides: file list, layer map, entry points, directory scores → replaces glob results
-3. **Always run**: `glob("{.git/HEAD,.git/index}")` — cheap, always needed for git context
+**Step 0 — Directory check (always run first):**
+```
+list_directory(".omo/library/")
+```
+- If result is "directory not found" or empty → **CACHE EMPTY** → skip to 0.1 Legacy Discovery.
+  - Emit: `## Cache: EMPTY (.omo/library/ not found) — run "blackcow-librarian scan" to populate`
+- If directory exists but `structure-cache.jsonl` is not listed → **CACHE EMPTY** → skip to 0.1.
 
-**Cache hit savings**: ~3K tokens (replaces 4 glob calls with 1 file read + bash checks)
+**Step 1 — Staleness check (only if structure-cache.jsonl exists):**
+```
+read_file(".omo/library/head.sha256") → CACHED_HEAD (if "file not found": treat as STALE)
+read_file(".omo/library/scanned-at.txt") → compute days since scan (if "file not found": treat as STALE)
+run_command("git rev-parse HEAD 2>/dev/null || echo NO_GIT") → CURRENT_HEAD
+```
+- If ANY cache artifact (head.sha256, scanned-at.txt) is missing while structure-cache.jsonl exists → **PARTIAL CACHE** → treat as STALE, fall through to 0.1.
+- If CACHED_HEAD == CURRENT_HEAD AND days ≤ 7: **CACHE HIT** → LOAD cache, skip all glob discovery in 0.1.
+- If CACHED_HEAD != CURRENT_HEAD: **STALE (HEAD changed)** → fall through to 0.1.
+- If days > 7: **STALE (age)** → fall through to 0.1.
+- If CACHED_HEAD is "NO_GIT" AND CURRENT_HEAD is "NO_GIT" → trust timestamp only (FRESH if ≤7d, else STALE).
+
+**Cache hit behavior:**
+- Cache load provides: file list, layer map, entry points, directory scores → replaces all glob results in 0.1.
+- Emit: `## Cache: HIT (scanned <N>d ago, HEAD matches) — skipping glob discovery (~3K saved)`
+
+**Cache miss behavior:**
+- Emit: `## Cache: <EMPTY | STALE | PARTIAL> — falling through to legacy discovery`
+- Proceed to Phase 0.1 normally.
+
+**Cache hit savings**: ~3K tokens (replaces 4 glob calls with 1 list_directory + 2 read_file + 1 run_command)
+
+> **Note:** `.omo/library/` is created by `blackcow-librarian scan` on first run. This planner **never** creates the directory — if it's missing, fall through to legacy discovery without error. The directory may also be absent in fresh clones or projects that haven't run librarian yet.
 
 ### 0.1 Legacy Discovery (fallback when cache absent/stale)
 
