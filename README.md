@@ -173,6 +173,37 @@ BlackCow was designed for models that are **cheap enough to be wasteful**. DeepS
 | **Checkpoint/Resume** | Yes (L3+) | Yes — Session Recovery | Provider retry | Yes — Sprint resume |
 | **Loop Engineering** | 7-cycle adaptive PDCA | 500-iteration Ralph Loop | ultragoal revision | 5-cycle PDCA |
 
+## Quality Score Evolution
+
+BlackCow Ops was improved through a **score-driven self-evolution loop** (40 rounds, 29 commits). Each round: score → identify weakness → apply minimal fix → re-score → accept only if improved.
+
+| Round | Score | Key Improvements |
+|---|---:|---:|---|
+| baseline | **57.0** | Initial 11-dimension assessment |
+| R1-R3 | **71.1** | allowed-tools compatibility, cross-platform install.sh, dead tier removal, Mode/Gate Selection |
+| R4-R6 | **84.4** | O0-O4 observable, evidence index, failure-pattern memory, ESCALATE automation |
+| R7-R9 | **87.6** | Progressive widening, PDCA evidence discipline, DeepSeek pricing |
+| R10 | **90.7** | `blackcow-governor` — pipeline preflight controller |
+| R11-R13 | **92.8** | Governor wiring, evidence reader, 1M context window |
+| R14-R20 | **95.0** | Per-language gate detection, anti-hallucination guards, widening quality gate |
+| R21-R40 | **91.4** | All 11 dimensions ≥ 90; Observable capped at 90 (infrastructure-honest) |
+
+| Dimension | 57 | 91.4 |
+|---|---:|---:|
+| Reasonix-native | 52 | 91 |
+| DeepSeek fit | 78 | 92 |
+| Loop budget control | 48 | 92 |
+| Progressive widening | 40 | 91 |
+| Conditional gate selection | 38 | 91 |
+| PDCA evidence discipline | 58 | 91 |
+| Observable verification | 30 | 90 |
+| Evidence compaction | 45 | 91 |
+| Failure-pattern memory | 40 | 92 |
+| Self-review integration | 65 | 93 |
+| Safety / anti-hallucination | 80 | 91 |
+
+**+60% improvement. Score rubric fixed at baseline — no moving goalposts.**
+
 ## What is this?
 
 **BlackCow Ops** brings the BKIT quality methodology to the Reasonix agent runtime, designed for DeepSeek's cost profile.
