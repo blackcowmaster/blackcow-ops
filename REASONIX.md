@@ -14,7 +14,7 @@ loaded into the immutable system prefix every session — keep it terse.
 - P3 latency gate 트리거 (51% 실행시간 단축)
 - Failure Pattern Memory: 10개 패턴, context_tags 지원
 - Ecosystem health: 514/514 (100%) 🟢 ALL GREEN
-- 11-dimension 점수: 95.5/100
+- 11-dimension 점수: 96.0/100 (O4 observable verified — puppeteer screenshot + JS eval on live GitHub)
 - Main 머지 완료
 
 ## 다음 목표
