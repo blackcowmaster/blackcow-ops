@@ -667,8 +667,8 @@ else
   print_skill_line "ecosystem" "$ECO_SCORE" "$ECO_COUNT"
   print_skill_line "other" "$OTHER_SCORE" "$OTHER_COUNT"
 
-  $QUIET || echo ""
-  log_info "Text report written to: $HEALTH_LOG"
+  $JSON_OUT || echo ""
+  $JSON_OUT || echo "  Text report written to: $HEALTH_LOG"
 fi
 
 # --- Final exit --------------------------------------------------------------
