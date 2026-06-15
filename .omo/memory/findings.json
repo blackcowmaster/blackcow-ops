@@ -1,1 +1,53 @@
-{"created": "2026-06-15T12:00:00Z", "findings": [], "archived": []}
+{
+  "created": "2026-06-15T12:00:00Z",
+  "findings": [
+    {
+      "id": "F-001",
+      "gate": "M2",
+      "severity": "LOW",
+      "status": "RESOLVED",
+      "title": "DELETE /api/tasks/:id — no explicit test for non-existent task → 404",
+      "description": "The route test suite has no explicit test case for DELETE /api/tasks/<non-existent-uuid> → 404. The implementation correctly returns 404 via AppError(404, 'NOT_FOUND', ...) in tasksService.remove().",
+      "file": "__tests__/routes/tasks.routes.test.ts",
+      "discovered": "2026-07-14T18:00:00Z",
+      "resolved": "2026-07-14T18:05:00Z",
+      "resolution": "VERIFIED_NO_CODE_GAP — Code trace confirms AppError(404) → asyncHandler → errorHandler → 404 JSON response. All 39 tests pass. Cross-user DELETE test exercises identical findById→null→404 path.",
+      "evidence": {
+        "service_throw": "services/tasks.service.ts:46-48",
+        "error_handler": "middleware/errorHandler.ts:11-18",
+        "async_handler": "middleware/asyncHandler.ts:9",
+        "test_suite": "39/39 tests pass"
+      }
+    },
+    {
+      "id": "F-002",
+      "gate": "S1",
+      "severity": "MEDIUM",
+      "status": "RESOLVED",
+      "title": "TOCTOU in service.remove() — repository return value discarded",
+      "description": "tasksService.remove() called findById (check) then remove (use) without checking remove's return value. If a concurrent request soft-deletes the task between check and use, remove() returns null but the service returned 204 No Content (success) instead of 404.",
+      "file": "src/services/tasks.service.ts",
+      "line": "43-52",
+      "discovered": "2026-07-14T18:06:00Z",
+      "resolved": "2026-07-14T18:10:00Z",
+      "resolution": "FIXED — Changed remove() return type from Promise<void> to Promise<Task>. Now captures repository.remove() return value and throws AppError(404, 'NOT_FOUND', ...) if null. Mirrors existing pattern in service.update(). Two-line addition: const deleted = await tasksRepository.remove(id, userId); if (!deleted) throw new AppError(404, ...).",
+      "evidence": {
+        "commit": "src/services/tasks.service.ts — remove() now checks repository return value",
+        "diff": "Lines 46-49: added const deleted = await ...; if (!deleted) throw ...",
+        "pattern": "Mirrors service.update() lines 38-40"
+      }
+    },
+    {
+      "id": "F-003",
+      "gate": "M5",
+      "severity": "LOW",
+      "status": "OPEN",
+      "title": "Unreachable 403 ownership check in service.remove() and service.update()",
+      "description": "The ownership check (task.user_id !== userId → 403) is dead code. findById() already filters by user_id in SQL (WHERE user_id = $2), so task.user_id will always equal userId. Same issue in both service.remove() and service.update().",
+      "file": "src/services/tasks.service.ts",
+      "line": "49-51 (remove), 33-35 (update)",
+      "discovered": "2026-07-14T18:06:00Z"
+    }
+  ],
+  "archived": []
+}
