@@ -154,7 +154,7 @@ run_skill({ name: "blackcow-plan", arguments: "<task> --mode=<mode> --govern=<sl
 run_skill({ name: "blackcow-skill-review", arguments: "--skill=blackcow-plan" })
 
 # 3. Execute
-run_skill({ name: "blackcow-loop", arguments: "Execute plans/<slug>.md --mode=<mode> --trust-level=<N> --gates=<selected>" })
+run_skill({ name: "blackcow-loop", arguments: "Execute plans/<slug>.md --mode=<mode> --trust-level=<N> --gates=<selected> --govern=<slug>" })
 
 # 4. Verify
 run_skill({ name: "blackcow-qa", arguments: "<target> --gates=<selected> --govern=<slug>" })
