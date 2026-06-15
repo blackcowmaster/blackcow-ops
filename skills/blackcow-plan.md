@@ -245,11 +245,16 @@ Do NOT dispatch all selected lanes at once. Use staged widening to minimize toke
 - Add: L5 (Config), L6 (Deps), L7 (Git), L8 (Security), L9 (Performance), L10 (Patterns)
 - **Stop condition**: All discovery complete
 
+**Auto-trigger thresholds** (no human decision needed):
+- Stage 1→2: Trigger if ANY of: `files_touched > 3`, `unknown_symbols > 10%`, `no test files found`, `cache stale >7d`
+- Stage 2→3: Trigger if ANY of: `auth_middleware_detected`, `db_queries_detected`, `external_api_calls > 0`, `security_surface_score > 50`
+
 **Evidence requirement per stage**: After each stage, record:
-- `remaining_uncertainty`: what is still unknown
-- `why_wider`: justification for next stage (or "NONE — stopping")
-- `evidence_produced`: what new facts were learned
+- `remaining_uncertainty`: what is still unknown (quantify: N unknown symbols, M uncovered call paths)
+- `why_wider`: which auto-trigger threshold was met (or "NONE — stopping")
+- `evidence_produced`: what new facts were learned (count: N symbols resolved, M files mapped)
 - `decision`: PROCEED to next stage | STOP (sufficient evidence)
+- `token_cost_this_stage`: estimated tokens consumed
 
 **XL (10 lanes — same as M, but all lanes use pro tier + triple adversarial review):** Identical lane set to M-scale. XL differentiation comes from (a) all lanes use `model=pro`, (b) 5-reviewer adversarial panel instead of 3, (c) full SIEGE-mode gate coverage.
 

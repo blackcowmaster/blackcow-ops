@@ -548,6 +548,33 @@ Max cycles = trust level (L0=0, L1=1, L2=3, L3=7, L4=7). After each cycle, re-ru
 
 **Evidence chain**: Each cycle's `before` record links to the previous cycle's `after` record. Broken chain → invalid PDCA.
 
+### Loop ROI Logging
+
+After each PDCA cycle (and at Completion Report time), log token efficiency to `.omo/memory/loop-roi.jsonl`:
+
+```json
+{
+  "run_id": "<uuid>",
+  "plan_slug": "<slug>",
+  "mode": "fast|standard|full|siege|escalate",
+  "phase": "<phase name>",
+  "tokens_spent": <N>,
+  "tokens_budgeted": <N>,
+  "score_before": <0-100>,
+  "score_after": <0-100>,
+  "score_delta": <±N>,
+  "roi": "<score_delta / tokens_spent>",
+  "timestamp": "<ISO>"
+}
+```
+
+**ROI thresholds for mode escalation:**
+- `roi < 0.001` (score gain per 1K tokens) for 2 consecutive cycles → escalate mode (STANDARD→FULL, FULL→SIEGE)
+- `roi > 0.01` for 3 consecutive cycles → consider reducing mode (FULL→STANDARD)
+- `roi == 0` (no score gain) for 1 cycle → STOP (do not waste tokens)
+
+**Governor integration**: Before each blackcow-loop invocation, check loop-roi.jsonl for the same plan area. If historical ROI was low, start at higher trust level or suggest scope reduction.
+
 ---
 
 ## Phase 3 — Verification (3 PARALLEL task SUBAGENTS)
