@@ -224,6 +224,33 @@ task(description="L10 Pattern Library", prompt=L10_PROMPT, run_in_background=tru
 
 **Generate the dispatch list from this table, then fire ALL selected lanes in ONE parallel batch. Never dispatch skipped lanes.**
 
+### Progressive Widening (Uncertainty-Driven)
+
+Do NOT dispatch all selected lanes at once. Use staged widening to minimize token spend:
+
+**Stage 1 — Cheapest Decisive Measurement** (dispatch first):
+- L1 (Surface Topology) + cache load from librarian
+- If cache provides file list, symbols, and entry points → sufficient for XS tasks
+- **Stop condition**: If Stage 1 fully answers "what files, what structure, what entry points" → skip remaining stages
+
+**Stage 2 — Widen if Uncertainty Remains** (dispatch only if needed):
+- **Remaining uncertainty**: Call graph unknown, data shapes unclear, test coverage gaps
+- **Why wider**: Task touches >3 files or unknown call chain
+- Add: L2 (Call Graph), L3 (Data Shapes), L4 (Tests)
+- **Stop condition**: If call graph + data shapes + test coverage are sufficient for the task → skip Stage 3
+
+**Stage 3 — Full Discovery** (dispatch only if STILL uncertain):
+- **Remaining uncertainty**: Security surface unknown, performance hotspots, external dep risks
+- **Why wider**: Task affects auth, data persistence, or external APIs
+- Add: L5 (Config), L6 (Deps), L7 (Git), L8 (Security), L9 (Performance), L10 (Patterns)
+- **Stop condition**: All discovery complete
+
+**Evidence requirement per stage**: After each stage, record:
+- `remaining_uncertainty`: what is still unknown
+- `why_wider`: justification for next stage (or "NONE — stopping")
+- `evidence_produced`: what new facts were learned
+- `decision`: PROCEED to next stage | STOP (sufficient evidence)
+
 **XL (10 lanes — same as M, but all lanes use pro tier + triple adversarial review):** Identical lane set to M-scale. XL differentiation comes from (a) all lanes use `model=pro`, (b) 5-reviewer adversarial panel instead of 3, (c) full SIEGE-mode gate coverage.
 
 ### Lane Prompts

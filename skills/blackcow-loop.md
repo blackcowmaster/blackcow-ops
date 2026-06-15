@@ -513,6 +513,45 @@ RETURN EXACTLY:
 
 Max cycles = trust level (L0=0, L1=1, L2=3, L3=7, L4=7). After each cycle, re-run gap-detector. Adaptive ceiling: track PDCA success rate; if >95% for 3 consecutive runs, auto-reduce cycles by 1 per successful run (minimum=3). Write PDCA metrics to `.omo/memory/pdca-history.jsonl`.
 
+### PDCA Evidence Discipline (MANDATORY per cycle)
+
+**Before EACH PDCA cycle, record:**
+```json
+{
+  "cycle": <N>,
+  "failing_gate": "M1|M2|...",
+  "current_score": <0-100>,
+  "hypothesis": "<why this fix will close the gap>",
+  "cheapest_measurement": "<minimal check to confirm>",
+  "expected_improvement": "<matchRate delta>",
+  "stop_condition": "<what proves the cycle succeeded>",
+  "escalation_condition": "<what triggers ESCALATE>"
+}
+```
+
+**After EACH PDCA cycle, record:**
+```json
+{
+  "new_evidence_produced": true|false,
+  "score_delta": <±N>,
+  "fixed": true|false,
+  "continue": true|false,
+  "reason": "<why continue or stop>"
+}
+```
+
+**Hard stop rules (enforced at runtime):**
+1. **No new evidence → STOP.** If a cycle produces zero new evidence (same gaps, same scores, no file changes), do NOT proceed to next cycle. ESCALATE.
+2. **Same gate fails twice → ESCALATE.** If the same gate (e.g., M1) fails on two consecutive cycles with the same root cause, stop the cheap loop and escalate to stronger model / adversarial review / user input.
+3. **No improvement near budget limit → ESCALATE or ask user.** If matchRate < 90% and PDCA cycles are at 80% of max, do not burn the last cycle — escalate.
+4. **Scope creep detected → STOP.** If D2 flags a gap that requires scope change (not just implementation fix), stop PDCA and return to planner.
+
+**Evidence chain**: Each cycle's `before` record links to the previous cycle's `after` record. Broken chain → invalid PDCA.
+
+---
+
+## Phase 3 — Verification (3 PARALLEL task SUBAGENTS)
+
 ---
 
 ## Phase 3 — Verification (3 PARALLEL task SUBAGENTS)
