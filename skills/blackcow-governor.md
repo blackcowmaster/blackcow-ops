@@ -104,6 +104,8 @@ Produce `.omo/governor/<slug>-governance.md`:
 | Same gap 3+ fixes | Same gap has 3+ failed PDCA fix attempts | ESCALATE — question architecture (pattern: each fix reveals new coupling) |
 | Budget near limit | 80% of max cycles | ESCALATE |
 | Scope creep | D2 flags scope change | Return to planner |
+| Trust level override | Downstream skill overrides governor's Trust Level (any direction) | ESCALATE — trust decisions are governor's authority; downstream MAY tighten (lower Trust) but MUST justify with evidence and flag for review |
+| Plan overrides mode/gates | Plan changes governor's mode or gate subset without documented justification | ESCALATE — mode/gate authority belongs to governor |
 
 ## Failure-Pattern Feed
 

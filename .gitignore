@@ -14,3 +14,19 @@ eco-out.txt
 
 # Reasonix runtime artifacts (session-specific)
 .reasonix/truncated-results/
+
+# Dependencies and build artifacts
+node_modules/
+coverage/
+.env
+.eslintrc.json
+.prettierrc
+jest.config.ts
+package-lock.json
+package.json
+tsconfig.json
+
+# Simulation artifacts (generated source code, not part of the tool)
+src/
+__tests__/
+db/

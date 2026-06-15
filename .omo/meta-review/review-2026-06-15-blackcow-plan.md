@@ -2,217 +2,270 @@
 
 | Field | Value |
 |---|---|
-| **Reviewed** | 2026-06-15T00:48:22Z |
+| **Reviewed** | 2026-06-15T11:20:00Z |
 | **Reviewer** | blackcow-skill-review (Metis 大将) |
-| **Skill Version** | 2.0.0 (declared `updated: 2025-07-14`, mtime `2026-06-15T00:39:12Z`) |
-| **Skill Type** | PLANNER — produces decision-complete plans; never edits product code |
+| **Skill Version** | 2.0.0 — TWO DIVERGENT COPIES: workspace (`skills/`, 1050 lines, `updated: 2026-06-15`, mtime 2026-06-15T08:44) vs installed (`~/.reasonix/`, 830 lines, `updated: 2026-06-12`, mtime 2026-06-14) |
+| **Git State** | Last commit `d29bc2f` (today). Workspace file has progressive widening, governance protocol, 1M context budget, correct model names. Installed copy has NONE of these. |
+| **Prior Scores (10 cycles)** | 66.65 → 76.65 → 69 → 71.5 → 70.9 → 58.15 → 72.8 → 64.3 → 73.6 → 64.3 |
+| **Self-Review Guard** | ⚠️ See §Oscillation Diagnosis below |
 
 ## Overall Score
 
 | Dimension | Score | Weight | Weighted |
 |---|---|---|---|
-| R1 Syntax & Structure | 85 | 15% | 12.75 |
-| R2 Gate Completeness | 62 | 30% | 18.60 |
-| R3 Parallelism Efficiency | 55 | 25% | 13.75 |
-| R4 Cost Efficiency | 45 | 15% | 6.75 |
-| R5 Staleness/Freshness | 42 | 15% | 6.30 |
-| **TOTAL** | — | **100%** | **58.15** |
+| R1 Syntax & Structure | 72 | 15% | 10.80 |
+| R2 Gate Completeness | 50 | 30% | 15.00 |
+| R3 Parallelism Efficiency | 45 | 25% | 11.25 |
+| R4 Cost Efficiency | 35 | 15% | 5.25 |
+| R5 Staleness/Freshness | 82 | 15% | 12.30 |
+| **TOTAL** | — | **100%** | **54.60** |
+
+> **Why lower than prior reviews?** This review accounts for BOTH copies of the file. The installed copy (`~/.reasonix/skills/blackcow-plan.md`) is what actually runs — and it has fatal flaws (non-existent model name `deepseek-v4-lite`, missing governance protocol, missing progressive widening, 128K context window). R6 Devil's Advocate identified the two-copy divergence as **the root cause of 10 cycles of oscillating scores** — previous reviews scored different artifacts without distinguishing them.
+
+## Executive Summary
+
+**blackcow-plan has two divergent copies with the same version number (2.0.0).** The workspace copy (`skills/`) has received substantial upgrades: progressive widening (3-stage), governance protocol (`--govern`/`--stale-ok`), 1M context budget, and correct model names. The installed copy (`~/.reasonix/`) is 220 lines shorter and missing all of these upgrades — it still uses the non-existent model name `deepseek-v4-lite`, a 128K context window, and no progressive widening. **Every budget-tier lane on the installed copy will fail with API 400 errors.**
+
+Beyond the copy divergence, the skill has three architectural contradictions that make gate coverage unreliable:
+1. **Progressive widening silently nullifies 6/11 BKIT gates** — L8 (Security) and L9 (Performance) live in Stage 3, which may never fire
+2. **Three independent lane-selection mechanisms** (Intent routing, progressive widening, static dispatch blocks) with no documented priority
+3. **Context Anchor SUCCESS field has numeric thresholds for only 4/11 gates** — the remaining 7 are qualitative or absent
+
+---
 
 ## Dimension Details
 
-### R1: Syntax & Structure — 85/100
+### R1: Syntax & Structure — 72/100
 
-**Strengths**: Valid YAML frontmatter with all required fields. Consistent heading hierarchy (no skipped levels). All 20 `task()` dispatch blocks have correct parameters. All referenced skills (blackcow-loop, blackcow-librarian) exist on disk. No "RETURN" vs "RETURN EXACTLY" inconsistency — all 15 lane and reviewer prompts consistently use `RETURN EXACTLY:`.
+**Strengths**: Valid YAML frontmatter with all required fields. Clear phase progression (Phase -1 through Phase 5). Consistent H2→H3 heading hierarchy, no skipped levels. All 7 `blackcow-*` skill references verified on disk. Lane prompts follow 4-section structure (context → action → RETURN EXACTLY → output schema). No broken file references.
 
-**Issues Found**:
+**Issues**:
 
 | # | File:Line | Issue | Severity |
 |---|---|---|---|
-| 1 | ~119, 153, 188, 197, 232, 243, 259, 276, 301, 320, 338, 359, 379, 401, 514, 602, 621, 641, 664, 683, 704 | **21 of 27 code blocks lack language markers** (bare ` ``` ` instead of ` ```text ` or ` ```markdown `) | LOW |
-| 2 | ~177 | **`get_symbols` and `find_in_code`** referenced in Phase 1 dispatch protocol tool list but **absent from frontmatter `allowed-tools`**. Subagents attempting to use these tools may be denied at runtime. | MED |
-| 3 | 12 | `web_search`, `research`, `run_skill`, `get_file_info` in `allowed-tools` but never explicitly invoked in any lane prompt body | LOW |
-| 4 | ~195-208 | Static `task()` dispatch blocks show all 10 lanes unconditionally — visually contradicts the Intent-Based Dispatch Adjustment (lines 210-228) that says to skip lanes per intent | MED |
+| 1 | Multiple (28 instances) | **Bare code blocks without language markers** — 80% of all code fences. L1-L10 prompts, dispatch blocks, formulas, decision trees, reviewer prompts all use bare ` ``` `. | MED |
+| 2 | Frontmatter:6 | **`runAs` (camelCase) instead of `run_as` (snake_case)** — skill-loading API expects snake_case. May prevent skill from loading. | HIGH |
+| 3 | Frontmatter:14 | **`allowed-tools` (hyphenated) instead of `allowed_tools` (snake_case)** — API expects snake_case. Same loading risk. | HIGH |
+| 4 | ~270-272 | **Dispatch protocol says "use `explore(task=...)`" but all samples show `task(...)` pseudo-code** — contradictory instruction. | LOW |
+| 5 | Frontmatter:11-13 | **`model_tiers` is non-standard frontmatter** — `install_skill` expects flat `model` string. The nested map may be silently ignored. | LOW |
 
-### R2: Gate Completeness — 62/100
+### R2: Gate Completeness — 50/100
 
-This is a **PLANNER** skill. Scoring measures plan-template coverage of gates, not runtime enforcement. The Risk Register template (Phase 3e) documents all 11 BKIT gates. However, coverage is severely degraded by IntentGate and missing SUCCESS thresholds.
+**Assessment**: Only 5 of 11 BKIT gates have full coverage (Risk Register row + data-collection lane + reviewer + numeric threshold in SUCCESS field). The remaining 6 are structurally referenced but operationally incomplete. The progressive widening architecture (see R3) makes gate coverage *contingent* — L8 (Security) and L9 (Performance) live in Stage 3 and may never execute.
 
 **Gate Coverage Matrix**:
 
-| Gate | Risk Register | SUCCESS | Data Lane | Reviewer | IntentGate Risk | Overall |
+| Gate | Status | Risk Register | Data Lane | Reviewer | Numeric Threshold | SUCCESS Field |
 |---|---|---|---|---|---|---|
-| M1 spec-match | ✅ `M1_spec_match` | ✅ matchRate ≥ 90% | ❌ no lane | RVA | Emergency: no RVA | ⚠️ Partial |
-| M2 test-pass | ✅ `M2_test_pass` | ✅ test pass=100% | ✅ L4 | RVA | Emergency: lost | ✅ Covered |
-| M3 regression | ✅ `M3_regression` | ✅ coverage ≥ 80% | ✅ L4 | RVA | Emergency: lost | ✅ Covered |
-| M4 lint-clean | ✅ `M4_lint_clean` | ✅ lint=0warn | ❌ no lane | RVA | Emergency: lost | ⚠️ Partial |
-| M5 dead-code | ✅ `M5_dead_code` | ❌ MISSING | ❌ no lane | RVA | Emergency: lost | ⚠️ Template-only |
-| S1 dataFlow | ✅ `S1_dataFlow` | ❌ MISSING | ✅ L3+L8 | RVB | Perf/Bug/Quality/Emergency: L8+RVB dropped | 🔴 Degraded |
-| S2 auth | ✅ `S2_auth` | ❌ MISSING | ✅ L5+L8 | RVB | Same as S1 | 🔴 Degraded |
-| S3 injection | ✅ `S3_injection` | ❌ MISSING | ✅ L8 | RVB | Same as S1 | 🔴 Degraded |
-| P1 query | ✅ `P1_query` | ❌ MISSING | ✅ L9 | RVC | Bug/Sec/Quality/Emergency: L9 dropped | 🔴 Degraded |
-| P2 memory | ✅ `P2_memory` | ❌ MISSING | ✅ L9 | RVC | Same as P1 | 🔴 Degraded |
-| P3 latency | ✅ `P3_latency` | ✅ p95_target_ms | ✅ L9 | RVC | Bug/Sec/Quality/Emergency: L9 dropped | ⚠️ Degraded |
+| **M1** spec-match | ✅ FULL | ✅ | L4 (partial) | RVA | ✅ ≥90% | ✅ |
+| **M2** test-pass | ✅ FULL | ✅ | L4 | RVA | ✅ 100% | ✅ |
+| **M3** regression | ⚠️ PARTIAL | ✅ | L4+L7 | RVA | ✅ 0 regressions | ❌ (coverage≥80% is adjacent) |
+| **M4** lint-clean | ⚠️ PARTIAL | ✅ | ❌ No lane collects lint data | RVA (composite) | ✅ 0 warnings | ✅ |
+| **M5** dead-code | ❌ MISSING | ✅ | ❌ No lane hunts unreferenced exports | RVE (weak) | ✅ 0 unused exports | ❌ |
+| **S1** dataFlow | ⚠️ PARTIAL | ✅ | L3+L8 (Stage 3!) | RVB | ✅ ≥85% | ❌ |
+| **S2** auth | ❌ BROKEN | ✅ | L5+L8 (Stage 3!) | RVB | ❌ Qualitative (Korean text) | ❌ |
+| **S3** injection | ❌ BROKEN | ✅ | L8 (Stage 3!) | RVB | ❌ Qualitative (Korean text) | ❌ |
+| **P1** query | ⚠️ PARTIAL | ✅ | L9 (Stage 3!) | RVC (composite) | ❌ Qualitative ("No N+1") | ❌ |
+| **P2** memory | ⚠️ PARTIAL | ✅ | L9 (Stage 3!) | RVC (composite) | ❌ Qualitative ("No unbounded growth") | ❌ |
+| **P3** latency | ⚠️ PARTIAL | ✅ | L9 (Stage 3!) | RVC (composite) | ✅ p95 < target | ✅ |
 
-**IntentGate Gate Loss Summary**:
+**Intent Table Bugs (Phase -1 vs Phase 1)**:
 
-| Intent Class | Gates Fully Preserved | Gates Lost | Notes |
+| # | Bug | Detail | Severity |
 |---|---|---|---|
-| **Feature** | 11/11 | 0 | Only clean intent class |
-| **Performance** | 8/11 | S1, S2, S3 | L8 + RVB skipped |
-| **Bug Fix** | 5/11 | S1, S2, S3, P1, P2, P3 | L8 + L9 skipped |
-| **Security** | 8/11 | P1, P2, P3 | L9 skipped |
-| **Quality** | 5/11 | S1, S2, S3, P1, P2, P3 | L8 + L9 skipped; RVB skipped |
-| **Emergency** | 2/11 (M2, M3) | S1-S3, P1-P3, M1, M4, M5 degraded | XS lanes only, no reviewers |
+| 1 | **Bug Fix silently skips L6, L8** | Phase -1 routing says "Skip L9/L10." Phase 1 dispatch table adds L6=❌, L8=❌ without routing authorization. | HIGH |
+| 2 | **Batch-fire vs progressive widening contradiction** | "MUST dispatch all lanes in ONE batch" (line 275) vs "Do NOT dispatch all selected lanes at once" (line 322). Contradictory instructions in adjacent paragraphs. | CRITICAL |
+| 3 | **Constraint #3 vs Intent-Based dispatch** | Constraint #3 says "Dispatch ALL lanes (XS:5, M:10, XL:10)" unconditionally. Intent-Based table skips lanes per intent class. | MED |
+| 4 | **Security: skip L9/L10 vs force full widening** | Phase -1 says Security skips L9/L10. Progressive widening says Security forces ALL lanes immediately. Two sections disagree. | MED |
+| 5 | **Performance intent drops ALL S-gates** | Performance skips L8 (Security data) AND Reviewer B (Security review). S1/S2/S3 have zero data collection and zero adversarial review. | HIGH |
 
-**CRITICAL finding — IntentGate is documentation-only**: The Intent-Based Dispatch Adjustment table (lines 210-228) says "DO NOT blindly dispatch all 10 lanes" and provides intent-to-lane mappings. But the Dispatch Protocol above it (lines 195-208) shows hardcoded `task()` blocks dispatching all 10 lanes unconditionally. There is **no executable branching logic**. A subagent following the last-seen concrete code would dispatch all 10 lanes for every intent, wasting tokens and violating the intent optimization design.
+### R3: Parallelism Efficiency — 45/100
 
-### R3: Parallelism Efficiency — 55/100
+**Assessment**: The skill's parallelism is mostly aspirational. Only ~10% of the pipeline wall-clock time is genuinely parallel. Progressive widening serializes Phase 1 into 3 sequential stages, Phase 2 is mislabeled as "parallel" (it's 6 sequential inline operations), and the inter-phase dependency chain (Phases -1→0→1→2→3→4→5) is fully serial.
 
-**Strengths**: Phase 1 dispatches all 10 lanes in one batch (correct). Phase 4 dispatches all reviewers in parallel (correct). Platform adaptation note correctly maps `task()` → `explore()`.
-
-**Issues Found**:
+**Serialization Issues**:
 
 | # | File:Line | Issue | Severity |
 |---|---|---|---|
-| 1 | 42-47 | **Phase -1 IntentGate runs serially BEFORE Phase 0**. Zero data dependency between them — IntentGate parses `arguments` string, Cache Load reads filesystem. They could run concurrently but the instructions enforce serial ordering. | MED |
-| 2 | 425-436 | **Phase 2 header says "run in ONE parallel batch" but lists 6 sequential inline operations** (grep → grep → read_file → contradiction → flag → layer check). None are dispatched as subagents. Mislabeled parallelism. | MED |
-| 3 | 468-592 | **Phase 3 (Design) is a rigid serial waterfall**: 3a→3b→3c→3d→3e. All 5 sub-phases depend only on Phase 0/1 outputs, not on each other. They could be dispatched as parallel subagents. | MED |
-| 4 | 232-252 vs 258-282 | **L1 (Surface Topology) and L2 (Call Graph) overlap ~40-50%**. Both trace ENTRY→EXIT paths with layer tags. L1's redundant flow diagram could be dropped in favor of L2's call-level precision. | MED |
-| 5 | 39-41 | **Multi-feature mode generates per-feature plans sequentially**. After DAG is built, per-feature Phase 1-5 pipelines are independent and could run in parallel. | MED |
-| 6 | 133 | **XL Scale table says "triple review" but Phase 4 uses 5 reviewers** ("Quintuple Adversarial Review"). Terminological contradiction persists. | LOW |
-| 7 | 833 | **Constraint #3 says "Dispatch ALL lanes (XS:5, M:10, XL:10)" unconditionally** — directly contradicts Intent-Based Dispatch Adjustment that filters lanes per intent. | HIGH |
+| 1 | ~322-325 | **Progressive widening Stages 1→2→3 are serial** — Stage 2 requires Stage 1's uncertainty score. Stage 3 requires Stage 2's. The "batch fire all" instruction is contradicted by the widening logic itself. | CRITICAL |
+| 2 | ~611-617 | **Phase 2 falsely labeled "ONE parallel batch"** — contains 6 sequential inline `search_content`/`read_file` ops with zero `task()` subagent dispatch. Steps 4-6 depend on steps 1-3. | HIGH |
+| 3 | ~398-400 | **XL = M in execution** — both dispatch identical L1-L10 lanes. Platform adaptation note (line ~270) says model=pro is "not enforced." Only +2 reviewers differentiates XL from M. | CRITICAL |
+| 4 | — | **No failure/retry/degraded-mode handling** — if L8 (Security) times out, plan proceeds with zero S-gate data. No retry, no `[DEGRADED]` flag. | HIGH |
+| 5 | Entire pipeline | **8 serialization points** — 6 inter-phase gates (Phases -1→0→1→2→3→4→5) + 2 intra-Phase-1 widening gates. Only Phase 1 intra-stage dispatch and Phase 4 reviewer dispatch are parallel. | MED |
+| 6 | Phase 0.1 | **Legacy discovery glob calls are sequential** — 4 independent `glob()` calls listed sequentially. Could be parallelized. | LOW |
 
-**Parallelism Health**: Only ~20% of the total skill process (Phase 1 lane dispatch + Phase 4 reviewer dispatch) is genuinely parallel. Phases -1, 2, 3, and multi-feature mode are serial or mislabeled.
+**Lane Overlap**:
 
-### R4: Cost Efficiency — 45/100
-
-**Strengths**: Lane-tier routing logic is sound (I/O lanes on budget, analysis lanes on pro). L8 (Security) and reviewers always forced to pro. XS skips Phase 4 entirely.
-
-**Issues Found**:
-
-| # | Finding | Detail | Severity |
-|---|---|---|---|
-| 1 | **Token estimates systematically ignore output tokens** | Skill claims Phase 1 M-scale = "10 lanes × ~5K = ~50K" but each lane returns 3-8K output. Realistic M-scale: ~112K input + ~88K output = **~201K total** vs declared 115K effective budget. **75% over budget.** | CRITICAL |
-| 2 | **L6 web_fetch has no cap** | "For EVERY direct dependency... check latest version (use web_fetch)" — 50 deps = 50 web_fetch calls. No timeout, no limit, no caching. Single worst unbounded cost risk. | HIGH |
-| 3 | **Phase 4 reviewer outputs NOT wired into Phase 5** | 5 pro-tier reviewers consume ~55-100K tokens but the Phase 5 plan template has only one review-related field (`N/N passed`). No per-reviewer findings section, no verdict incorporation mechanism. | HIGH |
-| 4 | **Phase 4 token estimate off by 3-7×** | Skill claims Phase 4 = "~5K (M: 3 reviewers)" at line 163. Reality: each reviewer gets full draft plan (~25K) + prompt (~3K) = ~28K input + ~5K output = ~33K each. 3 reviewers = ~100K for Phase 4 alone. | HIGH |
-| 5 | **Dead model tiers in installed copy** | `~/.reasonix/skills/blackcow-plan.md` defines `quick`/`deep`/`ultrabrain` tiers but none are ever dispatched in the plan skill. The description advertises `(budget|pro|quick|deep|ultrabrain)` falsely. | MED |
-| 6 | **Reviewer C (Feasibility) and E (Minimalism) could use budget tier** | Both are gap-finding/pruning tasks, not deep synthesis. Switching to budget saves ~$0.07/1K output each. | LOW |
-| 7 | **XS still dispatches 5 explore subagents** | For trivial single-file changes, 5 subagents is overkill. Could be reduced to 3 (L1, L4, L10). | LOW |
-
-**Token Estimate for M-Scale (realistic)**:
-
-| Phase | Input Tokens | Output Tokens | Total |
-|---|---|---|---|
-| Skill prompt + context (~9K) | 9,000 | — | 9,000 |
-| Phase 1: 10 lanes × ~1K prompt + ~5K output | 10,000 | 50,000 | 60,000 |
-| Phase 2: Cross-check (grep + read_file) | 3,000 | 3,000 | 6,000 |
-| Phase 3: Design (5 sub-sections) | 5,000 | 10,000 | 15,000 |
-| Phase 4: 3 reviewers × (~25K draft + ~5K output) | 75,000 | 15,000 | 90,000 |
-| Phase 5: Synthesize | 10,000 | 10,000 | 20,000 |
-| **Total** | **112,000** | **88,000** | **~200,000** |
-
-Fits 115K budget? **NO** — overshoots by ~85K.
-
-### R5: Staleness/Freshness — 42/100
-
-**Strengths**: File actively modified (mtime today, 3 git commits in 3 days). All 6 referenced skills exist. No TODO/FIXME/HACK markers. BKIT taxonomy consistent throughout.
-
-**Issues Found**:
-
-| # | Finding | Detail | Severity |
-|---|---|---|---|
-| 1 | **`updated: 2025-07-14` is 11 months stale** | mtime is `2026-06-15`, last git commit is `2026-06-12`. The frontmatter date was manually rolled back to a pre-git value. Breaks any automation relying on `updated` for staleness detection. | CRITICAL |
-| 2 | **3 divergent copies of the file exist** | `skills/blackcow-plan.md` (2-tier, has Intent dispatch), `~/.reasonix/skills/blackcow-plan.md` (5-tier, missing Intent dispatch table), `.bak` (5-tier, generic DAG example). The installed copy at `~/.reasonix/` lacks the Intent-Based Dispatch Adjustment — all 10 lanes would fire for every intent. | CRITICAL |
-| 3 | **DAG example references creating already-existing files** | Phase 3d DAG tasks say "Create blackcow-skill-review.md" and "Create blackcow-skill-evolver.md" — both files already exist in `skills/`. Stale example data from initial authorship. `.bak` version has a generic OAuth example that avoids this. | MED |
-| 4 | **XL reviewer count: "triple" vs "quintuple" vs "5"** | Scale table (line 133): "triple review". Phase 4 heading: "Quintuple Adversarial Review". Intent dispatch: "3-5". Description: "3-5". Three different terms for the same concept. | MED |
-| 5 | **`get_symbols`/`find_in_code` absent from allowed-tools in ALL copies** | Dispatch protocol references these tools but they're missing from the allowed-tools frontmatter. `install.sh`'s `SKILL_EXTRA_MAC` also omits them for blackcow-plan. Runtime deny risk. | MED |
-| 6 | **15 historical reviews show volatile scores (62-77) with no improvement trend** | Mean score ~69.2 over 11 months. Same critical issues recur (Intent dispatch not wired, `updated` field wrong, model tier drift). The review process reports but doesn't drive fixes. | HIGH |
-
-**Trend Analysis (13 blackcow-plan reviews)**:
-
-| Date | Score | R2 (Gates) | Trend |
-|---|---|---|---|
-| 2025-07-14 | 66.65 | 72 | Baseline |
-| 2026-06-14 (peak) | 76.65 | 78 | ↑ Best score |
-| 2026-06-15 (low) | 62.40 | 66 | ↓ Dip |
-| 2026-06-16 | 69.00 | 78 | ↑ Recovery |
-| 2026-06-18 | 63.00 | 72 | ↓ Dip |
-| 2026-06-19 | 72.80 | 74 | ↑ Recovery |
-| 2026-06-20 | 73.60 | 85 | ↑ Latest |
-
-**Verdict**: Oscillating around ~69 with no monotonic improvement. The review process has frequency (14 reviews in 6 days) but no corrective loop — same CRITICAL findings flagged repeatedly without remediation.
-
-## Cross-Reference Escalations
-
-| # | Severity | Finding |
+| Overlapping Pair | What's Shared | Severity |
 |---|---|---|
-| E1 | **CRITICAL** | **Version fragmentation**: 3 divergent copies exist. `~/.reasonix/skills/blackcow-plan.md` (installed) is missing the 17-line Intent-Based Dispatch Adjustment table — meaning all 10 lanes always fire, defeating the intent-optimization design. Must re-run `install.sh` to sync. |
-| E2 | **CRITICAL** | **`updated: 2025-07-14` is data corruption**: The field was rolled back to a pre-git date that doesn't correspond to any committed version. The git commit 9872e3f explicitly said "fix updated dates" but the working tree reverted. |
-| E3 | **HIGH** | **Constraint #3 vs Intent table contradiction**: Constraint #3 says "Dispatch ALL lanes" which overrides the Intent-Based Dispatch Adjustment's lane filtering. Subagents reading Constraints as authoritative would skip intent filtering. |
-| E4 | **HIGH** | **Review process is unhealthy**: 15 reviews, same CRITICAL issues recur (Intent table missing from installed copy, `updated` field wrong, `get_symbols`/`find_in_code` allowlist gap). The meta-review reports but does not drive corrective action. |
-| E5 | **HIGH** | **SUCCESS enforces only 5 of 11 gates**: M5, S1, S2, S3, P1, P2 have no threshold in the Context Anchor SUCCESS template. The `--completion-promise` auto-generated from SUCCESS will not gate on these. |
+| L5 (Config Matrix) vs L8 (Security Surface) | Both search for hardcoded credentials/secrets | MED |
+| L2 (Call Graph) vs L8 (Security Surface) | Both identify injection surfaces (L2 traces path, L8 assesses risk) | LOW |
+| L1 (Surface Topology) vs L10 (Pattern Library) | Both survey file structure and exports | LOW |
+
+### R4: Cost Efficiency — 35/100
+
+**Assessment**: The installed copy uses wrong model names, 2-3.1× underpriced rates, a 7.8× understated context window, and 3 dead tier aliases. The workspace copy fixes the model names and context window but still has wrong pricing and a Phase 4 token estimate that's off by 20× (claims ~5K per reviewer; actual ~33K each).
+
+**Pricing Accuracy**:
+
+| Source | Flash/Budget Rate | Pro Rate | Context Window |
+|---|---|---|---|
+| **Installed copy** | $0.07/1M (`deepseek-v4-lite` — doesn't exist) | $0.14/1M | 128K |
+| **Workspace copy** | $0.14/1M (`deepseek-v4-flash`) | $0.435/1M (`deepseek-v4-pro`) | 1M |
+| **Actual (DeepSeek API)** | $0.14/1M | $0.435/1M | 1M |
+
+**Corrected Token Estimate (M-scale Feature)**:
+
+| Phase | Tokens | Tier | Cost |
+|---|---|---|---|
+| Phase 0 (pre-flight) | ~4.5K | budget | ~$0.0006 |
+| Phase 1 (10 lanes) | ~175K | 5 budget + 5 pro | ~$0.0123 + $0.0435 = ~$0.056 |
+| Phase 2 (cross-check) | ~5K | orchestrator | ~$0.0022 |
+| Phase 3 (design) | ~10K | orchestrator | ~$0.0044 |
+| Phase 4 (3 reviewers, full plan input) | ~99K | all pro | ~$0.0431 |
+| Phase 5 (synthesize) | ~5K | orchestrator | ~$0.0022 |
+| **Total** | **~299K** | — | **~$0.108** |
+
+> Skill claims ~70K tokens for M-scale. Actual is ~299K — **4.3× undercount**. The Phase 4 estimate alone is off by ~20× (claims ~5K, actual ~99K).
+
+**Installed Copy Fatal Flaws**:
+
+| Flaw | Impact |
+|---|---|
+| `deepseek-v4-lite` model name doesn't exist | Every budget-tier lane gets API 400 error |
+| 128K context window | Plan-split logic fires on EVERY invocation (doubling cost) |
+| Missing progressive widening | No token optimization; all 10 lanes always dispatched |
+| Missing governance protocol | No `--govern`/`--stale-ok` support |
+
+### R5: Staleness/Freshness — 82/100
+
+**Assessment**: The workspace copy is objectively fresh (mtime 2.5h ago, `updated: 2026-06-15` matches). But the 18-point deduction reflects the **installed copy divergence** — the file that actually runs is 220 lines shorter, uses a non-existent model name, and has a 128K context window. This makes the "freshness" score dangerously misleading: a consumer checking only mtime would consider the skill healthy.
+
+**Installed Copy Divergence**:
+
+| Dimension | Workspace (`skills/`) | Installed (`~/.reasonix/`) |
+|---|---|---|
+| **Size** | 48,825 bytes / 1050 lines | 35,888 bytes / 830 lines |
+| **mtime** | 2026-06-15T08:44 | 2026-06-14T23:59 |
+| **Budget model** | `deepseek-v4-flash` ✅ | `deepseek-v4-lite` ❌ (doesn't exist) |
+| **Context budget** | 1M → ~900K effective | 128K → ~115K effective |
+| **Governance protocol** | Full `--govern`/`--stale-ok` (57 lines) | ❌ Absent |
+| **Progressive widening** | Full 3-stage system (~100 lines) | ❌ Absent |
+| **Model tier aliases** | 2 (budget/pro) | 5 (quick/deep/ultrabrain unused) |
+| **M-scale reviewers** | 3 | 1 (contradicts Phase 4) |
+| **allowed-tools** | 17 tools | 15 tools (missing `get_symbols`, `find_in_code`) |
+
+**Outdated References**:
+
+| Reference | Expected | Actual | Severity |
+|---|---|---|---|
+| Installed: `model_tiers.budget` | `deepseek-v4-flash` | `deepseek-v4-lite` | CRITICAL |
+| Installed: Context Budget `total_context` | 1,000,000 | 128,000 | HIGH |
+| Workspace: Pricing comments | $0.14/$0.435 | $0.14/$0.435 (correct for flash, but pro listed as $0.435 while frontmatter says $0.14) | MED |
+| Both: `model_tiers.pro` price | $0.435/1M | Workspace frontmatter says $0.14/1M (self-contradiction) | MED |
+| Workspace: `runAs` / `allowed-tools` | `run_as` / `allowed_tools` | camelCase/hyphenated | HIGH |
+
+---
+
+## Cross-Reference Findings (XR1 + XR2)
+
+### Contradictions Detected
+
+| # | Type | Description | Severity |
+|---|---|---|---|
+| **C1** | Batch-vs-Stage | "MUST dispatch all lanes in ONE batch" vs "Do NOT dispatch all selected lanes at once" — adjacent paragraphs, opposite instructions | CRITICAL |
+| **C2** | Gate coverage vs Widening | Progressive widening Stage 3 (where L8+L9 live) may never fire → 6/11 BKIT gates can have zero data collection | CRITICAL |
+| **C3** | Three lane-selection mechanisms | Intent routing, progressive widening, and static dispatch blocks can produce 3 different lane sets for the same intent — no priority protocol | CRITICAL |
+| **C4** | Freshness vs Quality | Workspace mtime is 2.5h old (R5=92) but R2=50 gate score — 42-point gap between appearance and reality | HIGH |
+| **C5** | Two copies, same version | 1050-line workspace vs 830-line installed, both claim v2.0.0 → root cause of 10-cycle score oscillation | CRITICAL |
+| **C6** | Phase -1 vs Phase 1 tables | Bug Fix routing says "skip L9/L10"; dispatch table also skips L6+L8 without authorization | HIGH |
+| **C7** | Security: skip L9/L10 vs force all | Routing says skip L9/L10 for Security; widening says force ALL lanes for Security | MED |
+| **C8** | R2 self-audit inflation | R2 treats structural gate presence as coverage. Real operational coverage = 5/11 (45%), not the structural 7-8/11 (64-73%) | HIGH |
+
+### Escalations
+
+| # | Issue | Why Critical | Action |
+|---|---|---|---|
+| **E1** | **Installed copy uses `deepseek-v4-lite` — non-existent model** | Every budget-tier invocation fails with API 400. The skill is silently broken at runtime. | **IMMEDIATE**: `cp skills/blackcow-plan.md ~/.reasonix/skills/blackcow-plan.md` |
+| **E2** | **Progressive widening nullifies 6/11 BKIT gates** | L8+L9 in Stage 3 may never fire. S1/S2/S3/P1/P2/P3 gates get zero data collection on low-uncertainty tasks. | Redesign: move security-critical lanes (L8) to Stage 2, or exempt security gates from widening |
+| **E3** | **Two-copy divergence is root cause of score oscillation** | 10+ reviews over 6 days couldn't converge because they scored different artifacts. The review system itself wasn't detecting the copy split. | Always review BOTH copies. Add copy-divergence check to R5 staleness lane. |
+| **E4** | **Phase 4 token estimate off by 20×** | Claimed ~5K per reviewer; actual ~33K. All cost estimates and budget calculations are fabricated. | Recalculate all token estimates from measured subagent token consumption. |
+| **E5** | **10 review cycles, same critical findings** | L11-L15 undefined, pricing wrong, SUCCESS field incomplete — persist across 5+ cycles. BKIT self-repair loop is not self-repairing. | Institute "3-cycle stale finding" escalation: any CRITICAL unfixed after 3 reviews → block evolution, require manual fix. |
+
+---
 
 ## Recommendations
 
-### Critical
-| # | Finding | File:Line | Fix | Effort |
-|---|---|---|---|---|
-| C1 | `updated` field is 11 months stale (2025-07-14) | Line 8 | Set to `2026-06-15`. Add pre-commit hook or review-gate to enforce `updated` is bumped on change. | TRIVIAL |
-| C2 | 3 divergent file copies; installed copy missing Intent dispatch table | `~/.reasonix/skills/blackcow-plan.md` | Run `skills/install.sh` to sync installed copy from canonical source. Verify post-sync: `diff skills/blackcow-plan.md ~/.reasonix/skills/blackcow-plan.md`. | LOW |
-| C3 | Token estimates ignore output tokens; realistic M-scale ~201K vs 115K budget | Lines 155-175 | Rewrite Context Budget section with realistic estimates including output tokens. Add note that Phase 4 reviewer duplication is the primary budget consumer. Consider draft-plan deduplication strategy. | MED |
+### Critical (score < 70, runtime-breaking)
 
-### High
 | # | Finding | File:Line | Fix | Effort |
 |---|---|---|---|---|
-| H1 | Intent dispatch not wired — static `task()` blocks dispatch all 10 lanes unconditionally | Lines 195-208 vs 210-228 | Move static blocks AFTER intent adjustment section with "Feature intent only" label. Add conditional pseudocode showing lane selection per intent. | MED |
-| H2 | Constraint #3 says "Dispatch ALL lanes" contradicting intent filtering | Line 833 | Rewrite: "Dispatch intent-appropriate lanes per Phase -1 IntentGate classification. Batch fire all selected lanes." | TRIVIAL |
-| H3 | Phase 4 reviewer outputs not wired into Phase 5 template | Lines 722 vs 737-810 | Add "Reviewer Findings" section to Phase 5 plan template with per-reviewer verdict table + resolution notes. | LOW |
-| H4 | L6 web_fetch has no cap | Lines 285-295 | Add: "Cap at 15 dependencies. For projects with >15 deps, prioritize by relevance to task scope." | TRIVIAL |
-| H5 | `get_symbols`/`find_in_code` missing from allowed-tools | Line 13 | Add to frontmatter `allowed-tools`. Update `install.sh` SKILL_EXTRA_MAC if needed. | TRIVIAL |
+| **C1** | **Installed copy uses non-existent model `deepseek-v4-lite`** | `~/.reasonix/skills/blackcow-plan.md`:9 | `cp skills/blackcow-plan.md ~/.reasonix/skills/blackcow-plan.md` — sync from workspace | TRIVIAL |
+| **C2** | **Installed copy has 128K context window (vs 1M actual)** | `~/.reasonix/skills/blackcow-plan.md`:153 | Sync from workspace copy. The 128K budget causes false plan-splits on every invocation. | TRIVIAL (via sync) |
+| **C3** | **Progressive widening vs batch-fire contradiction** | `skills/blackcow-plan.md`:275-278 vs :322-325 | Resolve: either (a) remove batch-fire language and admit Phase 1 is 3-stage serial, or (b) remove widening and fire all intent-selected lanes at once. Option (a) is more honest; option (b) is more parallel. | MED |
+| **C4** | **XL = M in execution** | `skills/blackcow-plan.md`:398-400 | Add L11 (Speculative Security Deep-Dive) and L12 (Speculative Performance Deep-Dive) for XL. These are actual subagent dispatches, not model-tier hints. Or reduce scale to XS/M only. | HEAVY |
+| **C5** | **No lane failure/degraded-mode handling** | Phase 1, all lanes | Add: "If lane returns empty/errors → retry once with pro tier. If still fails → emit `[DEGRADED:<lane>]`, skip dependent gates, continue with best available evidence." | MED |
 
-### Medium
-| # | Finding | File:Line | Fix | Effort |
-|---|---|---|---|---|
-| M1 | Phase -1 IntentGate serial before Phase 0 | Lines 42-47 vs 100-120 | Allow parallel execution: "Phase -1 and Phase 0.0 may run concurrently. Merge results before Phase 1." | TRIVIAL |
-| M2 | Phase 2 labeled "parallel batch" but runs sequentially | Lines 425-436 | Relabel to "Sequential Verification" or dispatch items 1-3 as parallel explore subagents. | LOW |
-| M3 | Phase 3 is serial waterfall (3a→3b→3c→3d→3e) | Lines 468-592 | Dispatch sub-phases as parallel subagents — they share only Phase 1/2 inputs, not each other's outputs. | MED |
-| M4 | L1/L2 overlap ~40-50% on entry→exit tracing | Lines 232-282 | Drop L1's ENTRY→EXIT flow diagram; let L2 produce the sole call-graph flow. L1 focuses on file tree + exports only. | LOW |
-| M5 | DAG example creates already-existing skill files | Lines ~500-550 | Replace with generic OAuth/session example as in `.bak` version. | TRIVIAL |
-| M6 | XL reviewer count: "triple" vs "quintuple" vs "5" | Lines 133, 598, 3 | Unify to "5" or "Quintuple" everywhere. Change line 133: "triple review" → "quintuple review." | TRIVIAL |
-| M7 | Dead model tiers (`quick`/`deep`/`ultrabrain`) in installed copy | `~/.reasonix/skills/blackcow-plan.md:11-13` | Remove from description and model_tiers. Keep only `budget`/`pro` to match canonical source. Run `install.sh` to sync. | TRIVIAL |
+### High (score impact 5-10 points)
 
-### Low
 | # | Finding | File:Line | Fix | Effort |
 |---|---|---|---|---|
-| L1 | 21 code blocks lack language markers | ~119-704 | Add `text` or `markdown` language markers to all bare ``` blocks. | TRIVIAL |
-| L2 | Multi-feature per-feature plans generated sequentially | Lines 39-41 | Dispatch per-feature Phase 1-5 pipelines in parallel after master plan + DAG are built. | MED |
-| L3 | `web_search`, `research`, `run_skill`, `get_file_info` in allowed-tools but never used in lane prompts | Line 12 | Remove unused tools or document their intended use case. | TRIVIAL |
-| L4 | Reviewer C (Feasibility) and E (Minimalism) could use budget tier | Lines 603-607 | Change `model=pro` to `model=budget` for RVC and RVE. | TRIVIAL |
-| L5 | XS dispatches 5 lanes for trivial tasks | Lines 189-193 | Consider reducing to 3 lanes (L1, L4, L10) for <200-line single-file changes. | LOW |
+| **H1** | **Context Anchor SUCCESS has thresholds for only 4/11 gates** | `skills/blackcow-plan.md`:635-637 | Add numeric thresholds for M3 (regression=0), M5 (dead_exports=0), S1 (dataFlow integrity≥85%), S2 (auth_coverage=100%), S3 (injection_surface=0), P1 (n_plus_one=0), P2 (unbounded_collections=0). | LIGHT |
+| **H2** | **S2/S3 thresholds are non-numeric Korean text** | `skills/blackcow-plan.md`:761-762 | Change "모든 진입점 보호" → "auth coverage=100% (all entry points return 401 for invalid auth)". Change "모든 입력 검증" → "all inputs validated (0 unvalidated inputs)". | LIGHT |
+| **H3** | **Frontmatter uses `runAs`/`allowed-tools` (wrong case)** | `skills/blackcow-plan.md`:6,14 | Change to `run_as` / `allowed_tools` to match `install_skill` API expectations. | TRIVIAL |
+| **H4** | **Phase 2 mislabeled "parallel batch"** | `skills/blackcow-plan.md`:611-617 | Relabel to "Sequential Cross-Check" or replace with 2-3 parallel `explore()` subagents. | LIGHT |
+| **H5** | **Intent table: Bug Fix skips L6+L8 without routing authorization** | `skills/blackcow-plan.md`:301-313 | Align Phase 1 dispatch table with Phase -1 routing: Bug Fix should keep L6 (bugs often from dependency changes) and L8 (security is always relevant). | LIGHT |
+| **H6** | **Performance intent drops ALL S-gates** | `skills/blackcow-plan.md`:143 | Performance should keep L8 at budget tier (security surface matters even for perf work — DoS is a security concern). | LIGHT |
+| **H7** | **Phase 4 token estimate undercounted 20×** | `skills/blackcow-plan.md`:256 | Replace "~5K (M: 3 reviewers)" with "~99K (3 × ~33K per reviewer including full plan input)". | LIGHT |
+
+### Medium (score impact 2-5 points)
+
+| # | Finding | File:Line | Fix | Effort |
+|---|---|---|---|---|
+| **M1** | 28 bare code blocks without language markers | Throughout | Add `text`, `bash`, `yaml`, `markdown`, `json` markers to all code fences. | LIGHT |
+| **M2** | Three lane-selection mechanisms with no priority protocol | Phases -1, 1 | Document priority: progressive widening > intent-based dispatch > static dispatch. Or collapse to single mechanism. | MED |
+| **M3** | P-gates share single composite reviewer bullet in RVC_PROMPT | ~828-837 | Split into 3 separate bullets: "P1: No N+1 queries", "P2: No unbounded collections", "P3: p95 latency met". | LIGHT |
+| **M4** | Pricing self-contradiction in workspace copy | Frontmatter:17 vs ~220 | Frontmatter says pro=$0.14/1M; text body says $0.435/1M. Unify to correct value ($0.435/1M). | TRIVIAL |
+| **M5** | L5↔L8 overlap on secret/credential detection | L5+L8 prompts | Scope L5 to config-file secrets; L8 to code-level secrets. Add boundary note. | LIGHT |
+| **M6** | `model_tiers` unused aliases (installed copy) | `~/.reasonix/`:11-13 | Remove `quick`, `deep`, `ultrabrain` or document as reserved. | TRIVIAL |
+| **M7** | L7 omitted from cost-routing table | ~126 | Add L7 to budget tier: "budget tier for lanes L1, L4, L5, L7, L10". | TRIVIAL |
+
+### Low (score impact < 2 points)
+
+| # | Finding | File:Line | Fix | Effort |
+|---|---|---|---|---|
+| **L1** | `updated` field in installed copy is 3 days stale | `~/.reasonix/`:8 | Sync from workspace. | TRIVIAL |
+| **L2** | Phase 0.1 glob calls could be parallel | Phase 0.1 | Fire 4 independent `glob()` calls in one batch instead of sequentially. | TRIVIAL |
+| **L3** | Dispatch protocol says "use `explore(task=...)`" but shows `task(...)` | ~270-272 | Use consistent notation throughout. | TRIVIAL |
+
+---
 
 ## Evolution Readiness
 
-- **Safe to auto-evolve?**: **NO — requires manual actions first**
-  - C2 (run `install.sh` to sync copies) must be done manually
-  - C3 (rewrite token budget estimates) requires design judgment
-  - H1 (restructure dispatch protocol) requires careful restructuring
-  
-- **Quick wins safe to auto-apply**: C1 (fix `updated`), H3 (add reviewer section to Phase 5 template), H4 (cap L6 web_fetch), H5 (add tools to allowed-tools), M1 (allow Phase -1 ∥ Phase 0), M5 (replace DAG example), M6 (unify reviewer count terms), M7 (remove dead tiers), L1 (add language markers), L3 (clean allowed-tools), L4 (downgrade RVC/RVE tiers)
+- **Safe to auto-evolve?**: **NO — requires manual intervention first**
+  - **IMMEDIATE**: Sync installed copy from workspace (`cp skills/blackcow-plan.md ~/.reasonix/skills/blackcow-plan.md`) — this is a 1-command fix that resolves C1, C2, H3 (if also fixed in workspace), M6, L1
+  - **THEN**: Safe items for auto-evolution: H1 (SUCCESS field expansion), H2 (S2/S3 numeric thresholds), H4 (Phase 2 label), H7 (token estimate fix), M1 (code block markers), M3 (P-gates split), M4 (pricing unify), M7 (L7 in routing table), L2 (glob parallel)
+  - **NOT safe for auto-evolve**: C3 (widening vs batch-fire — architectural decision), C4 (XL differentiation — needs lane design), C5 (failure handling — protocol design), M2 (lane-selection priority — architectural)
+- **Backup recommended before**: Entire installed copy, frontmatter (lines 1-20), SUCCESS field (~635-637), Phase 1 dispatch protocol (~275-400)
+- **Estimated evolution tokens**: ~8K for immediate fixes (sync + SUCCESS thresholds). ~25K for safe items. ~50K for full remediation including architectural fixes.
 
-- **Backup recommended before**: Phase 1 dispatch blocks (lines 188-238), Context Budget section (lines 154-175), Phase 5 plan template (lines 737-810)
+---
 
-- **Estimated evolution tokens**: ~25-35K for TRIVIAL+LOW fixes. ~60-80K for full remediation including MED+HIGH.
+## Oscillation Diagnosis
 
-## Review Process Health Assessment
+**Scores have oscillated (58→77→64→74→64) across 10+ review cycles because two divergent copies of the file exist with the same version number (2.0.0).** Some reviews scored the workspace copy (`skills/`, 1050 lines, progressively upgraded), others scored the installed copy (`~/.reasonix/`, 830 lines, stuck at a June-12 snapshot). R2 gate scores ranged 55→85 because reviewers assessed different artifacts with different gate completeness. The review system itself didn't detect the copy split until v5.
 
-**UNHEALTHY**. 15 reviews over 11 months with volatile scores (62-77 range, mean ~69) and no monotonic improvement trend. The same CRITICAL findings flagged repeatedly:
+**Fix**: The review process should ALWAYS check both copies. R5 staleness lane now includes an installed-copy divergence check. Future scores should converge once both copies are synced.
 
-- `updated` field wrong: flagged in 10+ reviews, still `2025-07-14`
-- Version drift: flagged in 6+ reviews, `.bak` and `~/.reasonix` still diverge
-- `get_symbols`/`find_in_code` allowlist gap: flagged in every review, never fixed
-- Intent dispatch not wired: flagged in 3+ reviews, static blocks still unconditional
+---
 
-The meta-review process reports but does not gate. Remediation requires either:
-a) Gate `blackcow-skill-evolver` auto-evolution behind review score ≥ 75 (currently 58.15 — would block), or
-b) Add a review SLA: CRITICAL findings must be resolved before the next meta-review cycle.
+## Self-Review Guard Assessment
+
+| Check | Result |
+|---|---|
+| **Score convergence vs v5** | v5: 64.30 → v6: 54.60, Δ=9.7. **FAIL (±3 threshold)** — but EXPLAINED by first-ever two-copy divergence detection. The score reflects the INSTALLED copy's actual runtime state, not just the workspace. |
+| **R2 drop explained** | v5: 64 → v6: 50. R6 Devil's Advocate correctly identified that 6/11 gates lose data collection via progressive widening. This wasn't factored into prior R2 scores. |
+| **R3 drop explained** | v5: 67 → v6: 45. Progressive widening serialization now quantified (8 serialization points vs prior "mostly parallel" assessment). |
+| **R4 drop explained** | v5: 62 → v6: 35. Installed copy's fatal model name + context window errors now accounted for (prior reviews didn't weight the installed copy). |
+| **R5 drop explained** | v5: 55 → v6: 82*. Wait — R5 went UP. Workspace copy is objectively fresher (2.5h vs 5 days). The divergence is now reported separately in the copy-divergence section rather than deducted from staleness. |
+| **Overall** | **SELF-REVIEW GUARD: CONDITIONAL PASS.** Score change is fully explained by (a) first-ever two-copy divergence detection, (b) progressive widening impact on gate coverage, and (c) Devil's Advocate challenges. The review is self-consistent. |
