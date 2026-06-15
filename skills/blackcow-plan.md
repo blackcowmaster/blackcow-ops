@@ -245,9 +245,26 @@ Do NOT dispatch all selected lanes at once. Use staged widening to minimize toke
 - Add: L5 (Config), L6 (Deps), L7 (Git), L8 (Security), L9 (Performance), L10 (Patterns)
 - **Stop condition**: All discovery complete
 
+**Uncertainty Scoring Formula** (compute before each stage):
+
+```
+uncertainty_score = (
+  0.25 * (unknown_symbols / total_symbols) +       # symbol coverage gap
+  0.20 * (untraced_call_paths / total_functions) +  # call graph coverage
+  0.20 * (uncovered_test_files / total_files) +      # test coverage
+  0.15 * (stale_dependency_count / total_deps) +     # dependency freshness
+  0.10 * (unchecked_entry_points / total_entries) +  # auth surface gap
+  0.10 * (unprofiled_hotspots / total_hotspots)       # perf surface gap
+)
+
+# Normalize to 0-100
+uncertainty_score = clamp(uncertainty_score * 100, 0, 100)
+```
+
 **Auto-trigger thresholds** (no human decision needed):
-- Stage 1→2: Trigger if ANY of: `files_touched > 3`, `unknown_symbols > 10%`, `no test files found`, `cache stale >7d`
-- Stage 2→3: Trigger if ANY of: `auth_middleware_detected`, `db_queries_detected`, `external_api_calls > 0`, `security_surface_score > 50`
+- Stage 1→2: Trigger if `uncertainty_score > 30` OR ANY of: `files_touched > 3`, `unknown_symbols > 10%`, `no test files found`, `cache stale >7d`
+- Stage 2→3: Trigger if `uncertainty_score > 60` OR ANY of: `auth_middleware_detected`, `db_queries_detected`, `external_api_calls > 0`, `security_surface_score > 50`
+- Stop widening: `uncertainty_score < 15` (sufficient evidence for any task)
 
 **Evidence requirement per stage**: After each stage, record:
 - `remaining_uncertainty`: what is still unknown (quantify: N unknown symbols, M uncovered call paths)

@@ -644,3 +644,16 @@ After appending to `qa-history.jsonl`, check if any gate warrants a failure-patt
 4. All thresholds are numeric.
 5. QA report always written to evidence directory with cost tracking section.
 6. Evidence→memory pipeline (qa-history.jsonl) appended after every QA run.
+
+## Self-Audit Checklist
+
+Before emitting QA report, verify:
+- [ ] Gate selection applied: only relevant gates dispatched (not all 11 unconditionally)
+- [ ] Auto-detect implementation ran: git diff checked for trigger signals
+- [ ] Universal gates (M1/M2/M3) always included
+- [ ] IntentGate integration: Security→force S-gates, Performance→force P-gates
+- [ ] Evidence index loaded from loop completion report (skip passed gates)
+- [ ] Failure-pattern auto-population checked (3+ consecutive fails→create pattern)
+- [ ] All gate scores are numeric (0-100), not "good" or "reasonable"
+- [ ] qa-history.jsonl appended with valid JSON schema
+- [ ] No claimed test pass without actual execution evidence

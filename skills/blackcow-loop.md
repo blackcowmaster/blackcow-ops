@@ -1215,3 +1215,16 @@ All quality gates passed. Emit final status:
 20. Completion report (Phase 8) mandatory before DONE emission (Phase 9).
 21. Security PoC engineers (Phase 5) are MANDATORY when S1/S2/S3 gates report CRITICAL or HIGH findings. Downgrade false positives, escalate confirmed exploits.
 22. Hashline content verification (Phase 0.5): MANDATORY read-before-edit → pre-edit snapshot → verify post-edit → retry once on failure → escalate to PDCA on second failure.
+
+## Self-Audit Checklist
+
+Before emitting DONE, verify:
+- [ ] Mode Selection applied: correct lanes/gates/PDCA budget per mode
+- [ ] Progressive widening followed (Stage 1→2→3 with evidence at each)
+- [ ] Hashline guards passed for every edit (pre-snapshot, post-verify, context intact)
+- [ ] PDCA evidence discipline: before/after records for every cycle
+- [ ] Hard stop rules honored (no new evidence→STOP, same failure×2→ESCALATE)
+- [ ] Observable level selected (O0-O4), evidence captured, residual risk documented
+- [ ] Evidence Compaction Index populated with all gate results
+- [ ] Loop ROI logged to `.omo/memory/loop-roi.jsonl`
+- [ ] No claimed visual/browser verification without actual observation

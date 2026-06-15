@@ -810,3 +810,16 @@ Before each `blackcow-plan` or `blackcow-loop` invocation, check `.omo/memory/fa
 10. **M2 cache correctness verification** (MANDATORY after scan/update): sample 5 random cache entries, verify referenced file exists and LOC matches (`wc -l`). Log spot-check results to `.omo/library/spot-check.jsonl`. Any mismatch → flag in output.
 11. **M5 dead entry pruning** (MANDATORY after scan/update): scan cache for entries whose source files no longer exist on disk. Remove dead entries, write pruned count + file paths to `.omo/library/prune-log.jsonl`.
 12. **M3 structural snapshot** (MANDATORY before/after scan): capture `{file_count, total_loc, symbol_count, entry_points}` before scan. Compare after scan — flag any unexpected decreases (>5%). Write snapshot to `.omo/library/structural-snapshot.json`.
+
+## Self-Audit Checklist
+
+Before completing any command, verify:
+- [ ] Cache integrity: structure-cache.jsonl is valid JSON Lines (every line parses)
+- [ ] HEAD match verified: cached head.sha256 matches current git HEAD
+- [ ] Staleness threshold honored: >7 days triggers update recommendation
+- [ ] AGENTS.md GUARD markers intact: no user content overwritten
+- [ ] Backup created before any AGENTS.md write
+- [ ] Failure-pattern memory: unresolved patterns loaded for governor feed
+- [ ] No phantom file references in cache (all entries resolve to existing files)
+- [ ] M2 spot-check passed: 5 random cache entries verified
+- [ ] M5 pruning completed: dead entries removed
