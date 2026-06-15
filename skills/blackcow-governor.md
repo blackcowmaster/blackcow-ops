@@ -211,3 +211,29 @@ Every skill in the pipeline MUST honor this contract for evidence exchange:
 6. Never claim O2+ observable verification without browser tooling.
 7. Governance decisions are advisory — downstream skills MAY override with justification.
 8. Check skill version consistency: all `blackcow-*` skills should report same `version` in frontmatter. Mismatch → warn.
+
+## Skill Value Assessment (R19-R20)
+
+### blackcow-skill-review
+
+**Current value: LIMITED.** Assessment:
+- ✅ Review history tracking + trend alerts (useful infrastructure)
+- ✅ R5 staleness detection (validates model names, tool references)
+- ❌ Audit lanes hallucinate — MD5 evidence shows actual file ≠ reviewed content
+- ❌ Scores oscillate wildly (58-76 range for same file) — unreliable as quality gate
+- **Recommendation**: Keep for trend tracking only. Do NOT use as score gate. Governor + self-audit checklists provide more reliable self-review.
+
+### blackcow-skill-evolver
+
+**Current value: PARTIAL.** Assessment:
+- ✅ Triple safety gates (scope-lock, backup, approve, validate) — independently valuable
+- ✅ Auto-revert on regression — good safety net
+- ❌ Depends on skill-review reports for input — compromised by review hallucination
+- ❌ `task()` dispatch incompatible with current platform
+- **Recommendation**: Extract safety mechanisms (backup/validate/rollback) into governor. Evolver needs input source migration (review reports → governor score-loop decisions).
+
+### Migration Path
+1. Governor absorbs evolver's safety gates (backup before edit, validate after, rollback on regression)
+2. Self-audit checklists replace skill-review as the primary self-review mechanism
+3. Review history tracking stays in skill-review for trend analysis only
+4. Evolver's edit-application logic becomes governor's `--approve` mode
