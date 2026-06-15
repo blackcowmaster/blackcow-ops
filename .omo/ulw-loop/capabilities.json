@@ -1,1 +1,1 @@
-{"browser_available": false, "max_o_level": "O2", "tools": ["curl", "run_command", "shell"], "bash_version": "5.2", "os": "macOS"}
+{"browser_available": true, "max_o_level": "O4", "tools": ["curl", "run_command", "shell", "puppeteer_navigate", "puppeteer_screenshot", "puppeteer_click", "puppeteer_fill", "puppeteer_evaluate"], "bash_version": "5.2", "os": "macOS"}
