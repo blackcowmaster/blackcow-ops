@@ -77,26 +77,30 @@ MAC_TOOLS="search_content, search_files, list_directory, directory_tree, run_com
 declare -A SKILL_EXTRA_WIN
 declare -A SKILL_EXTRA_MAC
 
-SKILL_EXTRA_WIN["blackcow-plan.md"]="explore, research, lsp_definition, lsp_diagnostics, lsp_hover, lsp_references"
-SKILL_EXTRA_MAC["blackcow-plan.md"]="explore, research, run_skill, get_file_info"
+# ── FP-001/FP-002/FP-003/FP-004 auto-fix: remove lsp_* legacy tools,
+#     remove redundant tools already in MAC_TOOLS base,
+#     add get_symbols + find_in_code for dispatch protocol ──
 
-SKILL_EXTRA_WIN["blackcow-loop.md"]="explore, research, lsp_definition, lsp_diagnostics, lsp_hover, lsp_references"
-SKILL_EXTRA_MAC["blackcow-loop.md"]="explore, research, run_skill, get_file_info, get_symbols, find_in_code"
+SKILL_EXTRA_WIN["blackcow-plan.md"]="explore, research"
+SKILL_EXTRA_MAC["blackcow-plan.md"]="get_symbols, find_in_code"
 
-SKILL_EXTRA_WIN["blackcow-qa.md"]="explore, research, lsp_definition, lsp_diagnostics, lsp_hover, lsp_references"
-SKILL_EXTRA_MAC["blackcow-qa.md"]="explore, research, run_skill, get_file_info, get_symbols, find_in_code"
+SKILL_EXTRA_WIN["blackcow-loop.md"]="explore, research"
+SKILL_EXTRA_MAC["blackcow-loop.md"]="get_symbols, find_in_code"
 
-SKILL_EXTRA_WIN["blackcow-librarian.md"]="lsp_definition, lsp_references, lsp_hover"
-SKILL_EXTRA_MAC["blackcow-librarian.md"]="explore, run_skill, get_file_info"
+SKILL_EXTRA_WIN["blackcow-qa.md"]="explore, research"
+SKILL_EXTRA_MAC["blackcow-qa.md"]="get_symbols, find_in_code"
+
+SKILL_EXTRA_WIN["blackcow-librarian.md"]=""
+SKILL_EXTRA_MAC["blackcow-librarian.md"]=""
 
 SKILL_EXTRA_WIN["blackcow-skill-review.md"]=""
-SKILL_EXTRA_MAC["blackcow-skill-review.md"]="explore, run_skill, get_file_info"
+SKILL_EXTRA_MAC["blackcow-skill-review.md"]=""
 
 SKILL_EXTRA_WIN["blackcow-skill-evolver.md"]=""
-SKILL_EXTRA_MAC["blackcow-skill-evolver.md"]="explore, run_skill, get_file_info"
+SKILL_EXTRA_MAC["blackcow-skill-evolver.md"]=""
 
 SKILL_EXTRA_WIN["blackcow-governor.md"]="explore, research"
-SKILL_EXTRA_MAC["blackcow-governor.md"]="explore, research, run_skill, get_file_info"
+SKILL_EXTRA_MAC["blackcow-governor.md"]=""
 
 # =============================================================================
 # Install

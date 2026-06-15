@@ -285,6 +285,32 @@ Append summary row to `.omo/meta-review/review-history.jsonl`:
 
 ---
 
+## Integration Contract
+
+### blackcow-governor reads:
+- `.omo/meta-review/review-history.jsonl` for trend alerts that trigger governor re-evaluation
+- Review scores inform Skill Value Assessment decisions
+
+### blackcow-plan reads:
+- Review scores for plan skill quality assessment
+- R5 staleness detection validates plan model names and tool references
+
+### blackcow-loop reads:
+- Review scores for loop skill quality assessment
+- R3 parallelism efficiency audit validates loop dispatch patterns
+
+### blackcow-qa reads:
+- Review scores for qa skill quality assessment
+- R2 gate completeness audit validates qa 11-gate coverage
+
+### blackcow-librarian reads:
+- Review scores for librarian skill quality assessment
+- R5 staleness detection validates librarian cache freshness logic
+
+### blackcow-skill-evolver reads:
+- `.omo/meta-review/review-*.md` reports as input for automated skill evolution
+- Review scores and recommendations drive evolution decisions
+
 ## Stop Rules
 - All 6 review lanes returned → DONE
 - Skill file not found → report and stop

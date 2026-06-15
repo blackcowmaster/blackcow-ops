@@ -673,6 +673,32 @@ After appending to `qa-history.jsonl`, check if any gate warrants a failure-patt
 **Governor feed**: Before each `blackcow-plan` run, the librarian loads unresolved failure patterns and feeds them into IntentGate for priority escalation.
 
 ---
+## Integration Contract
+
+### blackcow-governor reads:
+- `.omo/memory/qa-history.jsonl` for failure-pattern auto-population and governance trend analysis
+- Gate scores inform subsequent governance decisions
+
+### blackcow-plan reads:
+- QA gate scores inform plan quality assessment and IntentGate override decisions
+- Plan detected intent feeds back into qa conditional gate auto-detection
+
+### blackcow-loop reads:
+- `.omo/ulw-loop/completion-report.md` Evidence Compaction Index for skipping already-passed gates
+- `.omo/ulw-loop/evidence/*-l2-baseline.txt` for M3 regression baseline comparison
+
+### blackcow-librarian reads:
+- `.omo/memory/qa-history.jsonl` for failure-pattern auto-population and trend analysis
+- `.omo/library/structure-cache.jsonl` is consumed by qa for Phase 0 discovery skip
+
+### blackcow-skill-review reads:
+- QA gate scores and qa-history.jsonl for skill quality trend tracking
+- Gate evaluation completeness evidence for review R2 (Gate Completeness Audit)
+
+### blackcow-skill-evolver reads:
+- QA gate scores as input for automated skill evolution decisions
+- qa-history.jsonl trend data for evolution regression detection
+
 
 ## Stop Rules
 - All 11 gates evaluated → DONE

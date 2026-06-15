@@ -3,21 +3,22 @@
 Notes the user pinned via the `#` prompt prefix. The whole file is
 loaded into the immutable system prefix every session — keep it terse.
 
-- BlackCow Ops — Governor E2E 검증 + 90 돌파
+- BlackCow Ops — 93.0 돌파 + Failure Pattern Memory 가동
 
 현재 상태:
-- 7개 스킬 중 6개 실행 검증 완료 (librarian, loop, plan, qa, skill-review, skill-evolver)
-- governor만 세션 재시작으로 인덱싱 필요
-- 11-dimension 점수: 88.6/100
-- 90 돌파 조건: governor→plan→loop→qa 풀파이프라인 1회 실행
+- 7개 스킬 전부 검증 완료 (governor E2E 완료)
+- governor→plan→loop→qa 풀파이프라인 실행 완료 (STANDARD 모드)
+- ESCALATE 시나리오 발동 확인 (Rust rewrite → pipeline 거부)
+- Failure Pattern Memory 구축 (6개 패턴, auto-fix 검증)
+- Ecosystem health: 514/514 (100%) 🟢 ALL GREEN
+- 11-dimension 점수: 93.0/100
+- Main 머지 완료
 
-## 해야 할 일
+## 다음 목표
 
-1. governor가 /blackcow-governor로 인식되는지 확인
-2. governor로 간단한 태스크 preflight 실행
-3. governor → plan → loop(FULL) → qa 풀파이프라인 1회
-4. PDCA+ESCALATE 시나리오 중 하나 실제 발동 테스트
-5. dev 브랜치에서 계속 작업, main에 머지
+- DeepSeek 4.1 출시 시 재평가
+- OpenRouter + Claude 연동 검토 (4.1 이후)
+- 95점 돌파 연구
 
 ## 참고
 

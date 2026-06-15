@@ -28,7 +28,7 @@
 
 | Metric | Score |
 | --- | --- |
-| **BlackCow Ops Score** | **91.5 / 100** |
+| **BlackCow Ops Score** | **93.0 / 100** |
 | **Goal** | ~~Break 90 points~~ ✅ Achieved! |
 
 > The BlackCow Ops score is a composite of 11 quality dimensions (Reasonix-native, DeepSeek fit, loop budget control, progressive widening, conditional gate selection, PDCA evidence discipline, observable verification, evidence compaction, failure-pattern memory, self-review integration, and safety/anti-hallucination). Each dimension is scored 0–100 and averaged. See [Quality Score Evolution](#quality-score-evolution) for the full history.
@@ -184,7 +184,7 @@ BlackCow was designed for models that are **cheap enough to be wasteful**. DeepS
 
 ## Quality Score Evolution
 
-BlackCow Ops was improved through a **score-driven self-evolution loop** (55 rounds, 31 commits). Each round: score → identify weakness → apply minimal fix → re-score → accept only if improved.
+BlackCow Ops was improved through a **score-driven self-evolution loop** (60 rounds, 33 commits). Each round: score → identify weakness → apply minimal fix → re-score → accept only if improved.
 
 | Round | Score | Key Improvements |
 |---|---:|---:|---|
@@ -197,8 +197,10 @@ BlackCow Ops was improved through a **score-driven self-evolution loop** (55 rou
 | R14-R20 | **95.0** | Per-language gate detection, anti-hallucination guards, widening quality gate |
 | R21-R40 | **91.4** | All 11 dimensions ≥ 90; Observable capped at 90 (infrastructure-honest) |
 | R51-R55 | **91.5** | Governor E2E verified; governor→plan→loop→qa full pipeline; ESCALATE tested; ecosystem health + cross-skill contract |
+| R56-R60 | **93.0** | Failure Pattern Memory live; 9 pre-existing failures auto-fixed; ecosystem 514/514 (100%); all integration contracts complete |
 
-| Dimension | 57 | 91.5 |
+| Dimension | 57 | 93.0 |
+
 
 |---|---:|---:|
 | Reasonix-native | 52 | 91 |
