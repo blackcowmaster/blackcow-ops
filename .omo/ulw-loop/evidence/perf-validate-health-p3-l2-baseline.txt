@@ -1,0 +1,120 @@
+================================================================================
+L2 CALL SITE BASELINE — validate-blackcow-ecosystem-health.sh
+Generated: 2026-06-29
+================================================================================
+
+1. CALL SITE TABLE
+===================
+
+| # | Caller file:line | Callee name | Context snippet (3 lines) | Category |
+|---|-------------------|-------------|---------------------------|----------|
+| 1 | skills/install.sh:325 | `validate-blackcow-ecosystem-health.sh` | `HEALTH_RUNNER="$TEST_DIR/validate-blackcow-ecosystem-health.sh"\nif [[ -f "$HEALTH_RUNNER" ]]; then\n  echo "  ✅ Ecosystem health runner registered: ...` | direct |
+| 2 | skills/install.sh:327 | `validate-blackcow-ecosystem-health.sh` | `echo "  ✅ Ecosystem health runner registered: validate-blackcow-ecosystem-health.sh"\necho "     Usage: bash skills/tests/validate-blackcow-ecosystem-health.sh"\necho "            bash skills/tests/validate-blackcow-ecosystem-health.sh --json"` | direct |
+| 3 | skills/install.sh:328 | `validate-blackcow-ecosystem-health.sh` | `echo "     Usage: bash skills/tests/validate-blackcow-ecosystem-health.sh"\necho "            bash skills/tests/validate-blackcow-ecosystem-health.sh --json"\necho "            bash skills/tests/validate-blackcow-ecosystem-health.sh --verbose"` | direct |
+| 4 | skills/install.sh:329 | `validate-blackcow-ecosystem-health.sh` | see above | direct |
+| 5 | skills/install.sh:330 | `validate-blackcow-ecosystem-health.sh` | see above | direct |
+| 6 | skills/tests/test-l1-unit-ecosystem-health.sh:3 | `validate-blackcow-ecosystem-health.sh` | `# L1 Unit Tests — validate-blackcow-ecosystem-health.sh helper functions` | direct |
+| 7 | skills/tests/test-l1-unit-ecosystem-health.sh:16 | `validate-blackcow-ecosystem-health.sh` | `eval "$(sed -n '/^strip_ansi()/,/^}/p' skills/tests/validate-blackcow-ecosystem-health.sh)"\neval "$(sed -n '/^safe_int()/,/^}/p' skills/tests/validate-blackcow-ecosystem-health.sh)"\neval "$(sed -n '/^parse_counts()/,/^}/p' skills/tests/validate-blackcow-ecosystem-health.sh)"` | direct (source extraction) |
+| 8 | skills/tests/test-l1-unit-ecosystem-health.sh:17 | (same block) | see above | direct |
+| 9 | skills/tests/test-l1-unit-ecosystem-health.sh:18 | (same block) | see above | direct |
+| 10 | skills/tests/test-l2-integration-ecosystem-health.sh:3 | `validate-blackcow-ecosystem-health.sh` | `# L2 Integration Tests — validate-blackcow-ecosystem-health.sh` | direct |
+| 11 | skills/tests/test-l2-integration-ecosystem-health.sh:14 | `validate-blackcow-ecosystem-health.sh` | `SCRIPT="skills/tests/validate-blackcow-ecosystem-health.sh"\nPROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"\necho "=== L2 Integration Tests: ecosystem-health runner ==="` | direct |
+| 12 | skills/tests/test-l3-contract-ecosystem-health.sh:3 | `validate-blackcow-ecosystem-health.sh` | `# L3 Contract Tests — validate-blackcow-ecosystem-health.sh JSON schema contract` | direct |
+| 13 | skills/tests/test-l3-contract-ecosystem-health.sh:13 | `validate-blackcow-ecosystem-health.sh` | `SCRIPT="skills/tests/validate-blackcow-ecosystem-health.sh"\nPROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"\necho "=== L3 Contract Tests: ecosystem-health JSON schema ==="` | direct |
+| 14 | skills/tests/test-l4-system-ecosystem-health.sh:3 | `validate-blackcow-ecosystem-health.sh` | `# L4 System Tests — validate-blackcow-ecosystem-health.sh` | direct |
+| 15 | skills/tests/test-l4-system-ecosystem-health.sh:13 | `validate-blackcow-ecosystem-health.sh` | `SCRIPT="skills/tests/validate-blackcow-ecosystem-health.sh"\nPROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"` | direct |
+| 16 | skills/tests/test-l5-e2e-ecosystem-health.sh:3 | `validate-blackcow-ecosystem-health.sh` | `# L5 E2E Tests — validate-blackcow-ecosystem-health.sh` | direct |
+| 17 | skills/tests/test-l5-e2e-ecosystem-health.sh:14 | `validate-blackcow-ecosystem-health.sh` | `SCRIPT="skills/tests/validate-blackcow-ecosystem-health.sh"\nPROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"` | direct |
+| 18 | skills/tests/test-l5-e2e-install-security.sh:771 | `validate-blackcow-ecosystem-health.sh` | `if echo "$INSTALL_OUTPUT" | grep -q "validate-blackcow-ecosystem-health.sh"; then\n  pass "W7d: Ecosystem health runner registered in output"\nelse\n  fail "W7d: Ecosystem health runner not mentioned in output"` | direct |
+| 19 | skills/tests/validate-blackcow-ecosystem-health.sh:304 | self (self-skip) | `basename=$(basename "$f")\n  [[ "$basename" == "validate-blackcow-ecosystem-health.sh" ]] && continue\n  SCRIPTS+=("$f")` | internal (self-reference) |
+| 20 | .omo/ulw-loop/collect-evidence.sh:45 | `validate-blackcow-ecosystem-health.sh` | `echo "=== M5: dead-code ==="\ncollect_M5() {\ngrep -c "TIMEOUT_SEC" skills/tests/validate-blackcow-ecosystem-health.sh 2>/dev/null && echo "M5_DEADCODE: STILL_PRESENT" || echo "M5_DEADCODE: CLEAN"` | direct |
+| 21 | .omo/ulw-loop/checkpoint.json:9 | `validate-blackcow-ecosystem-health.sh` | `"files_touched": ["skills/tests/validate-blackcow-ecosystem-health.sh"]` | direct |
+| 22 | .omo/ulw-loop/evidence/ecosystem-health-json-flag-hashline.jsonl:1 | `validate-blackcow-ecosystem-health.sh` | `{"file":"skills/tests/validate-blackcow-ecosystem-health.sh","edit_type":"multi_edit"...}` | direct |
+| 23 | skills/tests/test-l5-e2e-ecosystem-health.sh:86 | `ecosystem-health-report.json` | `if [[ -f "$PROJECT_ROOT/.omo/governor/ecosystem-health-report.json" ]]; then\n  pass "File-based JSON report exists"\nelse\n  fail "File-based JSON report missing"` | indirect |
+| 24 | skills/tests/test-l5-e2e-ecosystem-health.sh:94 | `ecosystem-health-report.txt` | `if [[ -f "$PROJECT_ROOT/.omo/governor/ecosystem-health-report.txt" ]]; then\n  pass "File-based text report exists"\nelse\n  fail "File-based text report missing"` | indirect |
+| 25 | plans/perf-validate-health-p3.md:133 | `ecosystem-health-report.json` | `diff <(python3 -m json.tool .omo/governor/ecosystem-health-report.json) <(python3 -m json.tool .omo/governor/ecosystem-health-report.json.after)` | indirect |
+| 26 | .omo/governor/sim-bare-rn-nav-governance.md:35 | `ecosystem-health-report.txt` | `Diff signal: .omo/governor/ecosystem-health-report.txt, skills/tests/validate-blackcow-ecosystem-health.sh` | indirect |
+| 27 | .omo/governor/sim-markdown-docs-governance.md:37 | `ecosystem-health-report.txt` | `Diff signal: .omo/governor/ecosystem-health-report.txt` | indirect |
+| 28 | .omo/governor/sim-react-dashboard-governance.md:37 | `ecosystem-health-report.txt` | `Diff signal: .omo/governor/ecosystem-health-report.txt` | indirect |
+| 29 | .omo/governor/ecosystem-health-json-flag-governance.md:96 | `ecosystem-health-report.json` | `Writes file-based JSON to .omo/governor/ecosystem-health-report.json (file)` | indirect |
+| 30 | .omo/health_normal_output.tmp:78 | `ecosystem-health-report.txt` | `Text report written to: .../ecosystem-health-report.txt` | potential |
+| 31 | .omo/ulw-loop/evidence/ecosystem-health-json-flag-m3-normal-output.txt:78 | `ecosystem-health-report.txt` | `Text report written to: .../ecosystem-health-report.txt` | potential |
+| 32 | .omo/governor/ecosystem-health-parallel-governance.md:5 | `validate-blackcow-ecosystem-health.sh` | `Add parallel execution support to skills/tests/validate-blackcow-ecosystem-health.sh` | potential |
+| 33 | .omo/governor/ecosystem-health-quiet-report-path-governance.md:5 | `validate-blackcow-ecosystem-health.sh` | `Fix: --quiet mode suppresses "Text report written to:" line in validate-blackcow-ecosystem-health.sh` | potential |
+| 34 | .omo/governor/perf-validate-health-p3-governance.md:5 | `validate-blackcow-ecosystem-health.sh` | `Performance optimization: skills/tests/validate-blackcow-ecosystem-health.sh` | potential |
+| 35 | .omo/governor/perf-validate-health-p3-governance.md:165 | `validate-blackcow-ecosystem-health.sh` | `none in skills/tests/validate-blackcow-ecosystem-health.sh — no prior modifications` | potential |
+| 36 | .omo/governor/validate-input-guard-governance.md:101 | `validate-blackcow-ecosystem-health.sh` | `validate-blackcow-ecosystem-health.sh | (runner — invokes others) | N/A | Runner...` | potential |
+| 37 | .omo/governor/validate-input-guard-governance.md:142 | `validate-blackcow-ecosystem-health.sh` | `validate-blackcow-ecosystem-health.sh (runner): Update to add a new check...` | potential |
+| 38 | .omo/governor/validate-input-guard-governance.md:148 | `validate-blackcow-ecosystem-health.sh` | `Add a new check to validate-blackcow-ecosystem-health.sh that greps...` | potential |
+| 39 | .omo/governor/ecosystem-health-json-flag-governance.md:242 | `HEALTH_JSON` | `File-based JSON at $HEALTH_JSON — KEEP as-is` | indirect |
+| 40 | .omo/governor/ecosystem-health-json-flag-governance.md:243 | `HEALTH_LOG` | `Text report at $HEALTH_LOG — KEEP as-is` | indirect |
+| 41 | .omo/governor/ecosystem-health-quiet-report-path-governance.md:86 | `HEALTH_LOG` | `--summary block: Uses direct echo "  Text report written to: $HEALTH_LOG"` | indirect |
+| 42 | .omo/governor/ecosystem-health-quiet-report-path-governance.md:88 | `HEALTH_LOG` | `Normal path: Uses log_info "Text report written to: $HEALTH_LOG"` | indirect |
+| 43 | .omo/ulw-loop/evidence/validate-input-guard-qa-report.md:43 | `validate-blackcow-ecosystem-health.sh` | `validate-blackcow-ecosystem-health.sh | (meta-runner) | 195 | Zero scripts → exit 2` | potential |
+| 44 | .omo/ulw-loop/evidence/validate-input-guard-qa-report.md:89 | `validate-blackcow-ecosystem-health.sh` | `bash -n validate-blackcow-ecosystem-health.sh  → 0` | potential |
+| 45 | .omo/ulw-loop/evidence/ecosystem-health-json-flag-qa-report.md:5 | `validate-blackcow-ecosystem-health.sh` | `Target — skills/tests/validate-blackcow-ecosystem-health.sh` | potential |
+| 46 | plans/ecosystem-health-json-flag.md:18 | `validate-blackcow-ecosystem-health.sh` | `skills/tests/validate-blackcow-ecosystem-health.sh modified to emit...` | potential |
+| 47 | plans/ecosystem-health-json-flag.md:21 | `validate-blackcow-ecosystem-health.sh` | `SCOPE — ONLY skills/tests/validate-blackcow-ecosystem-health.sh` | potential |
+| 48 | plans/ecosystem-health-json-flag.md:41 | `validate-blackcow-ecosystem-health.sh` | `skills/tests/validate-blackcow-ecosystem-health.sh:31` | potential |
+| 49 | plans/ecosystem-health-json-flag.md:51 | `validate-blackcow-ecosystem-health.sh` | `Implement --json stdout flag in skills/tests/validate-blackcow-ecosystem-health.sh` | potential |
+| 50 | plans/ecosystem-health-json-flag.md:55 | `validate-blackcow-ecosystem-health.sh` | `bash skills/tests/validate-blackcow-ecosystem-health.sh --json` | potential |
+| 51 | plans/ecosystem-health-json-flag.md:136 | `HEALTH_JSON` | `Python block that writes to $HEALTH_JSON disk file is preserved unchanged` | indirect |
+| 52 | plans/install-path-security.md:47 | `validate-blackcow-ecosystem-health.sh` | `5 existing test-l* files all test validate-blackcow-ecosystem-health.sh` | potential |
+| 53 | plans/perf-validate-health-p3.md:1 | `validate-blackcow-ecosystem-health.sh` | `Plan: Optimize validate-blackcow-ecosystem-health.sh Runtime` | potential |
+| 54 | plans/perf-validate-health-p3.md:17 | `validate-blackcow-ecosystem-health.sh` | `bash skills/tests/validate-blackcow-ecosystem-health.sh` | potential |
+| 55 | plans/perf-validate-health-p3.md:129 | `HEALTH_JSON` | `Write to $HEALTH_JSON using the same pattern...` | indirect |
+| 56 | plans/validate-input-guard.md:17 | `validate-blackcow-ecosystem-health.sh` | `bash skills/tests/validate-blackcow-ecosystem-health.sh` | potential |
+| 57 | plans/validate-input-guard.md:87 | `validate-blackcow-ecosystem-health.sh` | `Modify: Add NOT FOUND summary line to .../validate-blackcow-ecosystem-health.sh:330` | potential |
+
+2. COUNT: TOTAL EXTERNAL CALL SITES
+=====================================
+
+  Direct call sites (references to script filename):  21  (#1-21)
+  Indirect call sites (references to output/report):    9  (#22-30)
+  Potential call sites (docs, plans, governance):      27  (#31-57)
+  ──────────────────────────────────────────────────────────
+  TOTAL external call sites (excl. self-reference):    57
+  TOTAL external + internal:                           58
+
+  REGRESSION BASELINE: After any change to validate-blackcow-ecosystem-health.sh,
+  the number of distinct external caller files must not decrease.
+
+3. TEST FILES
+==============
+
+  Five (5) test files directly exercise validate-blackcow-ecosystem-health.sh:
+
+  | File | Lines | Level | What it tests |
+  |------|-------|-------|---------------|
+  | skills/tests/test-l1-unit-ecosystem-health.sh | 96 | L1 Unit | Extracts/strip_ansi, safe_int, parse_counts via sed-eval |
+  | skills/tests/test-l2-integration-ecosystem-health.sh | 153 | L2 Integration | JSON validity, exit codes, stderr cleanliness |
+  | skills/tests/test-l3-contract-ecosystem-health.sh | 218 | L3 Contract | JSON schema contract against governance spec |
+  | skills/tests/test-l4-system-ecosystem-health.sh | 156 | L4 System | All flag combos: --json, --verbose, --quiet, --summary |
+  | skills/tests/test-l5-e2e-ecosystem-health.sh | 135 | L5 E2E | Cross-mode consistency, file artifacts, traffic-light/exit-code |
+
+  Plus one additional test that indirectly references the script:
+
+  | File | Line | What it checks |
+  |------|------|----------------|
+  | skills/tests/test-l5-e2e-install-security.sh | 771 | Verifies install output references validate-blackcow-ecosystem-health.sh |
+
+  Test file filenames matching pattern test-l*-ecosystem-health.sh:
+    skills/tests/test-l1-unit-ecosystem-health.sh
+    skills/tests/test-l2-integration-ecosystem-health.sh
+    skills/tests/test-l3-contract-ecosystem-health.sh
+    skills/tests/test-l4-system-ecosystem-health.sh
+    skills/tests/test-l5-e2e-ecosystem-health.sh
+
+4. KEY FINDINGS
+================
+
+  - No `source` or `.` import of validate-blackcow-ecosystem-health.sh found anywhere.
+  - No CI config (.yml/.yaml) references found.
+  - No Makefile references found.
+  - Test L1 uses `sed -n '/^func()/,/^}/p'` extraction — fragile if function names change.
+  - The self-skip at line 304 prevents recursive self-invocation.
+  - HEALTH_LOG / HEALTH_JSON variables defined only in the script itself (lines 29-30);
+    external references use the literal paths .omo/governor/ecosystem-health-report.{txt,json}.
+  - install.sh is the only non-test production script that references this file.
+
+================================================================================

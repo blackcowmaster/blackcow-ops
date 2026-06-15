@@ -1,18 +1,22 @@
 {
-  "run_id": "install-path-security-20260627",
+  "run_id": "perf-validate-health-p3",
   "trust_level": 2,
-  "started": "2026-06-27T00:00:00Z",
-  "last_checkpoint": "2026-06-27T00:02:00Z",
-  "phases_completed": ["0","1","2","3","4","5"],
-  "current_phase": "6",
+  "started": "2026-06-15T19:30:00Z",
+  "last_checkpoint": "2026-06-15T21:35:00Z",
+  "phases_completed": ["0","1","2","3","4","5","6"],
+  "current_phase": "7",
   "phase_results": {
-    "0": {"bootstrap_lanes": 0, "cache_hit": false, "plan_provided": true},
-    "1": {"tests_passing": true, "hashline_edits": 5, "hashline_failures": 1, "tests_total": 21, "tests_passed": 21, "tests_failed": 0, "score_pct": 100},
-    "2": {"gap_match_rate": 100, "pdca_cycles": 0, "s3_bypass_found": true, "s3_bypass_fixed": true},
-    "3": {"m3_regression": 0, "m4_lint": 0, "m2_test_pass": 100},
-    "4": {"cli_verified": true},
-    "5": {"s1_dataFlow": "clean", "s3_injection": "6 vectors blocked + prefix bypass fixed"}
+    "0": {"bootstrap_lanes": 9, "cache_hit": false, "speculative_adopted": "SP2 ADOPT"},
+    "1": {"tests_passing": true, "hashline_edits": 8, "hashline_failures": 0},
+    "2": {"gap_match_rate": 100, "pdca_cycles": 0},
+    "3": {"test_pass": "64/64", "regression": 0, "lint": "bash -n: pass"},
+    "4": {"cli_verified": true, "file_state_verified": true, "json_valid": true},
+    "5": {"qa_agents": "streamlined (XS scale)", "critical_findings": 0},
+    "6": {"dead_code_removed": "TIMEOUT_SEC", "format_verified": true}
   },
-  "files_touched": ["skills/install.sh", "skills/tests/test-l1-unit-install-security.sh"],
-  "git_snapshot": "HEAD"
+  "files_touched": [
+    "skills/tests/validate-blackcow-ecosystem-health.sh",
+    "skills/tests/test-l4-system-ecosystem-health.sh"
+  ],
+  "git_snapshot": "6cc2bfa454a02d7f89b4d7576856d3a27d7ae657"
 }

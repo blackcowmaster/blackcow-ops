@@ -3,22 +3,25 @@
 Notes the user pinned via the `#` prompt prefix. The whole file is
 loaded into the immutable system prefix every session — keep it terse.
 
-- BlackCow Ops — 93.0 돌파 + Failure Pattern Memory 가동
+- BlackCow Ops — 95.5 돌파 + 11/11 Gate 완전 커버
 
 현재 상태:
-- 7개 스킬 전부 검증 완료 (governor E2E 완료)
-- governor→plan→loop→qa 풀파이프라인 실행 완료 (STANDARD 모드)
-- ESCALATE 시나리오 발동 확인 (Rust rewrite → pipeline 거부)
-- Failure Pattern Memory 구축 (6개 패턴, auto-fix 검증)
+- 7개 스킬 전부 검증 완료
+- 7-agent multi-domain 시뮬레이션 (5개 도메인, 0 크로스 오염)
+- 11/11 gate 전부 트리거 (M1-5, S1-3, P1-3)
+- Phase 2.2 Root Cause 실전 검증 (keyset cursor bug)
+- FAN-OUT 병렬 Plan dispatch 모드 추가
+- P3 latency gate 트리거 (51% 실행시간 단축)
+- Failure Pattern Memory: 10개 패턴, context_tags 지원
 - Ecosystem health: 514/514 (100%) 🟢 ALL GREEN
-- 11-dimension 점수: 93.0/100
+- 11-dimension 점수: 95.5/100
 - Main 머지 완료
 
 ## 다음 목표
 
 - DeepSeek 4.1 출시 시 재평가
-- OpenRouter + Claude 연동 검토 (4.1 이후)
-- 95점 돌파 연구
+- 실제 앱 프로젝트로 실전 검증
+- 97점 돌파 연구 (O3/O4 관측, Librarian 활성화)
 
 ## 참고
 

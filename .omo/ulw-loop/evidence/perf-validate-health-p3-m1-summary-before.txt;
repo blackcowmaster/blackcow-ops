@@ -1,0 +1,21 @@
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ BlackCow Ecosystem Health Summary                       2026-06-15 12:20 UTC │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ validate-blackcow-ecosystem.sh                P:117 F:  0 S:  0 100% PASS    │
+│ validate-blackcow-governor-contract.sh        P: 75 F:  0 S:  0 100% PASS    │
+│ validate-blackcow-governor-integration.sh     P:  5 F:  0 S:  0 100% PASS    │
+│ validate-blackcow-governor-system.sh          P: 55 F:  0 S:  0 100% PASS    │
+│ validate-blackcow-governor.sh                 P: 77 F:  0 S:  0 100% PASS    │
+│ validate-blackcow-plan-contract.sh            P: 45 F:  0 S:  0 100% PASS    │
+│ validate-blackcow-plan-integration.sh         P: 22 F:  0 S:  0 100% PASS    │
+│ validate-blackcow-plan.sh                     P: 33 F:  0 S:  0 100% PASS    │
+│ validate-cross-skill-contract.sh              P: 85 F:  0 S:  0 100% PASS    │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ AGGREGATE                                     P:514 F:  0 S:  0 100% GREEN    │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Traffic light:  GREEN
+  Aggregate:      100%
+  Runtime:        2026-06-15T12:20:39Z (started 2026-06-15T12:20:34Z)
+  Text report written to: /Users/jeong-yugyeong/Project/blackcow-ops/.omo/governor/ecosystem-health-report.txt

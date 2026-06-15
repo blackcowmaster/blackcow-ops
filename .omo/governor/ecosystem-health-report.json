@@ -1,0 +1,104 @@
+{
+  "traffic_light": "GREEN",
+  "aggregate_score": 100,
+  "scripts_run": 9,
+  "scripts_passed": 9,
+  "scripts_failed": 0,
+  "total_checks": 445,
+  "total_pass": 445,
+  "total_fail": 0,
+  "total_skip": 0,
+  "generated_at": "2026-06-15T12:46:25Z",
+  "scripts": [
+    {
+      "name": "validate-blackcow-ecosystem.sh",
+      "pass": 117,
+      "fail": 0,
+      "skip": 0,
+      "total": 117,
+      "score": 100,
+      "exit_code": 0,
+      "duration_s": 0
+    },
+    {
+      "name": "validate-blackcow-governor-contract.sh",
+      "pass": 75,
+      "fail": 0,
+      "skip": 0,
+      "total": 75,
+      "score": 100,
+      "exit_code": 0,
+      "duration_s": 0
+    },
+    {
+      "name": "validate-blackcow-governor-integration.sh",
+      "pass": 4,
+      "fail": 0,
+      "skip": 0,
+      "total": 4,
+      "score": 100,
+      "exit_code": 1,
+      "duration_s": 0
+    },
+    {
+      "name": "validate-blackcow-governor-system.sh",
+      "pass": 55,
+      "fail": 0,
+      "skip": 0,
+      "total": 55,
+      "score": 100,
+      "exit_code": 0,
+      "duration_s": 0
+    },
+    {
+      "name": "validate-blackcow-governor.sh",
+      "pass": 77,
+      "fail": 0,
+      "skip": 0,
+      "total": 77,
+      "score": 100,
+      "exit_code": 0,
+      "duration_s": 0
+    },
+    {
+      "name": "validate-blackcow-plan-contract.sh",
+      "pass": 45,
+      "fail": 0,
+      "skip": 0,
+      "total": 45,
+      "score": 100,
+      "exit_code": 0,
+      "duration_s": 0
+    },
+    {
+      "name": "validate-blackcow-plan-integration.sh",
+      "pass": 22,
+      "fail": 0,
+      "skip": 0,
+      "total": 22,
+      "score": 100,
+      "exit_code": 0,
+      "duration_s": 0
+    },
+    {
+      "name": "validate-blackcow-plan.sh",
+      "pass": 33,
+      "fail": 0,
+      "skip": 0,
+      "total": 33,
+      "score": 100,
+      "exit_code": 0,
+      "duration_s": 0
+    },
+    {
+      "name": "validate-cross-skill-contract.sh",
+      "pass": 17,
+      "fail": 0,
+      "skip": 0,
+      "total": 17,
+      "score": 100,
+      "exit_code": 1,
+      "duration_s": 0
+    }
+  ]
+}

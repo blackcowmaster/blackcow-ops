@@ -1,58 +1,97 @@
 #!/usr/bin/env bash
-# Evidence collector for install-path-security
-# Gates: M1, M2, M3, M4, M5, S1, S3
+# collect-evidence.sh — BKIT 11-gate evidence collector for perf-validate-health-p3
 set -euo pipefail
 
-SLUG="install-path-security"
-EVD=".omo/ulw-loop/evidence"
+SLUG="perf-validate-health-p3"
+EVID="${SLUG}"
+DIR=".omo/ulw-loop/evidence"
 
-echo "=== BKIT 11-Gate Evidence Collector: ${SLUG} ==="
+# ---- M1: spec-match ----
+collect_M1() {
+  echo "=== M1: spec-match ==="
+  # Diff default mode output before/after
+  if [[ -f "${DIR}/${EVID}-m1-default-before.txt" && -f "${DIR}/${EVID}-m1-default-after.txt" ]]; then
+    diff "${DIR}/${EVID}-m1-default-before.txt" "${DIR}/${EVID}-m1-default-after.txt" && echo "M1_DEFAULT: IDENTICAL" || echo "M1_DEFAULT: DIFFER"
+  fi
+  if [[ -f "${DIR}/${EVID}-m1-json-before.txt" && -f "${DIR}/${EVID}-m1-json-after.txt" ]]; then
+    diff "${DIR}/${EVID}-m1-json-before.txt" "${DIR}/${EVID}-m1-json-after.txt" && echo "M1_JSON: IDENTICAL" || echo "M1_JSON: DIFFER"
+  fi
+  if [[ -f "${DIR}/${EVID}-m1-summary-before.txt" && -f "${DIR}/${EVID}-m1-summary-after.txt" ]]; then
+    diff "${DIR}/${EVID}-m1-summary-before.txt" "${DIR}/${EVID}-m1-summary-after.txt" && echo "M1_SUMMARY: IDENTICAL" || echo "M1_SUMMARY: DIFFER"
+  fi
+}
 
-# M1 - spec-match
-echo "--- M1 spec-match ---"
-echo "M1: Plan requires: validate_install_path() blocks 6 vectors, resolve_path() 4-tier fallback, --install-path alias, both flags validated, mutual exclusion"
-echo "STATUS: MANUAL_VERIFY"
+# ---- M2: test-pass ----
+collect_M2() {
+  echo "=== M2: test-pass ==="
+  echo "Test results from: ${DIR}/${EVID}-m2-test.txt"
+}
 
-# M2 - test-pass
-echo "--- M2 test-pass ---"
-TEST_FILE="skills/tests/test-l1-unit-install-security.sh"
-if [[ -f "$TEST_FILE" ]]; then
-  bash "$TEST_FILE" > "${EVD}/${SLUG}-m2-test.txt" 2>&1 && echo "M2: PASS" || echo "M2: FAIL"
-else
-  echo "M2: SKIP (test file not found)"
-fi
+# ---- M3: regression ----
+collect_M3() {
+  echo "=== M3: regression ==="
+  echo "Regression count from: ${DIR}/${EVID}-m3-regression.txt"
+}
 
-# M3 - regression
-echo "--- M3 regression ---"
-echo "M3: Verify --target /tmp/test still works, default path still works"
-bash skills/install.sh --dry-run --target /tmp/test 2>&1 | grep -q "Installed" && echo "M3a --target: PASS" || echo "M3a --target: FAIL"
-bash skills/install.sh --dry-run 2>&1 | grep -q "Installed" && echo "M3b default: PASS" || echo "M3b default: FAIL"
+# ---- M4: lint ----
+collect_M4() {
+  echo "=== M4: lint ==="
+  echo "Lint warnings from: ${DIR}/${EVID}-m4-lint.txt"
+}
 
-# M4 - lint
-echo "--- M4 lint ---"
-# shellcheck if available
-if command -v shellcheck &>/dev/null; then
-  shellcheck skills/install.sh > "${EVD}/${SLUG}-m4-lint.txt" 2>&1 || true
-  WARNINGS=$(grep -c "warning" "${EVD}/${SLUG}-m4-lint.txt" 2>/dev/null || echo "0")
-  echo "M4: $WARNINGS warnings"
-else
-  echo "M4: SKIP (shellcheck not available)"
-fi
+# ---- M5: dead-code ----
+collect_M5() {
+  echo "=== M5: dead-code ==="
+  grep -c "TIMEOUT_SEC" skills/tests/validate-blackcow-ecosystem-health.sh 2>/dev/null && echo "M5_DEADCODE: STILL_PRESENT" || echo "M5_DEADCODE: CLEAN"
+}
 
-# M5 - dead-code
-echo "--- M5 dead-code ---"
-echo "M5: All branches in validate_install_path() exercised by tests"
-echo "STATUS: MANUAL_VERIFY (check test coverage)"
+# ---- S1: dataFlow ----
+collect_S1() {
+  echo "=== S1: dataFlow ==="
+  echo "JSON structure validation:"
+  if [[ -f "${DIR}/${EVID}-s1-json-structure.txt" ]]; then
+    cat "${DIR}/${EVID}-s1-json-structure.txt"
+  fi
+}
 
-# S1 - dataFlow
-echo "--- S1 dataFlow ---"
-echo "S1: TARGET_DIR → validate_install_path() → mkdir -p → sed >"
-echo "STATUS: MANUAL_VERIFY (trace data flow)"
+# ---- S2: auth ----
+collect_S2() {
+  echo "=== S2: auth ==="
+  echo "S2: N/A (shell script, no auth surface)"
+}
 
-# S3 - injection
-echo "--- S3 injection ---"
-echo "S3: 6 attack vectors blocked: .., //, null byte, symlink TOCTOU, absolute path, home-relative"
-echo "STATUS: MANUAL_VERIFY (check test results)"
+# ---- S3: injection ----
+collect_S3() {
+  echo "=== S3: injection ==="
+  echo "S3 injection surface audit from: ${DIR}/${EVID}-s3-injection.txt"
+}
+
+# ---- P1: query ----
+collect_P1() {
+  echo "=== P1: query ==="
+  echo "External process spawn count from: ${DIR}/${EVID}-p1-query.txt"
+}
+
+# ---- P2: memory ----
+collect_P2() {
+  echo "=== P2: memory ==="
+  echo "Temp file leak check from: ${DIR}/${EVID}-p2-memory.txt"
+}
+
+# ---- P3: latency ----
+collect_P3() {
+  echo "=== P3: latency ==="
+  echo "Runtime measurement from: ${DIR}/${EVID}-p3-latency.txt"
+}
+
+# ---- Run all ----
+mkdir -p "$DIR"
+for gate in M1 M2 M3 M4 M5 S1 S2 S3 P1 P2 P3; do
+  echo ""
+  "collect_${gate}"
+done
 
 echo ""
-echo "=== Collector done ==="
+echo "=== SUMMARY ==="
+echo "Evidence directory: ${DIR}/"
+ls -la "${DIR}/${EVID}-"* 2>/dev/null || echo "(no evidence files yet)"

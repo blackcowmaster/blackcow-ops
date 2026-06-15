@@ -145,6 +145,45 @@ After pipeline completes, compare results against governance decisions:
 - Did any ESCALATE event fire? (check escalation-log.jsonl)
 - **Audit verdict**: All match → governance effective. Any mismatch → flag for review.
 
+## FAN-OUT Mode — Parallel Plan Dispatch
+
+When the governor detects that a task naturally decomposes into **independent subtasks**, FAN-OUT mode dispatches multiple `blackcow-plan` calls in parallel, then merges results into a single execution plan.
+
+### Trigger Conditions
+
+- Task explicitly requests N independent components (e.g., "plan A and B")
+- Task scope spans multiple non-overlapping domains (e.g., frontend + backend + CLI)
+- Phase 0 discovery confirms subtasks have zero shared files
+
+### Dispatch Pattern
+
+```markdown
+Phase 1: Governance → detect decomposable
+  ↓
+Phase 2-FAN-OUT: N parallel plan dispatches (one per subtask, unique slug)
+  run_skill({ name: "blackcow-plan", arguments: "<subtask-1> --govern=<slug>-sub1" })
+  run_skill({ name: "blackcow-plan", arguments: "<subtask-2> --govern=<slug>-sub2" })
+  ... (all in single turn, parallel execution)
+  ↓
+Phase 2-MERGE: Collect plans → resolve cross-references → produce unified master plan
+  ↓
+Phase 2-DISPATCH: Single loop → single QA (sequential, to avoid conflicts)
+```
+
+### When NOT to FAN-OUT
+
+- Subtasks share files → sequential only (race condition risk)
+- Subtask count > 5 → batch in groups of 5
+- Any subtask requires SIEGE mode → sequential only (needs full context)
+
+### FAN-OUT Cost Model
+
+| Fan-out width | Parallel plan cost | Merge cost | Total vs sequential |
+|---|---|---|---|
+| 2 | 2× plan tokens | ~2K | ~1.8× (acceptable) |
+| 3 | 3× plan tokens | ~3K | ~2.5× |
+| 5 | 5× plan tokens | ~5K | ~4× (only for large tasks) |
+
 ## Phase 2 — Dispatch
 
 After writing the governance decision, invoke the pipeline:

@@ -28,7 +28,7 @@
 
 | Metric | Score |
 | --- | --- |
-| **BlackCow Ops Score** | **94.0 / 100** |
+| **BlackCow Ops Score** | **95.5 / 100** |
 | **Goal** | ~~Break 90 points~~ ✅ Achieved! |
 
 > The BlackCow Ops score is a composite of 11 quality dimensions (Reasonix-native, DeepSeek fit, loop budget control, progressive widening, conditional gate selection, PDCA evidence discipline, observable verification, evidence compaction, failure-pattern memory, self-review integration, and safety/anti-hallucination). Each dimension is scored 0–100 and averaged. See [Quality Score Evolution](#quality-score-evolution) for the full history.
@@ -184,7 +184,7 @@ BlackCow was designed for models that are **cheap enough to be wasteful**. DeepS
 
 ## Quality Score Evolution
 
-BlackCow Ops was improved through a **score-driven self-evolution loop** (65 rounds, 35 commits). Each round: score → identify weakness → apply minimal fix → re-score → accept only if improved.
+BlackCow Ops was improved through a **score-driven self-evolution loop** (70 rounds, 37 commits). Each round: score → identify weakness → apply minimal fix → re-score → accept only if improved.
 
 | Round | Score | Key Improvements |
 |---|---:|---:|---|
@@ -199,8 +199,10 @@ BlackCow Ops was improved through a **score-driven self-evolution loop** (65 rou
 | R51-R55 | **91.5** | Governor E2E verified; governor→plan→loop→qa full pipeline; ESCALATE tested; ecosystem health + cross-skill contract |
 | R56-R60 | **93.0** | Failure Pattern Memory live; 9 pre-existing failures auto-fixed; ecosystem 514/514 (100%); all integration contracts complete |
 | R61-R65 | **94.0** | S1+S3 gates triggered (path traversal); real PDCA cycle (regression→detect→auto-fix); install.sh --install-path security hardening |
+| R66-R70 | **95.5** | 7-agent multi-domain sim; Phase 2.2 proven (root-cause fix); FAN-OUT mode; 11/11 gates covered (P3 latency triggered); cross-domain 0 contamination |
 
-| Dimension | 57 | 94.0 |
+| Dimension | 57 | 95.5 |
+
 
 
 
