@@ -805,8 +805,14 @@ The librarian stores structured failure records to inform future governor decisi
   "occurrence_count": <N>,
   "first_seen": "<ISO>",
   "last_seen": "<ISO>",
-  "resolved": true|false
+  "resolved": true|false,
+  "resolution_effectiveness": <0-100>,
+  "reappeared_after_fix": true|false,
+  "fix_persistence_days": <N>
 }
+```
+
+**Resolution effectiveness**: After marking resolved, track for 30 days. If the same gate+symptom reappears, set `reappeared_after_fix: true` and `resolution_effectiveness: 0`. If no recurrence for 30 days, `resolution_effectiveness: 100`. This feeds back into auto-fix suggestion confidence.
 ```
 
 ### Integration with Governor
@@ -831,6 +837,13 @@ Before feeding patterns to governor, compute:
   # Verify: <verification>
   ```
   Feed this template to blackcow-loop as a pre-emptive fix before PDCA starts.
+
+**ROI correlation**: For each unresolved pattern, check `.omo/memory/loop-roi.jsonl` for tasks in the same area. Compute:
+- `avg_cycles_wasted`: average PDCA cycles spent on this gate before resolution
+- `tokens_wasted_estimate`: cycles × avg tokens per cycle
+- `fix_roi`: tokens_wasted / (tokens to apply known fix)
+
+If `fix_roi > 3` (fix saves 3× the tokens it costs), auto-recommend the fix to governor.
 
 Write trend summary to `.omo/memory/failure-trends.json`:
 ```json

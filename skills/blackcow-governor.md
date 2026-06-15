@@ -101,9 +101,15 @@ Produce `.omo/governor/<slug>-governance.md`:
 
 ## Failure-Pattern Feed
 
-| Pattern ID | Gate | Symptom | Last Seen | Action |
-|---|---|---|---|---|
-| <id> | <gate> | <symptom> | <ISO> | Escalate gate priority / Apply known fix |
+| Pattern ID | Gate | Symptom | Last Seen | Effectiveness | Action |
+|---|---|---|---|---|---|
+| <id> | <gate> | <symptom> | <ISO> | <0-100> | Escalate gate priority / Apply known fix / Skip (proven fix) |
+
+**Feed rules:**
+- `effectiveness ≥ 80` → apply known fix automatically before PDCA
+- `effectiveness 40-79` → suggest fix, require confirmation
+- `effectiveness < 40` → escalate gate priority, do NOT auto-apply (fix unreliable)
+- `reappeared_after_fix: true` → mark pattern as CRITICAL, require architectural review
 
 ## Loop ROI Estimate
 
