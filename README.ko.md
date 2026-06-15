@@ -20,19 +20,19 @@
 <hr />
 
 > [!NOTE]
-> **BlackCow Ops는 6개의 자기 개선형 Reasonix 스킬**로 구성된 plan→execute→verify→evolve 파이프라인입니다. BKIT — 수치 임계값이 있는 11-게이트 품질 분류 체계를 DeepSeek의 비용 이점에 맞게 적용했습니다.
+> **BlackCow Ops는 7개의 자기 개선형 Reasonix 스킬**로 구성된 govern→plan→execute→verify→evolve 파이프라인입니다. BKIT — 수치 임계값이 있는 11-게이트 품질 분류 체계를 DeepSeek의 비용 이점에 맞게 적용했습니다.
 >
-> DeepSeek 가격(~$0.14/1M 입력 토큰) 기준, 15개 병렬 디스커버리 레인 + 8개 적대적 QA 에이전트 + 7회 PDCA 사이클을 **총 $0.03 미만**으로 실행할 수 있습니다.
+> DeepSeek 가격(flash ~$0.14/1M, pro ~$0.435/1M 입력 토큰) 기준, progressive widening(3단계), 조건부 게이트 선택, 5가지 실행 모드(FAST~ESCALATE)로 토큰 사용을 최적화합니다. FAST 모드 오타 수정은 ~$0.001, FULL 모드 다중 파일 기능은 ~$0.03입니다.
 
 ## 설치
 
 ```bash
 # Reasonix 스킬 디렉토리에 클론
 git clone https://github.com/blackcowmaster/blackcow-ops.git
-cp blackcow-ops/skills/*.md ~/.reasonix/skills/
+bash blackcow-ops/skills/install.sh
 ```
 
-Reasonix를 재시작하면 6개의 `blackcow-*` 스킬이 전역에서 사용 가능합니다.
+`install.sh`가 자동으로 OS를 감지하고 올바른 도구명으로 설치합니다. Reasonix를 재시작하면 7개의 `blackcow-*` 스킬이 전역에서 사용 가능합니다.
 
 ## 사용 시나리오
 
@@ -123,7 +123,7 @@ Reasonix가 스킬을 인덱싱했다면:
 
 ```
 blackcow-ops/
-├── skills/                          ← 6개 스킬 파일 (Reasonix 호환 Markdown)
+├── skills/                          ← 7개 스킬 파일 + 설치 스크립트 (Reasonix 호환 Markdown)
 │   ├── blackcow-plan.md             ← 전략 설계자 (Phase -1 ~ Phase 5)
 │   ├── blackcow-loop.md             ← 실행 엔진 (Phase 0 ~ Phase 9)
 │   ├── blackcow-qa.md               ← 품질 보증 (Phase 0 ~ Phase 3)
