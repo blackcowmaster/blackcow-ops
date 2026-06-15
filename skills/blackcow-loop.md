@@ -1326,6 +1326,14 @@ All quality gates passed. Emit final status:
 
 **This is the final output. The task is complete.**
 
+### Post-Mortem Trigger
+
+If mode is FULL or SIEGE, after DONE emission, trigger governor feedback:
+```
+run_skill({ name: "blackcow-governor", arguments: "--post-mortem <plan-slug>" })
+```
+This feeds completion data (mode used, gates passed, tokens spent, ROI) back into governor for trend analysis and future decision improvement.
+
 ## Stop Rules
 
 | Condition | Action |

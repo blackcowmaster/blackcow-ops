@@ -2,7 +2,7 @@
 name: blackcow-governor
 description: Governance preflight for BKIT pipeline. Mode selection, gate subset, observable level, PDCA budget, widening policy, escalation rules, evidence index prewrite, loop ROI estimate, failure-pattern feed. Runs before plan/loop/qa. Never writes product code.
 runAs: subagent
-version: 1.0.0
+version: 2.0.0
 updated: 2026-06-15
 model: deepseek-v4-pro
 model_tiers:
