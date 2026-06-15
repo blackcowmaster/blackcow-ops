@@ -756,20 +756,30 @@ Write to `.omo/ulw-loop/evidence/<slug>-observable.json`.
 ### Channel 1 — HTTP
 If the change affects an HTTP endpoint:
 ```bash
-# Verify endpoint responds
+# O1 smoke: endpoint responds
 curl -s -o /dev/null -w "%{http_code}" <endpoint-url> > .omo/ulw-loop/evidence/<slug>-manual-http.txt
-# Verify auth gate: unauthenticated request should return 401/403
+# O2 primary: response body contains expected data
+curl -s <endpoint-url> | grep -q "<expected-string>" && echo "BODY_MATCH" >> .omo/ulw-loop/evidence/<slug>-manual-http.txt
+# O3 state: POST/PUT changes state correctly (GET after mutation)
+curl -s -X POST -d '<payload>' <endpoint-url> && curl -s <endpoint-url> | grep -q "<new-state>" && echo "STATE_OK" >> .omo/ulw-loop/evidence/<slug>-manual-http.txt
+# Auth gate: unauthenticated request should return 401/403
 curl -s -o /dev/null -w "%{http_code}" -H "Authorization: invalid" <endpoint-url> >> .omo/ulw-loop/evidence/<slug>-manual-http.txt
 ```
-RETURN EXACTLY: checked:bool, endpoints:list, auth_gate_pass:bool
+RETURN EXACTLY: checked:bool, endpoints:list, auth_gate_pass:bool, body_verified:bool, state_verified:bool
 
 ### Channel 2 — CLI
 If the change affects a CLI command:
 ```bash
-# Verify command runs and produces expected output
-<cli-command> --help > .omo/ulw-loop/evidence/<slug>-manual-cli.txt 2>&1
+# O1: smoke — does it start?
+<cli-command> --help > .omo/ulw-loop/evidence/<slug>-manual-cli-help.txt 2>&1
+# O2: primary interaction — does it produce expected output?
+echo "<representative-input>" | <cli-command> > .omo/ulw-loop/evidence/<slug>-manual-cli-output.txt 2>&1
+# O3: state transition — does exit code match expected?
+<cli-command> --flag && echo "EXIT:0" || echo "EXIT:$?" > .omo/ulw-loop/evidence/<slug>-manual-cli-exit.txt
+# O4: regression — diff output against baseline
+diff .omo/ulw-loop/evidence/<slug>-cli-baseline.txt .omo/ulw-loop/evidence/<slug>-manual-cli-output.txt > .omo/ulw-loop/evidence/<slug>-manual-cli-diff.txt
 ```
-RETURN EXACTLY: checked:bool, commands:list, exit_code:int
+RETURN EXACTLY: checked:bool, commands:list, exit_code:int, output_matches_baseline:bool
 
 ### Channel 3 — File State
 If the change writes files:
@@ -790,6 +800,8 @@ RETURN EXACTLY: checked:bool, tables_checked:list, row_count:int
 ### Phase 4 Gate
 - ALL applicable channels checked → advance to Phase 5
 - Any channel fails → return to Phase 1.3 (GREEN) or trigger Phase 2a (PDCA)
+- **Observable evidence captured**: O1 minimum for any change; O2+ if tooling available
+- **Regression baseline**: For CLI/API changes, diff current output against stored baseline from Phase 1.1 characterization test
 - **→ Write checkpoint.json**
 
 ## Phase 5 — Adversarial QA (10 task SUBAGENTS, 2 BATCHES)

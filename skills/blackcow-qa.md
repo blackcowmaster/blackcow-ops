@@ -208,13 +208,27 @@ echo "$CHANGED" | grep -qE '(auth|middleware|guard|route|handler|controller)' &&
 echo "$CHANGED" | grep -qE '(form|input|parse|handler|controller|route|eval|exec|innerHTML|dangerouslySetInnerHTML)' && GATES="$GATES S3"
 
 # P1 (query): DB/repository/ORM code changed
-echo "$CHANGED" | grep -qE '(repository|dao|query|database|db|\.sql)' && GATES="$GATES P1"
+echo "$CHANGED" | grep -qE '(repository|dao|query|database|db|\.sql|\.prisma|\.gorm)' && GATES="$GATES P1"
+# Language-specific N+1 detection:
+echo "$CHANGED" | grep -qE '\.(ts|js)$' && git diff HEAD~1 | grep -qE '\.forEach.*await|\.map.*await|for.*of.*await' && echo "N_PLUS_1_RISK" >&2
+echo "$CHANGED" | grep -qE '\.py$' && git diff HEAD~1 | grep -qE 'for.*in.*:.*\.objects\.|for.*in.*:.*\.query' && echo "N_PLUS_1_RISK" >&2
 
 # P2 (memory): collections, streams, buffers changed
 echo "$CHANGED" | grep -qE '(collection|array|stream|buffer|cache|pool)' && GATES="$GATES P2"
 
 # P3 (latency): only if plan defines p95_target_ms
 grep -q 'p95_target_ms' plans/*.md 2>/dev/null && GATES="$GATES P3"
+
+# Language-specific injection patterns (S3 refinement):
+# Python: eval, exec, __import__, pickle, yaml.load (unsafe)
+echo "$CHANGED" | grep -qE '\.py$' && git diff HEAD~1 | grep -qE '(eval\(|exec\(|__import__|pickle\.loads|yaml\.load\()' && GATES="$GATES S3"
+# JavaScript/TS: eval, Function(), innerHTML, dangerouslySetInnerHTML
+echo "$CHANGED" | grep -qE '\.(ts|js|tsx|jsx)$' && git diff HEAD~1 | grep -qE '(eval\(|new Function|innerHTML|dangerouslySetInnerHTML)' && GATES="$GATES S3"
+# Go: os/exec with variable args, unsafe package
+echo "$CHANGED" | grep -qE '\.go$' && git diff HEAD~1 | grep -qE '(exec\.Command.*\+|unsafe\.)' && GATES="$GATES S3"
+# SQL injection: raw query concatenation (cross-language)
+echo "$CHANGED" | grep -qE '\.sql$' && GATES="$GATES S3 P1"
+git diff HEAD~1 | grep -qE '("SELECT.*\+|"INSERT.*\+|`SELECT.*\+|fmt\.Sprintf.*SELECT|\.execute\(.*\+)' && GATES="$GATES S3"
 ```
 
 **IntentGate integration**: The detected intent from `blackcow-plan` Phase -1 overrides auto-detection:
