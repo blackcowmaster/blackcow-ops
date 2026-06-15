@@ -101,6 +101,7 @@ Produce `.omo/governor/<slug>-governance.md`:
 |---|---|---|
 | No new evidence | 1 cycle with Δ=0 | Re-dispatch D1 (pro) → plan re-eval → user |
 | Same gate ×2 | Same gate fails twice | ESCALATE to user |
+| Same gap 3+ fixes | Same gap has 3+ failed PDCA fix attempts | ESCALATE — question architecture (pattern: each fix reveals new coupling) |
 | Budget near limit | 80% of max cycles | ESCALATE |
 | Scope creep | D2 flags scope change | Return to planner |
 

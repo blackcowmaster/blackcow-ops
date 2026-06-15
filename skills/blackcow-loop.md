@@ -61,6 +61,7 @@ Parse `--mode=auto|fast|standard|full|siege|escalate` (default: auto, which sele
 | 0.5 Hashline | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 1 TDD | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 2 Gap Detection | ❌ | ✅ | ✅ | ✅ | ✅ |
+| 2.2 Root Cause | ❌ | ✅ | ✅ | ✅ | ✅ |
 | 2a PDCA | ❌ | ≤3 cycles | ≤7 cycles | ≤7 cycles | ∞ |
 | 3 Verification | M2 only | M2+M3+M4 | M2+M3+M4 | M2+M3+M4 | All |
 | 4 Manual-QA | ❌ | Applicable channels | All channels | All channels | All channels |
@@ -525,6 +526,32 @@ RETURN EXACTLY:
 ```
 
 Max cycles = trust level (L0=0, L1=1, L2=3, L3=7, L4=7). After each cycle, re-run gap-detector. Adaptive ceiling: track PDCA success rate; if >95% for 3 consecutive runs, auto-reduce cycles by 1 per successful run (minimum=3). Write PDCA metrics to `.omo/memory/pdca-history.jsonl`.
+
+### Phase 2.2 — Root Cause Confirmation (NO FIX WITHOUT UNDERSTANDING)
+
+**Iron Law: No fix before root cause is understood.** Symptom fixes = failure.
+
+After D1 and D2 return, BEFORE applying any fix:
+
+1. **State the hypothesis explicitly.** Write ONE sentence: "I think [gap] is caused by [root cause] because [evidence from D1]." If you cannot write this sentence, you do not understand the problem yet. Return to D1 with more specific diagnostic questions.
+
+2. **Verify D1's diagnosis against D2's proposed fix.** Does D2's fix address D1's root cause, or just the symptom?
+   - Fix addresses root cause → proceed to apply
+   - Fix only masks symptom → reject D2, re-dispatch D1 with deeper diagnostic scope
+
+3. **Track fix attempts per gap.** Maintain a counter for each gap. After each failed fix attempt on the same gap, increment. Record in `gap-report.md`.
+
+4. **3-failure rule.** If the SAME gap has 3+ failed fix attempts → **STOP. Question architecture.** This is NOT a failed hypothesis — the pattern (each fix reveals new coupling, each fix creates new symptoms) signals an architectural problem. Trigger ESCALATE with a summary of all 3 attempts and their outcomes. Do NOT attempt a 4th fix without architectural discussion.
+
+5. **Red flags — STOP and return to diagnosis:**
+   - "Quick fix for now, investigate later"
+   - "Just try changing X and see if it works"
+   - "Add multiple changes, run tests"
+   - "It's probably X, let me fix that"
+   - "One more fix attempt" (after 2+ failures)
+   - Proposing solutions before stating the hypothesis
+
+**ALL of these mean: you are guessing. Return to D1.**
 
 ### PDCA Evidence Discipline (MANDATORY per cycle)
 
