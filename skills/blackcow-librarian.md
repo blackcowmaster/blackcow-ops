@@ -36,6 +36,8 @@ All 7 commands can also be chained: `init-deep → scan → check` in a single i
 
 Parse `--model-tier=auto|budget|pro` (default: auto). Scan lanes use budget, analysis lanes use pro.
 
+**Verified cost reference** (EXECUTED_EVAL, 2026-06-15): blackcow-skill-review on blackcow-plan consumed ~$0.03 per invocation (mixed flash/pro). Structure cache scan: ~$0.01 (flash-only). Use these as calibration for token estimates.
+
 ---
 
 ## Phase 0 — Command Dispatch
@@ -59,8 +61,10 @@ If `--command=all` or no command and cache is absent: chain `init-deep → scan 
 
 **CRITICAL: Dispatch all 5 lanes as `task` subagents with `run_in_background: true`. NEVER await any single lane before dispatching the rest.**
 
+> **Platform adaptation**: `task()` pseudo-code maps to `explore(task="<description>: <prompt>")`. Fire all explores in one turn. Ignore `run_in_background`, `max_steps`, `model` (budget hints, not enforced).
+
 Every lane subagent uses:
-- `tools`: `["read_file","grep","glob","ls","bash"]`
+- `tools`: `["read_file","search_content","search_files","glob","list_directory","directory_tree","run_command"]`
 - `max_steps`: 10
 - `run_in_background`: `true`
 - `model`: tier-assigned (budget for L2/L4/L5, pro for L1/L3)

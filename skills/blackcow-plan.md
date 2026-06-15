@@ -308,6 +308,12 @@ uncertainty_score = clamp(uncertainty_score * 100, 0, 100)
 ```
 Future tasks in the same area use this history: if similar tasks consistently stopped at Stage 2, start there.
 
+**Widening effectiveness metric**: After task completion, compute:
+```
+effectiveness = (uncertainty_before - uncertainty_after) / tokens_spent_on_widening
+```
+If effectiveness < 0.01 (less than 1% uncertainty reduction per 1K tokens), flag the widening decision as INEFFECTIVE. Future similar tasks skip that stage.
+
 **Evidence requirement per stage**: After each stage, record:
 - `remaining_uncertainty`: what is still unknown (quantify: N unknown symbols, M uncovered call paths)
 - `why_wider`: which auto-trigger threshold was met (or "NONE — stopping")

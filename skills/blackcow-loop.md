@@ -633,6 +633,8 @@ After each PDCA cycle (and at Completion Report time), log token efficiency to `
 - `roi > 0.01` for 3 consecutive cycles → consider reducing mode (FULL→STANDARD)
 - `roi == 0` (no score gain) for 1 cycle → STOP (do not waste tokens)
 
+**Token counting**: When actual token counts are available from the Reasonix runtime (reported after each `explore`/`run_skill` call), use actual values. Fall back to estimates only when runtime doesn't report. Mark each ROI entry: `counted: true|false`.
+
 **Governor integration**: Before each blackcow-loop invocation, check loop-roi.jsonl for the same plan area. If historical ROI was low, start at higher trust level or suggest scope reduction.
 
 ---
