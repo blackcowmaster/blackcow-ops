@@ -33,9 +33,12 @@ JSON_OUT=false
 VERBOSE=false
 QUIET=false
 SUMMARY_OUT=false
-TIMEOUT_SEC=120  # per-script timeout
 START_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 START_EPOCH=$(date +%s)
+
+# --- Temp directory for parallel sub-script output ---
+TMPDIR=$(mktemp -d "${TMPDIR:-/tmp}/ecosystem-health.XXXXXX")
+trap 'rm -rf "$TMPDIR"' EXIT
 
 # Scripts run from PROJECT_ROOT because many validate-*.sh use relative paths
 # like "skills/blackcow-governor.md" that resolve from the project root.
@@ -311,7 +314,7 @@ if [[ ${#SCRIPTS[@]} -eq 0 ]]; then
 fi
 
 # --- Header -----------------------------------------------------------------
-if ! $SUMMARY_OUT; then
+if ! $SUMMARY_OUT && ! $QUIET; then
   echo "╔══════════════════════════════════════════════════════════════════╗"
   echo "║       BlackCow Ecosystem Health Report                          ║"
   echo "║       $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)                              ║"
@@ -319,38 +322,60 @@ if ! $SUMMARY_OUT; then
   echo "╚══════════════════════════════════════════════════════════════════╝"
 fi
 
-# --- Run all scripts --------------------------------------------------------
-if ! $SUMMARY_OUT; then
+# --- Run all scripts (parallel) ---------------------------------------------
+if ! $SUMMARY_OUT && ! $QUIET; then
   header "Running ${#SCRIPTS[@]} Validation Scripts"
 fi
 
+# Phase 1: Launch all scripts in parallel, each writing to its own temp file
+declare -a TEMP_FILES=()
+i=0
 for script_path in "${SCRIPTS[@]}"; do
   script_name=$(basename "$script_path")
   SCRIPT_NAMES+=("$script_name")
-
   log_info "Running: $script_name ..."
 
-  script_start=$(date +%s)
-  local_output=""
-  local_exit=0
+  tmpfile="${TMPDIR}/out_${i}"
+  TEMP_FILES+=("$tmpfile")
+  # Run in background: capture output + exit code sentinel on last line
+  ( bash "$script_path" > "$tmpfile" 2>&1; echo "EXIT:$?" >> "$tmpfile" ) &
+  ((i++))
+done
+
+# Phase 2: Wait for all background jobs
+# 'wait' without args returns 0 (success) under normal conditions in bash,
+# even if children failed — their exit codes are captured in temp files.
+wait
+
+# Phase 3: Process results from temp files in original order
+i=0
+for script_path in "${SCRIPTS[@]}"; do
+  script_name="${SCRIPT_NAMES[$i]}"
+  tmpfile="${TEMP_FILES[$i]}"
+
+  # Recover output (all lines except EXIT sentinel) and exit code
+  local_output=$(sed '$d' "$tmpfile" 2>/dev/null || true)
+  local_exit=$(tail -1 "$tmpfile" 2>/dev/null | grep -oE '[0-9]+$' || echo "1")
+  local_exit=$(safe_int "$local_exit")
 
   if $VERBOSE; then
     echo "  ── ${script_name} output ──"
-    bash "$script_path" 2>&1 || local_exit=$?
+    if [[ -n "$local_output" ]]; then
+      echo "$local_output"
+    fi
     echo "  ── end ${script_name} ──"
-    local_output="[streamed — see above]"
-  else
-    local_output=$(bash "$script_path" 2>&1) || local_exit=$?
   fi
 
-  script_end=$(date +%s)
-  duration=$((script_end - script_start))
+  duration=0  # parallel: per-script wall-clock not individually measurable
 
   pass=0; fail=0; skip=0; total=0
   if ! $VERBOSE; then
     read -r pass fail skip total < <(parse_counts "$local_output")
   else
-    if [[ "$local_exit" -eq 0 ]]; then pass=1; total=1; else fail=1; total=1; fi
+    read -r pass fail skip total < <(parse_counts "$local_output") || true
+    if [[ "$pass" -eq 0 && "$fail" -eq 0 && "$skip" -eq 0 && "$total" -eq 0 ]]; then
+      if [[ "$local_exit" -eq 0 ]]; then pass=1; total=1; else fail=1; total=1; fi
+    fi
   fi
 
   pass=$(safe_int "$pass")
@@ -400,6 +425,8 @@ for script_path in "${SCRIPTS[@]}"; do
       SCRIPT_ERRORS+=("[see output above]")
     fi
   fi
+
+  ((i++))
 done
 
 # --- Aggregate Score ---------------------------------------------------------
@@ -440,42 +467,39 @@ mkdir -p "$REPORT_DIR"
   done
 } > "$HEALTH_LOG"
 
-if command -v python3 &>/dev/null; then
-  python3 -c "
-import json
-scripts = []
-$(
+# Pure-bash JSON report (no python3 dependency)
+{
+  printf '{\n'
+  printf '  "traffic_light": "%s",\n' "$TRAFFIC"
+  printf '  "aggregate_score": %d,\n' "$AGGREGATE_SCORE"
+  printf '  "scripts_run": %d,\n' "$SCRIPTS_RUN"
+  printf '  "scripts_passed": %d,\n' "$SCRIPTS_PASSED"
+  printf '  "scripts_failed": %d,\n' "$SCRIPTS_FAILED"
+  printf '  "total_checks": %d,\n' "$OVERALL_TOTAL"
+  printf '  "total_pass": %d,\n' "$OVERALL_PASS"
+  printf '  "total_fail": %d,\n' "$OVERALL_FAIL"
+  printf '  "total_skip": %d,\n' "$OVERALL_SKIP"
+  printf '  "generated_at": "%s",\n' "$START_TIME"
+  printf '  "scripts": [\n'
   for i in "${!SCRIPT_NAMES[@]}"; do
-    echo "scripts.append({"
-    echo "    'name': '${SCRIPT_NAMES[$i]}',"
-    echo "    'pass': ${SCRIPT_PASS[$i]},"
-    echo "    'fail': ${SCRIPT_FAIL[$i]},"
-    echo "    'skip': ${SCRIPT_SKIP[$i]},"
-    echo "    'total': ${SCRIPT_TOTAL[$i]},"
-    echo "    'score': ${SCRIPT_SCORE[$i]},"
-    echo "    'exit_code': ${SCRIPT_EXIT[$i]},"
-    echo "    'duration_s': ${SCRIPT_DURATION[$i]}"
-    echo "})"
+    printf '    {\n'
+    printf '      "name": "%s",\n' "${SCRIPT_NAMES[$i]}"
+    printf '      "pass": %d,\n' "${SCRIPT_PASS[$i]}"
+    printf '      "fail": %d,\n' "${SCRIPT_FAIL[$i]}"
+    printf '      "skip": %d,\n' "${SCRIPT_SKIP[$i]}"
+    printf '      "total": %d,\n' "${SCRIPT_TOTAL[$i]}"
+    printf '      "score": %d,\n' "${SCRIPT_SCORE[$i]}"
+    printf '      "exit_code": %d,\n' "${SCRIPT_EXIT[$i]}"
+    printf '      "duration_s": %d\n' "${SCRIPT_DURATION[$i]}"
+    if [[ "$i" -lt $((${#SCRIPT_NAMES[@]} - 1)) ]]; then
+      printf '    },\n'
+    else
+      printf '    }\n'
+    fi
   done
-)
-report = {
-    'traffic_light': '$TRAFFIC',
-    'aggregate_score': $AGGREGATE_SCORE,
-    'scripts_run': $SCRIPTS_RUN,
-    'scripts_passed': $SCRIPTS_PASSED,
-    'scripts_failed': $SCRIPTS_FAILED,
-    'total_checks': $OVERALL_TOTAL,
-    'total_pass': $OVERALL_PASS,
-    'total_fail': $OVERALL_FAIL,
-    'total_skip': $OVERALL_SKIP,
-    'generated_at': '$START_TIME',
-    'scripts': scripts
-}
-with open('$HEALTH_JSON', 'w') as f:
-    json.dump(report, f, indent=2)
-print(f'  JSON report written to: $HEALTH_JSON')
-" 2>/dev/null || true
-fi
+  printf '  ]\n'
+  printf '}\n'
+} > "$HEALTH_JSON"
 
 # --- Output: --summary path vs normal path -----------------------------------
 if $SUMMARY_OUT; then
@@ -517,7 +541,7 @@ if $SUMMARY_OUT; then
     done
   fi
 
-else
+elif ! $QUIET; then
   # --- Normal full report ---------------------------------------------------
   header "Per-Script Scores"
 
@@ -672,7 +696,7 @@ else
 fi
 
 # --- Final exit --------------------------------------------------------------
-if ! $SUMMARY_OUT; then
+if ! $SUMMARY_OUT && ! $QUIET; then
   echo ""
   echo "============================================================"
   echo -e "  ${BOLD}${TRAFFIC_LABEL}${NC}"

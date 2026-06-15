@@ -12,14 +12,14 @@ fail() { FAIL=$((FAIL+1)); TOTAL=$((TOTAL+1)); echo "  ❌ FAIL: $1"; }
 
 SCRIPT="skills/tests/validate-blackcow-ecosystem-health.sh"
 PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-RUN="bash -c \"cd '$PROJECT_ROOT' && bash '$SCRIPT'\""
+RUN() { ( cd "$PROJECT_ROOT" && bash "$SCRIPT" "$@"; ); }
 
 echo "=== L4 System Tests: ecosystem-health runner ==="
 echo ""
 
 # Test 1: --json suppresses text output
 echo "--- --json output suppression ---"
-json_out=$(eval "$RUN --json" 2>/dev/null) || true
+json_out=$(RUN --json 2>/dev/null) || true
 if [[ "$json_out" == "{"* ]]; then
   # Should start with { not with text/ANSI
   if ! echo "$json_out" | head -1 | grep -q $'\033'; then
@@ -33,7 +33,7 @@ fi
 
 # Test 2: --json + --verbose: JSON wins
 echo "--- --json --verbose interaction ---"
-jv_out=$(eval "$RUN --json --verbose" 2>/dev/null) || true
+jv_out=$(RUN --json --verbose 2>/dev/null) || true
 if [[ "$jv_out" == "{"* ]]; then
   pass "--json --verbose: JSON still emitted (JSON wins)"
 else
@@ -42,7 +42,7 @@ fi
 
 # Test 3: --json + --quiet: JSON wins
 echo "--- --json --quiet interaction ---"
-jq_out=$(eval "$RUN --json --quiet" 2>/dev/null) || true
+jq_out=$(RUN --json --quiet 2>/dev/null) || true
 if [[ "$jq_out" == "{"* ]]; then
   pass "--json --quiet: JSON still emitted"
 else
@@ -51,7 +51,7 @@ fi
 
 # Test 4: Normal mode produces text report
 echo "--- Normal mode text output ---"
-text_out=$(eval "$RUN" 2>/dev/null) || true
+text_out=$(RUN 2>/dev/null) || true
 if echo "$text_out" | grep -q "BlackCow Ecosystem Health Report"; then
   pass "Normal mode: header present"
 else
@@ -75,7 +75,7 @@ fi
 
 # Test 5: --quiet reduces output
 echo "--- --quiet output reduction ---"
-quiet_out=$(eval "$RUN --quiet" 2>/dev/null) || true
+quiet_out=$(RUN --quiet 2>/dev/null) || true
 normal_lines=$(echo "$text_out" | wc -l | tr -d ' ')
 quiet_lines=$(echo "$quiet_out" | wc -l | tr -d ' ')
 if [[ "$quiet_lines" -lt "$normal_lines" ]]; then
@@ -138,7 +138,7 @@ fi
 
 # Test 10: Non-existent flag is silently ignored (no crash)
 echo "--- Unknown flag handling ---"
-unknown_out=$(eval "$RUN --bogus-flag" 2>&1) || true
+unknown_out=$(RUN --bogus-flag 2>&1) || true
 ec=$?
 if [[ "$ec" -ge 0 && "$ec" -le 2 ]]; then
   pass "Unknown flag: exit code in [0,2] ($ec) — no crash"
