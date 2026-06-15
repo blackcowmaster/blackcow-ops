@@ -32,7 +32,7 @@ All 7 commands can also be chained: `init-deep → scan → check` in a single i
 
 ## Input
 
-`arguments`: `--command=<name>` (required, one of: init-deep, scan, update, check, load), plus optional target directory path.
+`arguments`: `--command=<name>` (required, one of: init-deep, scan, update, check, load, load-evidence), plus optional target directory path.
 
 Parse `--model-tier=auto|budget|pro` (default: auto). Scan lanes use budget, analysis lanes use pro.
 
@@ -47,12 +47,13 @@ Parse `--model-tier=auto|budget|pro` (default: auto). Scan lanes use budget, ana
 Parse `arguments` for `--command=<name>`. Route to the corresponding Phase:
 
 ```
---command=init-deep  → Phase 2
---command=scan       → Phase 3
---command=update     → Phase 4
---command=check      → Phase 5
---command=load       → Phase 6
-(default: no command) → Phase 1 (Discover: show what exists) → suggest next command
+--command=init-deep       → Phase 2
+--command=scan            → Phase 3
+--command=update          → Phase 4
+--command=check           → Phase 5
+--command=load            → Phase 6
+--command=load-evidence   → Phase 6b
+(default: no command)     → Phase 1 (Discover: show what exists) → suggest next command
 ```
 
 If `--command=all` or no command and cache is absent: chain `init-deep → scan → check`.
@@ -909,3 +910,11 @@ Before completing any command, verify:
 - [ ] M5 pruning completed: dead entries removed
 - [ ] No fabricated cache entries or file references
 - [ ] All spot-check results from actual file reads
+
+### Anti-Hallucination Guards
+
+**NEVER fabricate cache data.** Violation = invalid librarian run:
+- ❌ Create cache entries for files you haven't read
+- ❌ Guess LOC counts — must come from `wc -l`
+- ❌ Invent symbol names — must come from actual file inspection
+- ❌ Claim HEAD matches without running `git rev-parse`

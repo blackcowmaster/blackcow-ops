@@ -378,7 +378,7 @@ Before ANY `edit_file` or `multi_edit` call in Phase 1.3 (GREEN):
 ```bash
 # Capture file content + compute per-line hashes
 cat <target-file> > .omo/ulw-loop/evidence/<slug>-pre-edit.snapshot
-while IFS= read -r line; do echo "$line" | md5sum | cut -d' ' -f1; done < <target-file> > .omo/ulw-loop/evidence/<slug>-pre-edit.linehashes
+while IFS= read -r line; do echo "$line" | shasum -a 256 | cut -d' ' -f1; done < <target-file> > .omo/ulw-loop/evidence/<slug>-pre-edit.linehashes
 # Store line count
 wc -l < <target-file> > .omo/ulw-loop/evidence/<slug>-pre-edit.linecount
 ```
@@ -909,7 +909,7 @@ RETURN EXACTLY: checked:bool, log_pattern_found:bool, new_errors:int
 **Dispatch 8 `task` subagents with `run_in_background: true`. Each audits the changed code for one gate dimension (8 of 11 gates — M2/M3/M4 are verified in Phase 3). Routing: S1/S2/S3 use pro (security audits are analytical), M1/M5/P1/P2/P3 use budget (pattern-matching and spec-comparison are mechanical).**
 
 Every QA subagent uses:
-- `tools`: `["read_file","grep","glob","ls","bash"]`
+- `tools`: `["read_file","search_content","search_files","glob","list_directory","directory_tree","run_command"]`
 - `max_steps`: 10
 - `run_in_background`: `true`
 - `model`: tier-assigned (pro for S1/S2/S3 security audits, budget for M1/M5/P1/P2/P3 mechanical audits)
@@ -1111,7 +1111,7 @@ The changed files are: <target files>
 **Dispatch 3 cleanup subagents with `run_in_background: true`. Use model=budget (cleanup is mechanical, not analytical).**
 
 Every cleanup subagent uses:
-- `tools`: `["read_file","grep","glob","ls","bash","edit_file","multi_edit"]`
+- `tools`: `["read_file","search_content","search_files","glob","list_directory","directory_tree","run_command","edit_file","multi_edit"]`
 - `max_steps`: 10
 - `run_in_background`: `true`
 - `model`: `budget`
