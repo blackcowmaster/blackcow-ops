@@ -1,1 +1,13 @@
-{"browser_available": true, "max_o_level": "O4", "tools": ["curl", "run_command", "shell", "puppeteer_navigate", "puppeteer_screenshot", "puppeteer_click", "puppeteer_fill", "puppeteer_evaluate"], "bash_version": "5.2", "os": "macOS"}
+{
+  "browser_available": true,
+  "max_o_level": "O4",
+  "o4_method": "npx playwright screenshot",
+  "o4_verified": true,
+  "o4_evidence": ".omo/ulw-loop/evidence/o4-playwright-screenshot.png",
+  "o4_verified_at": "2026-06-15T22:43:51.873Z",
+  "tools": ["curl", "run_command", "shell", "npx playwright screenshot", "npx playwright codegen"],
+  "playwright_version": "1.61.0",
+  "bash_version": "5.2",
+  "os": "macOS",
+  "note": "O4 achieved via npx playwright CLI, NOT native puppeteer tools. Subagents use run_command to invoke playwright screenshot/codegen."
+}
