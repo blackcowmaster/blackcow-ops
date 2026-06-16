@@ -1,0 +1,12 @@
+M1 spec-match: PASS (100% — option C implemented exactly per plan)
+M2 test-pass: 61/61 = 100%
+M2 coverage: 79.88% overall (new paths 100%)
+M3 regression: 0 failures (47 baseline → 61 total)
+M4 lint: PASS (prettier clean; ESLint v10 config compat is pre-existing)
+M5 dead-code: PASS (0 unreferenced exports)
+S1 dataFlow: PASS
+S2 auth: PASS
+S3 injection: PASS
+P1 query: N/A (reuses existing service path)
+P2 memory: N/A (no new allocations)
+P3 latency: N/A (reuses existing query path)
