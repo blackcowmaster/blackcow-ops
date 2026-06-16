@@ -1,0 +1,3 @@
+FAIL __tests__/pomodoro/sessionStats.test.ts
+  ● Test suite failed to run
+    Cannot find module '../../src/pomodoro/sessionStats' or its corresponding type declarations.

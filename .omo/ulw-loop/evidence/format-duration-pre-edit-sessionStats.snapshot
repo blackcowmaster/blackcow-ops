@@ -1,0 +1,179 @@
+// src/pomodoro/sessionStats.ts
+// Pure-computation session statistics module.
+//
+// Computes: sessions completed today, total focus minutes, and consecutive-day
+// streak from a history of completed SessionRecords.
+//
+// DESIGN CONSTRAINT (from pomodoro-wave1-qa S1 finding):
+//   This module accepts SessionRecord[] as input.  It MUST NOT read
+//   TimerState.sessionsToday, which is wiped by TIMER_RESET and is
+//   therefore unreliable as a stats source.  Persistence is the caller's
+//   responsibility; this module is a pure function.
+//
+// Framework-agnostic — zero dependencies.  Testable with Jest.
+
+// ── Types ────────────────────────────────────────────────────────────────────
+
+/** A single completed session record (persisted by the caller). */
+export interface SessionRecord {
+  /** ISO-8601 timestamp of session completion */
+  completedAt: string;
+  /** Duration in seconds (typically 1500 for work, 300 for break) */
+  durationSeconds: number;
+  /** Session type */
+  type: 'work' | 'break';
+}
+
+/** Computed session statistics. */
+export interface SessionStats {
+  /** Total work sessions completed today (local date) */
+  sessionsToday: number;
+  /** Total focus minutes today (work sessions only) */
+  totalFocusMinutes: number;
+  /** Consecutive days (including today) with ≥1 work session */
+  currentStreak: number;
+}
+
+/** Daily summary — a flattened, consumer-friendly stats view for a single day. */
+export interface DailySummary {
+  /** Today's date in YYYY-MM-DD format (local timezone) */
+  date: string;
+  /** Total work sessions completed today */
+  sessionsCompleted: number;
+  /** Total focus minutes today (work sessions only) */
+  focusMinutes: number;
+  /** Consecutive days (including today) with ≥1 work session */
+  streak: number;
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Extract a YYYY-MM-DD date string from an ISO-8601 timestamp using the local timezone. */
+function toLocalDate(isoString: string): string {
+  const d = new Date(isoString);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+/** Yield the day before `dateStr` (YYYY-MM-DD) using UTC arithmetic to avoid DST issues. */
+function previousDay(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const prev = new Date(Date.UTC(y, m - 1, d - 1));
+  const py = prev.getUTCFullYear();
+  const pm = String(prev.getUTCMonth() + 1).padStart(2, '0');
+  const pd = String(prev.getUTCDate()).padStart(2, '0');
+  return `${py}-${pm}-${pd}`;
+}
+
+// ── Exports ──────────────────────────────────────────────────────────────────
+
+/**
+ * Helper: get today's date string in local timezone (YYYY-MM-DD).
+ */
+export function getTodayDateString(): string {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+/**
+ * Helper: check if `day2` is the calendar day immediately after `day1`.
+ *
+ * Uses UTC date arithmetic — immune to DST transitions.
+ *
+ * @param day1  YYYY-MM-DD string
+ * @param day2  YYYY-MM-DD string
+ * @returns true iff day2 === day1 + 1 calendar day
+ */
+export function isConsecutiveDay(day1: string, day2: string): boolean {
+  const [y1, m1, d1] = day1.split('-').map(Number);
+  // Date.UTC handles month/year wrap automatically (e.g., Jan 31 → Feb 1)
+  const next = new Date(Date.UTC(y1, m1 - 1, d1 + 1));
+  const ny = next.getUTCFullYear();
+  const nm = String(next.getUTCMonth() + 1).padStart(2, '0');
+  const nd = String(next.getUTCDate()).padStart(2, '0');
+  const expected = `${ny}-${nm}-${nd}`;
+  return day2 === expected;
+}
+
+/**
+ * Compute session statistics from completed session history.
+ *
+ * Pure function — no side effects, no mutation, no external state.
+ *
+ * @param history  Array of completed session records (any order)
+ * @returns SessionStats with sessionsToday, totalFocusMinutes, currentStreak
+ */
+export function computeSessionStats(history: SessionRecord[]): SessionStats {
+  const today = getTodayDateString();
+
+  // Filter to work sessions only (breaks do not count toward stats)
+  const workSessions = history.filter((s) => s.type === 'work');
+
+  // ── sessionsToday + totalFocusMinutes ──────────────────────────────
+  let sessionsToday = 0;
+  let totalFocusSeconds = 0;
+
+  // ── Streak: collect unique days that have ≥1 work session ──────────
+  const activeDays = new Set<string>();
+
+  for (const session of workSessions) {
+    const localDate = toLocalDate(session.completedAt);
+
+    if (localDate === today) {
+      sessionsToday++;
+      totalFocusSeconds += session.durationSeconds;
+    }
+
+    activeDays.add(localDate);
+  }
+
+  const totalFocusMinutes = Math.round(totalFocusSeconds / 60);
+
+  // ── Streak calculation ─────────────────────────────────────────────
+  // Walk backward from today; count consecutive days present in activeDays.
+  let currentStreak = 0;
+
+  if (activeDays.has(today)) {
+    currentStreak = 1;
+    let cursor = today;
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      cursor = previousDay(cursor);
+      if (activeDays.has(cursor)) {
+        currentStreak++;
+      } else {
+        break;
+      }
+    }
+  }
+
+  return { sessionsToday, totalFocusMinutes, currentStreak };
+}
+
+/**
+ * Generate a daily summary from completed session history.
+ *
+ * Convenience wrapper around `computeSessionStats` that returns a
+ * flattened, consumer-friendly shape with today's date included.
+ *
+ * Pure function — no side effects, no mutation, no external state.
+ * Zero additional dependencies beyond existing module internals.
+ *
+ * @param history  Array of completed session records (any order)
+ * @returns DailySummary with date, sessionsCompleted, focusMinutes, streak
+ */
+export function generateDailySummary(history: SessionRecord[]): DailySummary {
+  const stats = computeSessionStats(history);
+  return {
+    date: getTodayDateString(),
+    sessionsCompleted: stats.sessionsToday,
+    focusMinutes: stats.totalFocusMinutes,
+    streak: stats.currentStreak,
+  };
+}

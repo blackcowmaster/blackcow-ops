@@ -1,18 +1,21 @@
 {
-  "run_id": "sim-express-crud-patch-2025-07-16",
-  "trust_level": 2,
-  "started": "2025-07-16T00:00:00Z",
-  "last_checkpoint": "2025-07-16T00:15:00Z",
-  "phases_completed": ["0","1","3","4","5","6"],
-  "current_phase": "7",
+  "run_id": "format-duration-helper-fast",
+  "trust_level": 3,
+  "started": "2025-07-17T00:00:00.000Z",
+  "last_checkpoint": "2025-07-17T00:00:00.000Z",
+  "phases_completed": ["0","1","2","3","4","6","7","8","9"],
+  "current_phase": "done",
   "phase_results": {
-    "0": {"bootstrap_lanes": 0, "cache_hit": true, "plan_cache_used": true},
-    "1": {"tests_passing": true, "hashline_edits": 6, "hashline_failures": 0, "test_count": 61},
-    "3": {"m2_test_pass": "61/61", "m2_coverage": "79.88%", "m3_regression": 0, "m4_lint": 0},
-    "4": {"http_checked": true, "endpoints": ["PATCH /api/tasks/:id"], "auth_gate_pass": true},
-    "5": {"qa_gates_passed": 8, "qa_gates_total": 8},
-    "6": {"format_applied": true, "dead_code_removed": 0}
+    "0": {"bootstrap_lanes": 0, "mode": "FAST"},
+    "1": {"tests_passing": true, "hashline_edits": 3, "hashline_failures": 0},
+    "2": {"gap_match_rate": 100, "pdca_cycles": 0},
+    "3": {"m2_test_pass": "63/63", "m3_regression": 0},
+    "4": {"m1_spec_match": "100%", "m4_lint": "0 new warnings"},
+    "6": {"cleanup": "done"},
+    "7": {"commit": "53d6cdd"},
+    "8": {"report": ".omo/ulw-loop/completion-report.md"},
+    "9": {"status": "DONE"}
   },
-  "files_touched": ["src/schemas/task.schema.ts", "src/routes/tasks.routes.ts", "src/controllers/tasks.controller.ts", "__tests__/routes/tasks.routes.test.ts"],
-  "git_snapshot": "N/A"
+  "files_touched": ["src/pomodoro/sessionStats.ts", "__tests__/pomodoro/sessionStats.test.ts"],
+  "git_snapshot": "53d6cdd"
 }
