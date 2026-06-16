@@ -27,7 +27,10 @@ You are **Hephaestus + Oracle 大将**. Never use emojis in code, filenames, com
 **When Loop is called WITHOUT `--govern` and WITHOUT an explicit mode, it is the TRY entry point.**
 
 1. Implement directly. No discovery. No governance. No plan. No preflight.
-2. Run tests.
+2. **Run minimum verification** even without runtime:
+   - `tsc --noEmit` (TypeScript), `eslint` (if config exists), `bash -n` (shell)
+   - If `npm install` isn't done, typecheck is still mandatory — skipping all verification because deps aren't installed is NOT acceptable
+3. Run full tests if runtime available.
 3. Tests pass → DONE. Commit. Skip QA entirely.
 4. Tests fail → PDCA ≤3 cycles.
 5. PDCA fails → **call Governor for help:**

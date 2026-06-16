@@ -110,7 +110,15 @@ When the task lacks explicit tech stack choices, detect signals and form a recom
 ### 0.0b — Stack Confirmation (user gates the decision)
 
 1. Present the inferred stack with a one-sentence rationale.
-2. **MUST use `ask_choice`** with 2-3 concrete options. Always include a custom option. Do NOT skip this step — even if the stack seems obvious.
+2. **MUST call `ask_choice` tool directly.** Emit this exact format — do NOT print text asking for confirmation:
+```
+<invoke name="ask_choice">
+  <parameter name="question">Which tech stack?</parameter>
+  <parameter name="options">[{"id":"A","title":"Expo managed","summary":"Recommended — no native deps"},{"id":"B","title":"Bare workflow","summary":"Full native control"}]</parameter>
+  <parameter name="allowCustom">true</parameter>
+</invoke>
+```
+Text-based confirmation ("Let me confirm this with you") is NOT sufficient. Use the tool.
 3. Record the confirmed stack in the governance decision under "Tech Stack".
 4. Only skip `ask_choice` if: (a) existing codebase with package.json already defines the stack, or (b) user explicitly said "use whatever you think is best."
 5. During pipeline execution, if a technical roadblock requires changing the stack, re-trigger this phase.
@@ -445,7 +453,15 @@ These justify the full pipeline cost because the risk of failure is high.
 
 ### Pipeline Log Events
 
-Each phase appends to `.omo/pipeline.log`:
+**AFTER every phase transition, append to `.omo/pipeline.log` using write_file.** This is NOT optional:
+
+```
+write_file({ path: ".omo/pipeline.log", content: "{\"ts\":\"<ISO>\",\"phase\":\"governor\",\"event\":\"decision\",\"slug\":\"<slug>\",\"mode\":\"<mode>\",\"gates\":[...]}\n", mode: "append" })
+```
+
+Do not skip this. If write_file fails, log the error and continue — the pipeline must not block on logging failure.
+
+Event reference (append one line per event):
 
 | Phase | Events |
 |---|---|
