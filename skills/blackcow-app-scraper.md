@@ -61,23 +61,43 @@ Output saved to: .blackcow/app-scraper/<app-name>.json
 | Field | Description |
 |------|-------------|
 | metadata.title | App name |
-| metadata.rating | Average rating |
+| metadata.summary | Short description |
+| metadata.developer | Developer name |
+| metadata.category | Category (e.g. "여행 및 지역정보") |
+| metadata.rating | Average rating (float) |
 | metadata.rating_count | Total ratings count |
-| metadata.installs | Install range (Play Store) |
-| metadata.free | Free or paid |
-| metadata.contains_ads | Has ads (Play Store) |
+| metadata.review_count | Total reviews count |
+| metadata.rating_histogram | [1★,2★,3★,4★,5★] counts |
+| metadata.installs | Install range text (e.g. "50,000+") |
+| metadata.real_installs | Estimated actual installs (e.g. 82080) |
+| metadata.min_installs | Minimum guaranteed installs |
+| metadata.free | Free or paid (bool) |
+| metadata.price | Price (0 = free) |
+| metadata.currency | Currency code (e.g. "KRW") |
+| metadata.contains_ads | Has ads in app |
 | metadata.offers_iap | Has in-app purchases |
-| metadata.in_app_price_range | IAP price range |
-| metadata.content_rating | Age rating |
+| metadata.in_app_price_range | IAP price range text |
+| metadata.version | Current version string |
 | metadata.released | First release date |
 | metadata.updated | Last update date |
-| metadata.android_version | Min Android version |
-| metadata.description | Full description |
+| metadata.android_version | Min Android API level |
+| metadata.content_rating | Age rating (e.g. "12세 이상") |
+| metadata.content_rating_desc | Rating description (e.g. "보호자 동반 권장") |
+| metadata.whats_new | Changelog text |
+| metadata.privacy_policy_url | Privacy policy link |
+| metadata.developer_website | Developer homepage |
+| metadata.developer_email | Developer contact email |
+| metadata.publisher_country | Publisher country |
+| metadata.description | Full app description |
+| metadata.icon_url | App icon URL |
 | metadata.screenshots | Array of screenshot URLs |
+| metadata.url | Store page URL |
 | reviews[].rating | 1-5 star rating |
 | reviews[].text | Review content |
+| reviews[].author | Reviewer name |
 | reviews[].created_at | ISO datetime |
 | reviews[].app_version | Version at time of review |
+| reviews[].thumbs_up | Helpful vote count |
 | similar_apps[] | Related apps by Play Store algorithm |
 
 ## Notes
