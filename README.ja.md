@@ -66,7 +66,8 @@ blackcow-qa "src/auth/" --gates=auto
 - **11ゲート品質。** M1-M5(実装)、S1-S3(セキュリティ)、P1-P3(パフォーマンス)。全ゲートに数値閾値と証拠が必要。
 - **Findings Gate。** レビュー中に発見された問題は追跡され、完了前に解決必須。既知のバグを黙認しません。
 - **障害パターンメモリ。** 過去の障害が効果スコア付きで記録。高効果の修正は自動適用、低効果パターンはエスカレーション。
-- **Subagent O4検証。** Playwright CLI(`npx playwright screenshot`)でブラウザスクリーンショット — サブエージェントでネイティブpuppeteer依存不要。
+- **ビジュアルレビュー。** DeepSeek V4はビジョン非対応。codex CLI導入時は`codex exec --image`で分析。なしで自動スキップ。
+- **Subagent O4検証。** Playwright CLIでブラウザスクリーンショット。
 - **CLIブリッジ。** サブエージェントは`run_command`で任意のCLIツール(`supabase`、`aws`、`firebase`、`docker`)を使用可能。認証ツールはユーザー確認が必要。
 - **自己監査。** 全スキルに構造化された自己監査チェックリスト。スキルが自らをレビューし進化。
 

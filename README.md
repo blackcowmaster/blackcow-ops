@@ -61,7 +61,7 @@ Invoke via `run_skill` or the `/` shortcut: `/blackcow-plan Add OAuth2`
 - **11-gate quality.** M1-M5 (implementation), S1-S3 (security), P1-P3 (performance). Every gate has a numeric threshold and requires evidence to pass.
 - **Findings gate.** Issues discovered during review are tracked and must be resolved before completion. No silent acceptance of known bugs.
 - **Failure-pattern memory.** Past failures are recorded with effectiveness scores. High-effectiveness fixes are auto-applied; low-effectiveness patterns trigger escalation.
-- **Visual review.** Screenshots analyzed by codex CLI for UI feedback — readability, contrast, spacing, hierarchy. Works on iOS simulator and web. Falls back gracefully if codex is unavailable.
+- **Visual review.** DeepSeek V4 has no native vision. When `codex` CLI is installed, screenshots are analyzed via `codex exec --image` for UI feedback (readability, contrast, spacing, hierarchy). Falls back gracefully if codex is unavailable.
 - **Simulator automation.** `xcrun simctl` boot, screenshot, and app launch — full mobile development cycle without leaving the terminal.
 - **Workspace isolation.** All new projects created under `./projects/` — never pollutes the tool directory. Sandbox-compatible.
 - **CLI bridge.** Subagents can use any CLI tool (`supabase`, `aws`, `firebase`, `docker`) via `run_command`. Authenticated tools require user confirmation.

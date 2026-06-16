@@ -66,7 +66,8 @@ blackcow-qa "src/auth/" --gates=auto
 - **11 门质量体系。** M1-M5（实现）、S1-S3（安全）、P1-P3（性能）。每道门都有数值阈值，通过需提供证据。
 - **Findings Gate。** 审查中发现的问题会被追踪，必须在完成前解决。不默许已知缺陷。
 - **故障模式记忆。** 历史故障按有效性评分记录。高有效性修复自动应用，低有效性模式触发升级。
-- **子智能体 O4 验证。** 通过 Playwright CLI（`npx playwright screenshot`）截取浏览器截图 — 子智能体无需原生 puppeteer 依赖。
+- **视觉审查。** DeepSeek V4 无原生视觉。安装 codex CLI 时通过 `codex exec --image` 分析截图。无 codex 时自动跳过。
+- **子智能体 O4 验证。** Playwright CLI 浏览器截图。
 - **CLI 桥接。** 子智能体可通过 `run_command` 使用任意 CLI 工具（`supabase`、`aws`、`firebase`、`docker`）。需认证的工具要求用户确认。
 - **自我审计。** 每个技能都有结构化的自我审计清单。技能自我审查、自我进化。
 
