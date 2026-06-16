@@ -1,15 +1,11 @@
 ---
 name: blackcow-app-intel
-description: Analyze scraped app reviews into intelligence — complaints, praise, feature gaps, competitor landscape, PRD-ready context.
----
-
----
-name: blackcow-app-intel
-description: Analyzes scraped app review data into actionable intelligence — user sentiment breakdown, top complaints, praise, feature requests, competitor landscape, and PRD-ready context. Feeds into blackcow-plan, create-prd, competitor-analysis, and aso-audit skills.
+description: Analyzes scraped app review data into actionable intelligence — user sentiment breakdown, top complaints, praise, feature requests, competitor landscape, and PRD-ready context. Now includes quantitative keyword analysis, rating trends, and version-impact detection. Feeds into blackcow-plan, create-prd, competitor-analysis, and aso-audit skills.
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   dependencies:
     - blackcow-app-scraper
+    - scripts/app_intel_analyzer.py
 ---
 
 # blackcow-app-intel
@@ -38,124 +34,106 @@ Either:
 If the user provides a URL, run the scraper first:
 ```bash
 cd /Users/honeyhead/Project/blackcow-ops
+mkdir -p .blackcow/app-scraper
 .venv/bin/python scripts/app_scraper.py "<url>" --count 200 > .blackcow/app-scraper/<app-name>.json
 ```
 
-If they provide an existing JSON file, read it directly.
+### Step 2: Run Quantitative Analysis (NEW v1.1)
 
-### Step 2: Analyze Reviews
+Run the analyzer script on the scraper JSON:
+```bash
+.venv/bin/python scripts/app_intel_analyzer.py .blackcow/app-scraper/<app-name>.json \
+  --output .blackcow/app-intel/<app-name>-quant.md
+```
 
-Read through all reviews. Categorize each review into:
+This produces **objective, numerical evidence** for the qualitative review:
+- **Rating distribution** — polarization detection (e.g. 72% 5★ vs 20% 1★ = review manipulation?)
+- **Sentiment breakdown** — keyword-based complaint/praise/feature request %
+- **Top complaint keywords** — "지방 9회", "서울 7회" → quantified evidence of regional issue
+- **Top praise keywords** — "좋아 53회", "버스 16회" → what users actually value
+- **Rating trend (weekly)** — is the app improving or declining?
+- **Version stats** — e.g. v1.55.3 ⭐3.67 vs v1.42.0 ⭐4.83 = that update BROKE something
+- **High-impact negative reviews** — long, detailed 1-2★ reviews to read first
+
+### Step 3: Read Reviews & Generate Qualitative Report
+
+Read all 1-2★ reviews + a sample of 5★ + the longest reviews. Categorize:
 
 | Category | Signal | Example |
 |----------|--------|---------|
-| **complaint** | Bug, missing feature, poor UX, unfair pricing, too many ads | "광고가 너무 많아요" |
-| **praise** | Love the app, great UX, worth paying | "진짜 돈 들어옴 최고" |
-| **feature_request** | "I wish it could...", "add X" | "복권 한번에 여러장 긁기 해줘요" |
-| **bug_report** | Crash, error, not working | "응모권이 안 쌓여요" |
-| **ux_issue** | Confusing, hard to use, annoying flow | "하루 몇번인지 표시좀" |
-| **competitor_mention** | Comparing to another app | "캐시워크보다 좋음" |
+| **complaint** | Bug, missing feature, poor UX, unfair pricing | "고객센터 응대가 너무 늦고" |
+| **praise** | Love the app, great UX, worth paying | "혼자 가도 커뮤니티로 안 외로움" |
+| **feature_request** | "I wish it could...", "add X" | "지방 출발지도 만들어주세요" |
+| **bug_report** | Crash, error, not working | "업데이트 하라는데 업데이트 없음" |
+| **ux_issue** | Confusing, hard to use, annoying flow | "채팅방 입장이 안돼요" |
 
-### Step 3: Generate The Report
+**Cross-reference with quantitative findings** — the analyzer says "지방 9회", so CONFIRM that pattern in actual review text.
 
-Produce a markdown report saved to `.blackcow/app-intel/<app-name>.md` with these sections:
+### Step 4: Generate Final Report
+
+Save to `.blackcow/app-intel/<app-name>.md`. Use this template:
 
 ```markdown
 # App Intelligence Report: <App Name>
 
 ## 1. Executive Summary
-(3-5 bullets: what this app does, who it's for, overall user sentiment, key finding)
+(3-5 bullets)
 
-## 2. App Profile
-| Field | Value |
-|-------|-------|
-| Store | Play Store / App Store |
-| Rating | ⭐X.X (N reviews) |
-| Installs | XXX |
-| Developer | Name |
-| Category | Category |
-| Price | Free / $X.XX |
+## 2. Quantitative Snapshot (from analyzer)
+- Rating: ⭐X.XX | Distribution: [chart]
+- Sentiment: 😍 N% / 😡 N% / 💡 N%
+- Top complaint keywords: [...]
+- Top praise keywords: [...]
+- ⚠️ Version alert: (if any version has crashed rating)
+- 📉 Trend: (rating direction)
 
-## 3. User Sentiment Overview
-| Sentiment | Count | % |
-|-----------|-------|---|
-| 😍 Praise | N | X% |
-| 😡 Complaint | N | X% |
-| 💡 Feature Request | N | X% |
-| 🐛 Bug Report | N | X% |
-| 🤔 UX Issue | N | X% |
+## 3. App Profile
+(table with store, rating, installs, developer, category, price)
 
-## 4. Top Complaints (What Users HATE)
-(Ranked by frequency + impact)
+## 4. User Sentiment Overview
+(sentiment table with counts + %)
 
-| # | Issue | Count | Severity | Example Quote |
-|---|-------|-------|----------|---------------|
-| 1 | ... | N | 🔴High | "..." |
-| 2 | ... | N | 🟡Med | "..." |
+## 5. Top Complaints (What Users HATE)
+(ranked table with severity + quotes + PRD implication)
 
-**Implication for PRD:** (how to avoid these pitfalls when building a similar app)
+## 6. Top Praises (What Users LOVE)
+(ranked table with quotes + PRD implication)
 
-## 5. Top Praises (What Users LOVE)
-| # | Praise | Count | Example Quote |
-|---|--------|-------|---------------|
-| 1 | ... | N | "..." |
+## 7. Feature Requests & Unmet Needs
+(table with feasibility)
 
-**Implication for PRD:** (what to replicate/improve upon)
+## 8. Competitive Landscape
+(Similar Apps + Developer Portfolio tables)
 
-## 6. Feature Requests & Unmet Needs
-| # | Request | Count | Feasibility |
-|---|---------|-------|-------------|
-| 1 | ... | N | Easy / Medium / Hard |
+## 9. Weakness Map
+| Area | Current State | User Pain | Quant Evidence |
+|------|---------------|-----------|----------------|
+| Regional Coverage | Seoul-only | 🔴 | "지방 9회, 서울 7회" |
+| Customer Support | Slow/Kakao only | 🔴 | "문의 6회, 안되 8회" |
+| App Performance | Slow/crashing | 🟡 | v1.55.3 ⭐3.67 |
+| ... | ... | ... | ... |
 
-**Opportunity:** (what niche/gap this reveals)
+## 10. PRD-Ready Takeaways
+(5-7 concrete, numbered, actionable points)
 
-## 7. Competitive Landscape
-
-### Similar Apps (from Play Store)
-| App | Rating | Installs | Key Differentiator |
-|-----|--------|----------|-------------------|
-| ... | ⭐X.X | N | ... |
-
-### Developer Portfolio (same developer's other apps)
-| App | Rating | Installs |
-|-----|--------|----------|
-| ... | ⭐X.X | N |
-
-## 8. Weakness Map (앱의 아킬레스건)
-
-| Area | Current State | User Pain Level |
-|------|---------------|-----------------|
-| Ad Experience | ... | 🔴 / 🟡 / 🟢 |
-| Reward Rate | ... | 🔴 / 🟡 / 🟢 |
-| Stability/Bugs | ... | 🔴 / 🟡 / 🟢 |
-| UX/Clarity | ... | 🔴 / 🟡 / 🟢 |
-| Customer Support | ... | 🔴 / 🟡 / 🟢 |
-| Payout/Trust | ... | 🔴 / 🟡 / 🟢 |
-
-## 9. PRD-Ready Takeaways
-(5-7 concrete, actionable points that can go directly into a PRD)
-1. ...
-2. ...
-
-## 10. Raw Data
-- Scraper output: `.blackcow/app-scraper/<app-name>.json`
-- Review count: N
-- Date range: YYYY-MM-DD ~ YYYY-MM-DD
+## 11. Raw Data
+- Scraper: `.blackcow/app-scraper/<app-name>.json`
+- Quant: `.blackcow/app-intel/<app-name>-quant.md`
 ```
 
-### Step 4: Cross-Skill Integration
+### Step 5: Cross-Skill Integration
 
-After generating the report, mention how it connects:
-- `blackcow-plan` → use Weakness Map + Feature Requests to plan roadmap
-- `create-prd` → use PRD-Ready Takeaways section directly
-- `aso-audit` → use App Profile metadata to score listing
-- `competitor-analysis` → use Similar Apps section as competitor list
-- `keyword-research` → use description text to extract keyword themes
+After generating the report, mention connections:
+- `blackcow-plan` → Weakness Map + Feature Requests → roadmap
+- `create-prd` → PRD-Ready Takeaways section → spec document
+- `aso-audit` → Quantitative Snapshot metadata → ASO score
+- `competitor-analysis` → Similar Apps section → competitor inputs
+- `keyword-research` → description text → keyword themes
 
 ## Notes
 
-- Always save outputs to `.blackcow/app-intel/` directory
-- The report should be **actionable**, not just descriptive
-- When analyzing a competitor for building a similar app, emphasize what to do DIFFERENTLY
-- Developer responses in reviews should be noted but treated separately from user sentiment
-- The report language should match the language of the reviews (Korean for Korean apps, etc.)
+- **Always run BOTH the quant analyzer (Step 2) AND qualitative review (Step 3)**
+- The quant analyzer catches patterns LLM might miss (version crashes, keyword stats)
+- The LLM catches nuance the analyzer misses (sarcasm, context, feature names)
+- Developer responses should be treated separately
+- Match report language to review language
