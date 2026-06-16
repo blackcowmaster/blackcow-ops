@@ -209,7 +209,8 @@ Produce `.omo/governor/<slug>-governance.md`:
 
 | Decision | Value | Rationale |
 |---|---|---|
-| **Mode** | FAST / STANDARD / FULL / SIEGE / ESCALATE | <why> |
+| **Mode** | TRY / STANDARD / FULL / SIEGE / ESCALATE | <why> |
+| **Path** | TRY (default for small tasks) or STANDARD (TRY failed / explicitly large) | <why> |
 | **Trust Level** | L0-L4 | <why> |
 | **Bootstrap Lanes** | <N> | Per mode table |
 | **PDCA Max Cycles** | <N> | Per mode + trust level |
@@ -353,26 +354,52 @@ Phase 2-DISPATCH: Single loop → single QA (sequential, to avoid conflicts)
 | 3 | 3× plan tokens | ~3K | ~2.5× |
 | 5 | 5× plan tokens | ~5K | ~4× (only for large tasks) |
 
-## Phase 2 — Dispatch
+## Phase 2 — Dispatch (DeepSeek-native: try first, govern when stuck)
 
-After writing the governance decision, invoke the pipeline:
+**Core philosophy**: DeepSeek is cheap enough to try. Don't spend 8 minutes planning what 2 minutes of coding can test. Governor is the escalation point — step in only when things go wrong.
+
+### TRY path (default for small/medium tasks)
 
 ```
-# 1. Plan (skip for FAST mode or if plan already exists)
-run_skill({ name: "blackcow-plan", arguments: "<task> --mode=<mode> --govern=<slug>" })
+1. Loop tries directly (no plan, no governor preflight overhead):
+   run_skill({ name: "blackcow-loop", arguments: "<task> --mode=try --govern=<slug>" })
 
-# 2. Self-review plan (optional, for FULL/SIEGE modes)
-run_skill({ name: "blackcow-skill-review", arguments: "--skill=blackcow-plan" })
-
-# 3. Execute
-run_skill({ name: "blackcow-loop", arguments: "Execute plans/<slug>.md --mode=<mode> --trust-level=<N> --gates=<selected> --govern=<slug>" })
-
-# 4. Verify
-run_skill({ name: "blackcow-qa", arguments: "<target> --gates=<selected> --govern=<slug>" })
-
-# 5. Post-mortem self-review (FULL/SIEGE modes)
-run_skill({ name: "blackcow-skill-review", arguments: "--all" })
+2. Loop outcome:
+   ✅ Tests pass, no regressions → DONE (no QA needed for simple tasks)
+   ❌ Tests fail OR regressions found → PDCA 3 cycles
+   ❌ PDCA exhausted → escalate to STANDARD path
 ```
+
+### STANDARD path (when TRY fails, or task is explicitly large)
+
+```
+1. Plan (skip if TRY path produced working code):
+   run_skill({ name: "blackcow-plan", arguments: "<task> --govern=<slug>" })
+
+2. Execute with full verification:
+   run_skill({ name: "blackcow-loop", arguments: "Execute plans/<slug>.md --mode=standard --govern=<slug>" })
+
+3. Verify (only for STANDARD+):
+   run_skill({ name: "blackcow-qa", arguments: "<target> --gates=selected --govern=<slug>" })
+```
+
+### FULL/SIEGE path (security, auth, data migration)
+
+```
+Same as STANDARD + adversarial QA + skill-review + post-mortem.
+These justify the full pipeline cost because the risk of failure is high.
+```
+
+### When to use which
+
+| Task | Path | Why |
+|---|---|---|
+| Typo, config, 1-line fix | TRY | 2 min. Don't plan a typo. |
+| Bug fix, small feature | TRY → escalate to STANDARD if fails | Try first. 80% succeed on first try. |
+| Multi-file feature, new module | STANDARD | Plan once, execute with verification. |
+| Auth, security, data, deploy | FULL/SIEGE | High risk justifies full pipeline. |
+
+**Anti-pattern**: Running STANDARD for a typo fix. That's how we got 27-minute pipelines for 1-line changes.
 
 ## Integration Contract
 

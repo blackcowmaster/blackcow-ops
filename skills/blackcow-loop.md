@@ -45,7 +45,8 @@ Parse `--mode=auto|fast|standard|full|siege|escalate` (default: auto, which sele
 
 | Mode | Bootstrap Lanes | Verification | QA Gates | PDCA Max | Use Case |
 |---|---|---|---|---|---|
-| **FAST** | Cache-only (skip 7+2) | M2 only (test-pass) | M1, M2, M4 (3 gates) | 0 | Typo, doc, config, 1-line fix |
+| **TRY** | None (skip all discovery) | Tests only | None (tests = gate) | 3 | Default for most tasks. Try fast, PDCA if fail. |
+| **FAST** | Cache-only (skip 7+2) | M2 only (test-pass) | M1, M2, M4 (3 gates) | 0 | Typo, doc, config — guaranteed trivial |
 | **STANDARD** | 7 lanes (cache-assisted) | M2, M3, M4 (3 gates) | M1-M5 + selected S/P (5-7 gates) | 3 | Single-file bug, small feature |
 | **FULL** | 7+2 lanes (full bootstrap) | M2, M3, M4 (3 gates) | All 11 gates | 7 | Multi-file feature, API change |
 | **SIEGE** | 7+2 lanes + 3 extra security | M2, M3, M4 + S-gates | All 11 gates + PoC exploits | 7 | Auth change, data migration, security |
@@ -53,21 +54,21 @@ Parse `--mode=auto|fast|standard|full|siege|escalate` (default: auto, which sele
 
 **Mode → Phase mapping:**
 
-| Phase | FAST | STANDARD | FULL | SIEGE | ESCALATE |
+| Phase | TRY | FAST | STANDARD | FULL | SIEGE |
 |---|---|---|---|---|---|
-| 0.0 Cache Load | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 0.3 7 Bootstrap | ❌ | ✅ (cache-assisted) | ✅ | ✅ | ✅ (all pro) |
-| 0.4 2 Speculative | ❌ | ❌ | ✅ | ✅ | ✅ |
+| 0.0 Governance Shortcut | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 0.1 Cache Load | ❌ | ❌ | ✅ | ✅ | ✅ |
+| 0.3 7 Bootstrap | ❌ | ❌ | ✅ | ✅ | ✅ |
 | 0.5 Hashline | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 1 TDD | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 2 Gap Detection | ❌ | ✅ | ✅ | ✅ | ✅ |
-| 2.2 Root Cause | ❌ | ✅ | ✅ | ✅ | ✅ |
-| 2a PDCA | ❌ | ≤3 cycles | ≤7 cycles | ≤7 cycles | ∞ |
-| 3 Verification | M2 only | M2+M3+M4 | M2+M3+M4 | M2+M3+M4 | All |
-| 4 Manual-QA | ❌ | Applicable channels | All channels | All channels | All channels |
-| 5 Adversarial QA | ❌ | 5 agents (no PoC) | 8 agents | 8+2 PoC | 10 agents |
+| 2 Gap Detection | ❌ | ❌ | ✅ | ✅ | ✅ |
+| 2.2 Root Cause | ❌ | ❌ | ✅ | ✅ | ✅ |
+| 2a PDCA | ≤3 | 0 | ≤3 | ≤7 | ≤7 |
+| 3 Verification | Tests | M2 | M2-M4 | M2-M4 | All |
+| 4 Manual-QA | ❌ | ❌ | Optional | ✅ | ✅ |
+| 5 Adversarial QA | ❌ | ❌ | 3 agents | 8 agents | 10 agents |
 | 6 Cleanup | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 7 Findings Gate | ❌ | ✅ | ✅ | ✅ | ✅ |
+| 7 Findings Gate | ❌ | ❌ | ✅ | ✅ | ✅ |
 | 8 Git Commit | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 9 Completion | ✅ | ✅ | ✅ | ✅ | ✅ |
 
