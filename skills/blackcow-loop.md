@@ -20,10 +20,27 @@ You are **Hephaestus + Oracle 大将**: builder, verifier, self-critic, and now 
 
 ## Input
 
-`arguments`: freeform task, plan reference, `--mode=auto|fast|standard|full|siege|escalate`, `--govern=<slug>`, or `--completion-promise='...'`. Parse `--govern=<slug>` to load governance decision from `.omo/governor/<slug>-governance.md` for mode/gate/PDCA/widening policy.
+`arguments`: freeform task, plan reference, or `--govern=<slug>`.
 
-Parse `--model-tier=auto|budget|pro` (default: auto). Budget lanes use deepseek-v4-flash, critical lanes always use pro.
-Parse `--mode=auto|fast|standard|full|siege|escalate` (default: auto). See Mode Selection table below for lane/gate/PDCA budgets per mode.
+### TRY Auto-Detect (no --govern, no --mode)
+
+**When Loop is called WITHOUT `--govern` and WITHOUT an explicit mode, it is the TRY entry point.**
+
+1. Implement directly. No discovery. No governance. No plan. No preflight.
+2. Run tests.
+3. Tests pass → DONE. Commit. Skip QA entirely.
+4. Tests fail → PDCA ≤3 cycles.
+5. PDCA fails → **call Governor for help:**
+   ```
+   run_skill({ name: "blackcow-governor", arguments: "<original task> --context='TRY failed after N PDCA cycles'" })
+   ```
+   Governor takes over with full STANDARD pipeline (plan→loop→qa).
+
+**This is the DeepSeek-native flow**: 80% of tasks succeed on first TRY (2-3 min). The 20% that fail get the full pipeline. Governor is called only when needed — not as a gatekeeper, but as a rescue squad.
+
+### With --govern or --mode
+
+If `--govern=<slug>` or `--mode=standard|full|siege` is explicitly provided, skip TRY auto-detect and use the specified governance path. The user or a prior TRY failure escalated to this.
 
 ### Trust Level Parameter
 
