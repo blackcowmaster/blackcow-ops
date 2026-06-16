@@ -2,7 +2,7 @@
 name: blackcow-app-intel
 description: Analyzes scraped app review data into actionable intelligence — user sentiment breakdown, top complaints, praise, feature requests, competitor landscape, and PRD-ready context. Now includes quantitative keyword analysis, rating trends, and version-impact detection. Feeds into blackcow-plan, create-prd, competitor-analysis, and aso-audit skills.
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   dependencies:
     - blackcow-app-scraper
     - scripts/app_intel_analyzer.py
@@ -46,14 +46,13 @@ Run the analyzer script on the scraper JSON:
   --output .blackcow/app-intel/<app-name>-quant.md
 ```
 
-This produces **objective, numerical evidence** for the qualitative review:
+This produces **objective, numerical evidence** for the LLM's qualitative review:
 - **Rating distribution** — polarization detection (e.g. 72% 5★ vs 20% 1★ = review manipulation?)
-- **Sentiment breakdown** — keyword-based complaint/praise/feature request %
-- **Top complaint keywords** — "지방 9회", "서울 7회" → quantified evidence of regional issue
-- **Top praise keywords** — "좋아 53회", "버스 16회" → what users actually value
-- **Rating trend (weekly)** — is the app improving or declining?
-- **Version stats** — e.g. v1.55.3 ⭐3.67 vs v1.42.0 ⭐4.83 = that update BROKE something
-- **High-impact negative reviews** — long, detailed 1-2★ reviews to read first
+- **Language mix** — char-set detection (ko/en/ja/zh), no external deps
+- **Version impact** — per-version avg rating + 1-5★ spread (e.g. v1.56.3 ⭐2.0 with 1/1/1/0/0 = CRASH)
+- **Rating trend (weekly/monthly)** — is the app improving or declining?
+- **Review length histogram** — are complaints detailed or just "별로임 ㅡㅡ"?
+- **Pre-selected review samples** — all 1★ + all 2★ + long 4-5★ reviews extracted to a separate JSON, ready for the LLM to read and classify sentiment
 
 ### Step 3: Read Reviews & Generate Qualitative Report
 

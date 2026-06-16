@@ -1,258 +1,255 @@
 #!/usr/bin/env python3
-"""blackcow-app-intel analyzer — Quantitative review analysis layer.
-Reads a scraper JSON file and produces structured analytics.
+"""blackcow-app-intel analyzer — Pure statistical analysis, NO language-dependent logic.
+All sentiment/meaning extraction is left to the LLM.
 Usage:
-  .venv/bin/python scripts/app_intel_analyzer.py <.json file> [--lang ko|en]
+  .venv/bin/python scripts/app_intel_analyzer.py <.json file> [--lang ko|en] [-o report.md]
 """
 
 import argparse
 import json
-import re
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from typing import Any
 
 
-# ── keyword patterns for Korean reviews ─────────────────────────────────
-
-COMPLAINT_PATTERNS = [
-    "오류", "느리", "불편", "안되", "먹통", "꺼짐", "작동", "실행", "충돌",
-    "버그", "안돼", "안들어가", "접속", "렉", "렉걸", "로딩", "멈춰", "멈추",
-    "취소", "환불", "고객센터", "응대", "문의", "답변", "읽씹", "전화",
-    "서울", "수도권", "지방", "출발", "사당", "지역",
-    "비싸", "가격", "비용", "돈", "캐시", "포인트", "적립",
-    "광고", "업데이트", "권한", "카메라", "토큰", "로그인", "계정",
-    "친목", "소외", "대장", "크루", "클럽",
-    "쓰레기", "최악", "별로", "망함", "짜증", "화나", "열받", "에바",
-    "삭제", "지움", "탈퇴", "접었",
-]
-
-PRAISE_PATTERNS = [
-    "좋아", "좋고", "좋네", "좋습", "굿", "굳", "최고", "짱", "갑",
-    "편리", "편하", "편해", "편함", "유용", "쉽", "쉬워", "간편",
-    "감사", "추천", "강추", "굿입니다", "만족",
-    "재밌", "즐겁", "행복", "좋은", "멋지", "예쁘",
-    "함께", "같이", "인연", "친구", "커뮤니티", "사람", "분들",
-    "셔틀", "버스", "안전", "보험", "대장님", "리딩",
-    "처음", "입문", "초보", "시작",
-]
-
-FEATURE_REQUEST_PATTERNS = [
-    "있으면", "해줘", "해주", "추가", "개선", "필요", "원함", "바람",
-    "없나", "없어", "아쉽", "아쉬", "부족", "없네", "없음",
-    "만들어", "넣어", "됐으면", "했으면", "기능", "좀",
-]
-
-
-# ── analysis functions ──────────────────────────────────────────────────
-
 def analyze_reviews(reviews: list[dict]) -> dict[str, Any]:
-    """Run full quantitative analysis on review list."""
+    """Run pure statistical analysis. No keyword matching, no sentiment."""
     total = len(reviews)
     if total == 0:
         return {"error": "no reviews"}
 
-    # Rating distribution
+    # ── rating distribution ──────────────────────────────────────────────
     rating_counts = Counter(r["rating"] for r in reviews)
-    avg_rating = sum(r["rating"] for r in reviews) / total
+    avg_rating = round(sum(r["rating"] for r in reviews) / total, 2)
 
-    # Category classification via keyword matching
-    complaint_count = 0
-    praise_count = 0
-    feature_count = 0
-    complaint_keywords = Counter()
-    praise_keywords = Counter()
-
-    for r in reviews:
-        text = r["text"]
-        is_complaint = any(kw in text for kw in COMPLAINT_PATTERNS)
-        is_praise = any(kw in text for kw in PRAISE_PATTERNS)
-        is_feature = any(kw in text for kw in FEATURE_REQUEST_PATTERNS)
-
-        if is_complaint:
-            complaint_count += 1
-        if is_praise:
-            praise_count += 1
-        if is_feature:
-            feature_count += 1
-
-        # Count specific keywords
-        for kw in COMPLAINT_PATTERNS:
-            if kw in text:
-                complaint_keywords[kw] += 1
-        for kw in PRAISE_PATTERNS:
-            if kw in text:
-                praise_keywords[kw] += 1
-
-    # Rating trend (by week)
+    # ── time series (weekly) ─────────────────────────────────────────────
     weeks = defaultdict(list)
+    monthlies = defaultdict(list)
     for r in reviews:
         try:
             dt = datetime.fromisoformat(r["created_at"].replace("Z", "+00:00"))
             week_key = dt.strftime("%Y-W%W")
+            month_key = dt.strftime("%Y-%m")
             weeks[week_key].append(r["rating"])
+            monthlies[month_key].append(r["rating"])
         except (ValueError, KeyError):
             pass
 
     rating_trend = []
     for wk in sorted(weeks.keys()):
         vals = weeks[wk]
-        rating_trend.append({"week": wk, "avg": round(sum(vals) / len(vals), 2), "count": len(vals)})
+        rating_trend.append({"period": wk, "avg": round(sum(vals) / len(vals), 2), "count": len(vals)})
 
-    # Version analysis
+    monthly_trend = []
+    for mo in sorted(monthlies.keys()):
+        vals = monthlies[mo]
+        monthly_trend.append({"period": mo, "avg": round(sum(vals) / len(vals), 2), "count": len(vals)})
+
+    # ── version impact ───────────────────────────────────────────────────
     versions = defaultdict(list)
+    version_dates = {}
     for r in reviews:
-        v = r.get("app_version", "unknown")
+        v = r.get("app_version") or "unknown"
         versions[v].append(r["rating"])
+        if v != "unknown":
+            try:
+                dt = datetime.fromisoformat(r["created_at"].replace("Z", "+00:00"))
+                if v not in version_dates or dt > version_dates[v]:
+                    version_dates[v] = dt
+            except (ValueError, KeyError):
+                pass
 
     version_stats = []
-    for v, ratings in sorted(versions.items(), key=lambda x: -len(x[1])):
+    for v, ratings in versions.items():
+        # sort by first seen date (newest first), unknowns last
+        first_seen = version_dates.get(v, datetime(2000, 1, 1, tzinfo=timezone.utc))
         version_stats.append({
             "version": v,
             "count": len(ratings),
             "avg_rating": round(sum(ratings) / len(ratings), 2),
+            "rating_spread": {"1": sum(1 for x in ratings if x == 1),
+                              "2": sum(1 for x in ratings if x == 2),
+                              "3": sum(1 for x in ratings if x == 3),
+                              "4": sum(1 for x in ratings if x == 4),
+                              "5": sum(1 for x in ratings if x == 5)},
+            "first_seen": first_seen.strftime("%Y-%m-%d") if first_seen.year > 2000 else None,
         })
 
-    # Review length distribution
+    version_stats.sort(key=lambda x: (x["first_seen"] or "0000", -x["count"]), reverse=True)
+
+    # ── review length stats ──────────────────────────────────────────────
     lengths = [len(r["text"]) for r in reviews]
-    avg_length = sum(lengths) / total
+    avg_length = round(sum(lengths) / total, 1)
     short_reviews = sum(1 for l in lengths if l < 20)
     medium_reviews = sum(1 for l in lengths if 20 <= l < 80)
     long_reviews = sum(1 for l in lengths if l >= 80)
 
-    # Top keywords
-    top_complaints = complaint_keywords.most_common(15)
-    top_praises = praise_keywords.most_common(15)
+    # ── language detection (simple char-set based, no deps) ──────────────
+    lang_chars = {"ko": 0, "en": 0, "ja": 0, "zh": 0, "other": 0}
+    for r in reviews:
+        text = r["text"]
+        has_ko = any('\uAC00' <= c <= '\uD7AF' for c in text)
+        has_ja = any('\u3040' <= c <= '\u309F' or '\u30A0' <= c <= '\u30FF' for c in text)
+        has_zh = any('\u4E00' <= c <= '\u9FFF' for c in text)
+        has_en = any(c.isascii() and c.isalpha() for c in text)
+
+        if has_ko:
+            lang_chars["ko"] += 1
+        elif has_ja:
+            lang_chars["ja"] += 1
+        elif has_zh:
+            lang_chars["zh"] += 1
+        elif has_en:
+            lang_chars["en"] += 1
+        else:
+            lang_chars["other"] += 1
+
+    # ── sampling for LLM ─────────────────────────────────────────────────
+    # Pick the most valuable reviews for the LLM to read
+    reviews_sorted_by_len = sorted(reviews, key=lambda x: len(x["text"]), reverse=True)
+
+    sample_for_llm = {
+        "all_1star": [r for r in reviews if r["rating"] == 1],  # LLM must read ALL 1★
+        "all_2star": [r for r in reviews if r["rating"] == 2],
+        "long_5star": [r for r in reviews_sorted_by_len if r["rating"] >= 4][:15],
+        "longest_any": reviews_sorted_by_len[:15],
+    }
 
     return {
         "total_reviews": total,
-        "rating_distribution": dict(rating_counts),
-        "avg_rating": round(avg_rating, 2),
-        "sentiment": {
-            "complaints": complaint_count,
-            "praise": praise_count,
-            "feature_requests": feature_count,
-            "complaint_pct": round(complaint_count / total * 100, 1),
-            "praise_pct": round(praise_count / total * 100, 1),
-            "feature_pct": round(feature_count / total * 100, 1),
-        },
-        "top_complaint_keywords": top_complaints,
-        "top_praise_keywords": top_praises,
-        "rating_trend_weekly": rating_trend[-12:],  # last 12 weeks
-        "version_stats": version_stats[:10],
+        "rating_distribution": dict(sorted(rating_counts.items(), reverse=True)),
+        "avg_rating": avg_rating,
+        "rating_trend_weekly": rating_trend[-12:],
+        "rating_trend_monthly": monthly_trend,
+        "version_stats": version_stats[:12],
         "review_length": {
-            "avg_chars": round(avg_length, 1),
+            "avg_chars": avg_length,
             "short": short_reviews,
             "medium": medium_reviews,
             "long": long_reviews,
+            "histogram": _length_histogram(lengths),
         },
-        "high_impact_reviews": [
-            {
-                "rating": r["rating"],
-                "text": r["text"][:200],
-                "length": len(r["text"]),
-                "date": r.get("created_at", ""),
-            }
-            for r in sorted(reviews, key=lambda x: len(x["text"]), reverse=True)[:10]
-            if len(r["text"]) > 100 and r["rating"] <= 2
-        ],
+        "language_mix": lang_chars,
+        "date_range": {
+            "earliest": reviews[-1].get("created_at", "") if reviews else "",
+            "latest": reviews[0].get("created_at", "") if reviews else "",
+        },
+        "sample_for_llm": {
+            "count_1star": len(sample_for_llm["all_1star"]),
+            "count_2star": len(sample_for_llm["all_2star"]),
+            "count_long_5star": len(sample_for_llm["long_5star"]),
+            "reviews_1star": sample_for_llm["all_1star"],
+            "reviews_2star": sample_for_llm["all_2star"],
+            "reviews_long_5star": sample_for_llm["long_5star"],
+            "reviews_longest": sample_for_llm["longest_any"],
+        },
     }
 
 
-def print_report(stats: dict, lang: str = "ko") -> None:
-    """Print a formatted analytics report."""
-    if lang == "ko":
-        _print_ko(stats)
-    else:
-        _print_en(stats)
+def _length_histogram(lengths: list[int]) -> dict[str, int]:
+    bins = {"0-20": 0, "20-40": 0, "40-60": 0, "60-80": 0, "80-120": 0, "120+": 0}
+    for l in lengths:
+        if l < 20:
+            bins["0-20"] += 1
+        elif l < 40:
+            bins["20-40"] += 1
+        elif l < 60:
+            bins["40-60"] += 1
+        elif l < 80:
+            bins["60-80"] += 1
+        elif l < 120:
+            bins["80-120"] += 1
+        else:
+            bins["120+"] += 1
+    return bins
 
 
-def _print_ko(s: dict) -> None:
-    print("=" * 60)
-    print("          📊 APP INTEL — 정량 분석 리포트")
-    print("=" * 60)
-    print()
-    print(f"  총 리뷰: {s['total_reviews']}개 | 평균 평점: ⭐{s['avg_rating']}")
-    print()
+# ── report generation ───────────────────────────────────────────────────
 
-    # Rating distribution
-    print("  📈 평점 분포")
+def print_report(stats: dict) -> str:
+    """Generate a markdown stats report that the LLM can read as context."""
+    d = stats["rating_distribution"]
+    total = stats["total_reviews"]
+    star_emoji = {5: "🟢", 4: "🔵", 3: "🟡", 2: "🟠", 1: "🔴"}
+
+    lines = []
+    lines.append("## Quantitative Stats Snapshot\n")
+    lines.append(f"**Total reviews:** {total} | **Avg rating:** ⭐{stats['avg_rating']}\n")
+
+    # Rating bar chart
+    lines.append("### Rating Distribution\n")
+    lines.append("| Stars | Count | % | Distribution |")
+    lines.append("|-------|-------|---|-------------|")
     for star in range(5, 0, -1):
-        cnt = s["rating_distribution"].get(star, 0)
-        pct = round(cnt / s["total_reviews"] * 100)
+        cnt = d.get(star, 0)
+        pct = round(cnt / total * 100)
         bar = "█" * (pct // 2)
-        print(f"  {star}★ {bar} {cnt}개 ({pct}%)")
-    print()
+        lines.append(f"| {star}★ | {cnt} | {pct}% | {bar} |")
 
-    # Sentiment
-    se = s["sentiment"]
-    print("  🎭 감정 분류 (키워드 기반)")
-    print(f"  😍 칭찬:   {se['praise']}개 ({se['praise_pct']}%)")
-    print(f"  😡 불만:   {se['complaints']}개 ({se['complaint_pct']}%)")
-    print(f"  💡 요청:   {se['feature_requests']}개 ({se['feature_pct']}%)")
-    print()
-
-    # Top keywords
-    print("  🔥 불만 키워드 TOP10")
-    for i, (kw, cnt) in enumerate(s["top_complaint_keywords"][:10], 1):
-        bar = "▓" * min(cnt, 20)
-        print(f"  {i:2}. {kw:<12} {bar} {cnt}")
-    print()
-    print("  ❤️  칭찬 키워드 TOP10")
-    for i, (kw, cnt) in enumerate(s["top_praise_keywords"][:10], 1):
-        bar = "▓" * min(cnt, 20)
-        print(f"  {i:2}. {kw:<12} {bar} {cnt}")
-    print()
-
-    # Rating trend
-    if s["rating_trend_weekly"]:
-        print("  📅 평점 추이 (주간)")
-        for w in s["rating_trend_weekly"]:
-            bar = "━" * int(w["avg"] * 2)
-            print(f"  {w['week']}  ⭐{w['avg']} {bar} ({w['count']}개)")
-        print()
-
-    # Version stats
-    if s["version_stats"]:
-        print("  📱 버전별 평점")
-        for v in s["version_stats"]:
-            emoji = "🟢" if v["avg_rating"] >= 4 else ("🟡" if v["avg_rating"] >= 3 else "🔴")
-            vlabel = (v['version'] or 'unknown')[:12]
-            print(f"  {emoji} v{vlabel:<12} ⭐{v['avg_rating']} ({v['count']}개)")
-        print()
+    # Language mix
+    lang = stats["language_mix"]
+    if sum(lang.values()) > 0:
+        lines.append("\n### Language Mix (char-set detection)\n")
+        lines.append("| Lang | Count | % |")
+        lines.append("|------|-------|---|")
+        for l, cnt in sorted(lang.items(), key=lambda x: -x[1]):
+            if cnt > 0:
+                lines.append(f"| {l} | {cnt} | {round(cnt/total*100)}% |")
 
     # Review length
-    rl = s["review_length"]
-    print("  📝 리뷰 길이 분포")
-    print(f"  짧음(<20자): {rl['short']}개 | 중간: {rl['medium']}개 | 긴글(80자+): {rl['long']}개")
-    print(f"  평균 길이: {rl['avg_chars']}자")
-    print()
+    rl = stats["review_length"]
+    lines.append("\n### Review Length\n")
+    lines.append(f"- Average: **{rl['avg_chars']} chars**")
+    lines.append(f"- Short (<20): {rl['short']} | Medium: {rl['medium']} | Long (80+): {rl['long']}")
+    lines.append(f"- Histogram: {rl['histogram']}")
 
-    # High impact reviews
-    if s["high_impact_reviews"]:
-        print("  🚨 파급력 높은 부정 리뷰 (길고 낮은 평점)")
-        for i, r in enumerate(s["high_impact_reviews"][:5], 1):
-            print(f"  [{r['rating']}★] [{r['length']}자] {r['date'][:10]}")
-            print(f"  {r['text'][:150]}...")
-            print()
+    # Version stats
+    vs = stats["version_stats"]
+    if vs:
+        lines.append("\n### Version Impact\n")
+        lines.append("| Version | Reviews | Avg ★ | 1★ | 2★ | 3★ | 4★ | 5★ | First Seen |")
+        lines.append("|---------|---------|-------|----|----|----|----|----|------------|")
+        for v in vs[:8]:
+            spread = v["rating_spread"]
+            emoji = "🟢" if v["avg_rating"] >= 4 else ("🟡" if v["avg_rating"] >= 3 else "🔴")
+            lines.append(
+                f"| {emoji} {v['version'][:15]} | {v['count']} | {v['avg_rating']} | "
+                f"{spread['1']} | {spread['2']} | {spread['3']} | {spread['4']} | {spread['5']} | "
+                f"{v['first_seen'] or '-'} |"
+            )
 
+    # Rating trend
+    rt = stats["rating_trend_weekly"]
+    if rt:
+        lines.append("\n### Rating Trend (weekly)\n")
+        lines.append("| Week | Count | Avg ★ | Trend |")
+        lines.append("|------|-------|--------|-------|")
+        for w in rt:
+            bar = "━" * max(1, int(w["avg"] * 2))
+            lines.append(f"| {w['period']} | {w['count']} | {w['avg']} | {bar} |")
 
-def _print_en(s: dict) -> None:
-    # English version — similar structure, English labels
-    print(f"Total: {s['total_reviews']} reviews | Avg: ⭐{s['avg_rating']}")
-    print(f"Complaints: {s['sentiment']['complaint_pct']}% | Praise: {s['sentiment']['praise_pct']}%")
-    print(f"Top complaint keywords: {[kw for kw, _ in s['top_complaint_keywords'][:5]]}")
-    print(f"Top praise keywords: {[kw for kw, _ in s['top_praise_keywords'][:5]]}")
+    # Date range
+    dr = stats["date_range"]
+    lines.append(f"\n**Date range:** {dr['latest'][:10]} ~ {dr['earliest'][:10]}\n")
+
+    # Sample counts for LLM
+    s = stats["sample_for_llm"]
+    lines.append("\n### Reviews Ready for LLM Analysis\n")
+    lines.append(f"- 🔴 1★ reviews: **{s['count_1star']}** (LLM should read ALL)")
+    lines.append(f"- 🟠 2★ reviews: **{s['count_2star']}** (LLM should read ALL)")
+    lines.append(f"- 🟢 Long 4-5★ reviews: **{s['count_long_5star']}** (sample)")
+
+    return "\n".join(lines)
 
 
 # ── CLI ─────────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="blackcow-app-intel quantitative analyzer")
-    parser.add_argument("json_file", help="Path to scraper JSON output")
-    parser.add_argument("--lang", default="ko", choices=["ko", "en"])
-    parser.add_argument("--output", "-o", help="Save report to file instead of stdout")
+    parser = argparse.ArgumentParser(description="blackcow-app-intel stats analyzer")
+    parser.add_argument("json_file", help="Scraper JSON output")
+    parser.add_argument("-o", "--output", help="Save stats markdown to file")
+    parser.add_argument("--json-stats", action="store_true", help="Output JSON stats (for LLM consumption)")
     args = parser.parse_args()
 
     with open(args.json_file) as f:
@@ -260,30 +257,29 @@ def main():
 
     reviews = data.get("reviews", [])
     if not reviews:
-        print("❌ No reviews found in JSON", file=sys.stderr)
+        print("❌ No reviews found", file=sys.stderr)
         sys.exit(1)
 
     stats = analyze_reviews(reviews)
 
-    import io
-    buf = io.StringIO()
-    old_stdout = sys.stdout
-    sys.stdout = buf
-    print_report(stats, args.lang)
-    sys.stdout = old_stdout
-    output = buf.getvalue()
-
-    if args.output:
-        with open(args.output, "w") as f:
-            f.write(output)
-        print(f"✅ Report saved to {args.output}", file=sys.stderr)
+    if args.json_stats:
+        # Output pure JSON for LLM to parse
+        out = {k: v for k, v in stats.items() if k != "sample_for_llm"}
+        print(json.dumps(out, indent=2, ensure_ascii=False, default=str))
     else:
-        print(output)
+        report = print_report(stats)
+        if args.output:
+            with open(args.output, "w") as f:
+                f.write(report)
+            print(f"✅ Stats saved to {args.output}", file=sys.stderr)
+        print(report)
 
-    # Also print JSON stats on stdout (so LLM can consume it)
-    print("\n<!-- QUANT_STATS_JSON", file=sys.stderr)
-    json.dump(stats, sys.stderr, indent=2, ensure_ascii=False, default=str)
-    print("-->", file=sys.stderr)
+    # Always write sample_for_llm as a separate JSON file (for the LLM to read inline)
+    if args.output:
+        sample_path = args.output.replace(".md", "-samples.json")
+        with open(sample_path, "w") as f:
+            json.dump(stats["sample_for_llm"], f, indent=2, ensure_ascii=False, default=str)
+        print(f"✅ Review samples saved to {sample_path}", file=sys.stderr)
 
 
 if __name__ == "__main__":
