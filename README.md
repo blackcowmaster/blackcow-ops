@@ -86,12 +86,9 @@ blackcow-skill-review ──→ blackcow-skill-evolver
 
 BlackCow was designed for models cheap enough to be wasteful. DeepSeek pricing (~$0.14/1M flash input) enables patterns that would be cost-prohibitive elsewhere: 15 parallel discovery lanes, 8 QA agents, 7 PDCA cycles.
 
-## References
+## Reference
 
 - **[BKIT](https://github.com/popup-studio-ai/bkit-claude-code)** — 11-gate quality taxonomy. Apache 2.0.
-- **[FableCodex](https://github.com/baskduf/FableCodex)** — Findings gate pattern.
-- **[superpowers-reasonix](https://github.com/christopherarter/superpowers-reasonix)** — Root-cause-before-fix discipline.
-- **[fablize](https://github.com/fivetaku/fablize)** — Honest-limits philosophy.
 
 ## License
 

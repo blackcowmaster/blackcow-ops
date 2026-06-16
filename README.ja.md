@@ -89,9 +89,6 @@ BlackCowは無駄にできるほど安いモデルのために設計されまし
 ## 参照
 
 - **[BKIT](https://github.com/popup-studio-ai/bkit-claude-code)** — 11ゲート品質体系。Apache 2.0。
-- **[FableCodex](https://github.com/baskduf/FableCodex)** — Findings Gateパターン。
-- **[superpowers-reasonix](https://github.com/christopherarter/superpowers-reasonix)** — 根本原因診断優先の規律。
-- **[fablize](https://github.com/fivetaku/fablize)** — 正直な限界哲学。
 
 ## ライセンス
 
