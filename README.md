@@ -33,20 +33,19 @@ BlackCow Ops is a set of 7 Reasonix skills that form a **govern → plan → exe
 
 ```bash
 git clone https://github.com/blackcowmaster/blackcow-ops.git
-cp blackcow-ops/skills/*.md ~/.reasonix/skills/
+bash blackcow-ops/skills/install.sh
 ```
 
-Restart Reasonix. All 7 skills are available globally.
+Restart Reasonix. All 7 skills with correct platform-specific tool names are available globally.
 
 ## Quick Start
 
 ```
-# Most tasks: just ask Loop directly (TRY mode, ~3 min)
+# 80% of tasks: just ask Loop (TRY mode, ~3 min)
 blackcow-loop "Add a password reset feature"
 
-# For complex tasks: Governor plans, Loop executes, QA verifies
+# Complex tasks: full pipeline (Governor plans, Loop executes, QA verifies)
 blackcow-governor "Add OAuth2 authentication with role-based access"
-blackcow-plan "Add OAuth2 authentication" --govern=oauth
 blackcow-loop "Execute plans/oauth.md" --govern=oauth
 blackcow-qa "src/auth/" --govern=oauth
 ```
