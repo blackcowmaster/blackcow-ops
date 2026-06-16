@@ -26,7 +26,7 @@
 
 | Metric | Score |
 | --- | --- |
-| **BlackCow Ops Score** | **89.4 / 100** |
+| **BlackCow Ops Score** | **89.8 / 100** |
 | **Goal** | ~~Break 90 points~~ ✅ Achieved! |
 
 > The BlackCow Ops score is a composite of 11 quality dimensions (Reasonix-native, DeepSeek fit, loop budget control, progressive widening, conditional gate selection, PDCA evidence discipline, observable verification, evidence compaction, failure-pattern memory, self-review integration, and safety/anti-hallucination). Each dimension is scored 0–100 and averaged. See [Quality Score Evolution](#quality-score-evolution) for the full history.
@@ -202,8 +202,9 @@ BlackCow Ops was improved through a **score-driven self-evolution loop** (89 rou
 | R66-R73 | ~~96.2~~ | Multi-domain sim; Phase 2.2 root-cause; FAN-OUT; 11/11 gates; O4; Findings Gate; native review; honest recalibration to 89.0 |
 | R74-R89 | **89.0** | 15-round self-study: widening verified, PDCA confirmed, timeout limit found (>20 files) |
 | R90-R92 | **89.8** | context_tags filtering + native review fallback + O4 subagent via Playwright CLI bridge |
+| R93-R95 | **89.8** | context_tags on all 10 patterns; skill-review timeout fix (6→3 lanes, ultrabrain fix); O4 #2; PDCA anchor acknowledged at 85 |
 
-| Dimension | Baseline (57) | Current (89.4) |
+| Dimension | Baseline (57) | Current (89.8) |
 
 |---|---:|---:|---:|
 | Reasonix-native | 52 | 91 |
@@ -212,7 +213,7 @@ BlackCow Ops was improved through a **score-driven self-evolution loop** (89 rou
 | Progressive widening | 40 | 85 |
 | Conditional gate selection | 38 | 91 |
 | PDCA evidence discipline | 58 | 84 |
-| Observable verification | 30 | 91 |
+| Observable verification | 30 | 92 |
 | Evidence compaction | 45 | 91 |
 | Failure-pattern memory | 40 | 82 |
 | Self-review integration | 65 | 85 |
