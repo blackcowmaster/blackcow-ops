@@ -49,6 +49,14 @@ When the task lacks explicit tech stack choices, detect signals and form a recom
 | No native deps, fast iteration | Expo managed workflow |
 | Static site, blog, docs | Next.js static export or Astro |
 
+**UI & Design signals:**
+| Signal | Suggestion |
+|---|---|
+| Web UI components needed | shadcn/ui (default for React projects) |
+| Korean service, localization needed | Reference `getdesign.kr` for KR design patterns |
+| Global service, brand design needed | Reference `getdesign.md` for 75+ brand design systems |
+| Custom design system required | Generate DESIGN.md following Google's spec (see getdesign.md for examples) |
+
 **Backend signals:**
 | Signal | Suggestion |
 |---|---|
@@ -57,6 +65,13 @@ When the task lacks explicit tech stack choices, detect signals and form a recom
 | Real-time, collaboration, live sync | Supabase Realtime |
 | No persistent server needed | Serverless (Vercel Functions + Edge) |
 | Long-running processes, custom logic | Express or Fastify |
+
+**Mobile monetization signals:**
+| Signal | Suggestion |
+|---|---|
+| Rewarded ads, ad revenue needed | react-native-google-mobile-ads (AdMob) |
+| In-app purchases | expo-in-app-purchases or RevenueCat |
+| Subscriptions | RevenueCat + App Store / Play Store |
 
 **When to ask vs. just proceed:**
 - **Trivial tasks** (typo, config change, 1-file edit) → skip. Use existing stack.
