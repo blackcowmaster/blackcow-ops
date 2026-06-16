@@ -1,35 +1,33 @@
 <div align="center">
   <h1>BlackCow Ops</h1>
-
-  <p><strong>BKIT 기반 에이전트 엔지니어링 하네스.</strong><br />
-  Reasonix + DeepSeek 네이티브.</p>
-
+  <p><strong>Reasonix + DeepSeek를 위한 7개의 자기 개선형 워크플로우 스킬.</strong></p>
   <p>
-    <a href="#설치">설치</a>
-    ·
-    <a href="#빠른-시작">빠른 시작</a>
-    ·
-    <a href="README.md">English</a>
-    ·
-    <a href="README.ja.md">日本語</a>
-    ·
-    <a href="README.zh-cn.md">简体中文</a>
+    <a href="#설치">설치</a> · <a href="#빠른-시작">빠른 시작</a> ·
+    <a href="README.md">English</a> · <a href="README.ja.md">日本語</a> · <a href="README.zh-cn.md">简体中文</a>
   </p>
 </div>
 
-<hr />
+---
 
-> [!NOTE]
-> **BlackCow Ops는 7개의 자기 개선형 Reasonix 스킬**로 구성된 **govern → plan → execute → verify → evolve** 파이프라인입니다. BKIT 11-게이트 품질 체계(M1-M5 구현, S1-S3 보안, P1-P3 성능)를 DeepSeek의 비용 이점(~$0.14/1M flash, ~$0.435/1M pro)에 맞게 튜닝했습니다. FAST 모드 오타 수정은 ~$0.001, FULL 모드 다중 파일 기능은 ~$0.03입니다.
+## 무엇인가
 
-## 프로젝트 상태
+BlackCow Ops는 코딩 작업을 위한 **govern → plan → execute → verify → evolve** 파이프라인을 형성하는 7개의 Reasonix 스킬입니다. BKIT 11-게이트 품질 체계를 DeepSeek의 비용 이점에 맞게 튜닝했습니다. 오타 수정은 약 $0.001, 다중 파일 기능은 약 $0.03에 처리됩니다.
 
-| 지표 | 점수 |
-| --- | --- |
-| **BlackCow Ops 점수** | **96.2 / 100** |
-| **목표** | ~~90점 돌파~~ ✅ 달성! |
+**솔직한 점수: 89.8/100** (11차원 평균). 기준표 고정 — 움직이는 골대 없음.
 
-> 11개 품질 차원의 종합 지표. [품질 점수 개선 이력](#품질-점수-개선-이력) 참고.
+> 절차는 모델의 천장을 올릴 수 없습니다. 천장까지 가는 길을 밝힐 뿐입니다. BlackCow는 한계에 도달하면 에스컬레이션합니다. 결코 가장하지 않습니다.
+
+## 스킬
+
+| 스킬 | 역할 |
+|---|---|
+| `blackcow-governor` | 사전 점검 제어기. 작업 전에 모드, 게이트, 관측 수준, PDCA 예산을 선택합니다. |
+| `blackcow-plan` | 전략 설계자. 점진적 확장, 아키텍처 옵션, 결정 완결형 계획. |
+| `blackcow-loop` | 실행 엔진. 5가지 모드(FAST~ESCALATE), PDCA, findings gate, O0-O4 검증. |
+| `blackcow-qa` | 품질 보증. 수치 임계값 기반 조건부 11-게이트 평가. |
+| `blackcow-librarian` | 프로젝트 메모리. 구조 캐싱, 실패 패턴 메모리, 트렌드 분석. |
+| `blackcow-skill-review` | 메타 감사. 스킬 자체의 트렌드 추적과 진부화 감지. |
+| `blackcow-skill-evolver` | 안전 진화 엔진. 검토된 변경사항을 3중 안전 게이트로 적용. |
 
 ## 설치
 
@@ -38,30 +36,40 @@ git clone https://github.com/blackcowmaster/blackcow-ops.git
 cp blackcow-ops/skills/*.md ~/.reasonix/skills/
 ```
 
-Reasonix 재시작 후 7개 `blackcow-*` 스킬이 전역에서 사용 가능합니다.
+Reasonix를 재시작하면 7개 스킬이 전역에서 사용 가능합니다.
 
-## 사용 시나리오
+## 빠른 시작
 
-| 상황 | 권장 |
-| --- | --- |
-| **Reasonix + DeepSeek** | **즉시 사용.** 모든 설정이 DeepSeek에 최적화됨. 7개 스킬 무설정 사용. |
-| **Reasonix + 다른 모델** | **미검증.** 다른 제공사용 튜닝 필요. YAML의 `model_tiers` 수정. |
-| **Claude Code, Codex CLI 등** | **포팅 필요.** BKIT 방법론은 하네스 독립적. 도구 호출 재작성 필요. |
-| **11-게이트 방법론만** | **무료.** `docs/BKIT.md` 참고. Apache 2.0. |
+```
+# 코드베이스 캐싱 (최초 1회)
+blackcow-librarian --command=init-deep
 
-## 명령어
+# 작업 제어 (모드, 게이트, 예산)
+blackcow-governor "OAuth2 인증 추가"
 
-| 명령어 | 설명 |
-| --- | --- |
-| `blackcow-governor` | 파이프라인 제어기. 모드/게이트/O-레벨/PDCA 예산 선택. 실패 패턴 메모리와 ROI 이력 로드. |
-| `blackcow-plan` | 전략 설계자. 3단계 점진적 확장, 10개 디스커버리 레인, 3가지 아키텍처 옵션. |
-| `blackcow-loop` | 실행 엔진. 5개 모드, 네이티브 review+security_review, Phase 2.2 Root Cause, Findings Gate, O0-O4 검증. |
-| `blackcow-qa` | 품질 보증. 조건부 게이트 선택, 11-게이트 평가, L1-L5 테스트 피라미드. |
-| `blackcow-librarian` | 프로젝트 메모리. 7개 명령어, 구조 캐시, 실패 패턴 메모리, 트렌드 분석. |
-| `blackcow-skill-review` | 메타 감사. 트렌드 추적, 진부화 감지. ⚠️ 점수 변동 가능 — 트렌드 분석용으로만 사용. |
-| `blackcow-skill-evolver` | 안전 진화 엔진. 3중 안전(범위 잠금→백업→승인→검증). |
+# 구현 계획
+blackcow-plan "OAuth2 인증 추가" --govern=oauth
 
-## 파이프라인
+# 계획 실행
+blackcow-loop "Execute plans/oauth.md" --mode=standard --trust-level=2
+
+# 품질 검증
+blackcow-qa "src/auth/" --gates=auto
+```
+
+`run_skill` 또는 `/` 단축키로 호출: `/blackcow-plan OAuth2 인증 추가`
+
+## 주요 강점
+
+- **DeepSeek 비용 최적화.** 5가지 실행 모드가 오타 수정 $0.001부터 전체 보안 감사 $0.10까지 확장됩니다. 점진적 확장으로 필요할 때만 비용이 증가합니다.
+- **11-게이트 품질.** M1-M5(구현), S1-S3(보안), P1-P3(성능). 모든 게이트는 수치 임계값과 증거를 요구합니다.
+- **Findings gate.** 리뷰 중 발견된 이슈는 추적되며 완료 전에 반드시 해결되어야 합니다. 알려진 버그를 묵인하지 않습니다.
+- **실패 패턴 메모리.** 과거 실패가 효과성 점수와 함께 기록됩니다. 높은 효과성의 수정은 자동 적용되고, 낮은 효과성 패턴은 에스컬레이션됩니다.
+- **Subagent O4 검증.** Playwright CLI(`npx playwright screenshot`)로 브라우저 스크린샷 — subagent에서 네이티브 puppeteer 의존성 불필요.
+- **CLI 브릿지.** Subagent는 `run_command`로 모든 CLI 도구(`supabase`, `aws`, `firebase`, `docker`)를 사용할 수 있습니다. 인증 도구는 사용자 확인이 필요합니다.
+- **자가 감사.** 모든 스킬에 구조화된 자가 감사 체크리스트가 있습니다. 스킬이 스스로를 검토하고 진화합니다.
+
+## 아키텍처
 
 ```
 blackcow-governor ──→ blackcow-plan ──→ blackcow-loop ──→ blackcow-qa
@@ -74,152 +82,25 @@ blackcow-skill-review ──→ blackcow-skill-evolver
                (캐싱 + 메모리 + 트렌드)
 ```
 
-앞 4개는 **제품 사이클**, 뒤 2개는 **메타 사이클**. Librarian이 모든 것을 뒷받침합니다.
+## 왜 DeepSeek인가
 
-## 빠른 시작
+BlackCow는 낭비해도 될 만큼 저렴한 모델을 위해 설계되었습니다. DeepSeek 가격(flash ~$0.14/1M 입력)은 다른 곳에서는 비용 부담이 큰 패턴을 가능하게 합니다: 15개 병렬 디스커버리 레인, 8 QA 에이전트, 7 PDCA 사이클.
 
-```
-# 1. 코드베이스 캐싱 (최초 1회)
-blackcow-librarian --command=init-deep
+## 참고
 
-# 2. 사전 점검 (모드/게이트/예산 선택)
-blackcow-governor "OAuth2 사용자 인증 추가"
+다음 프로젝트들의 아이디어를 기반으로 합니다:
 
-# 3. 기능 설계
-blackcow-plan "OAuth2 사용자 인증 추가" --govern=auth
-
-# 4. 계획 실행
-blackcow-loop "Execute plans/user-auth.md" --mode=standard --trust-level=2
-
-# 5. 품질 검증
-blackcow-qa "src/auth/" --gates=auto
-
-# 6. 스킬 자체 감사
-blackcow-skill-review --all
-```
-
-## Reasonix에서 호출
-
-```
-run_skill({ name: "blackcow-plan", arguments: "OAuth2 인증 추가" })
-run_skill({ name: "blackcow-loop", arguments: "Execute plans/auth.md --trust-level=2" })
-```
-
-또는 슬래시 단축키: `/blackcow-plan OAuth2 인증 추가`
-
-## 주요 기능
-
-| 기능 | 설명 |
-| --- | --- |
-| **BKIT 11-게이트** | M1-M5(구현), S1-S3(보안), P1-P3(성능). 모든 게이트에 수치 임계값과 증거 요구. |
-| **5개 실행 모드** | FAST → STANDARD → FULL → SIEGE → ESCALATE. 모드별 레인/게이트/PDCA 예산. |
-| **조건부 게이트 선택** | git diff 신호 + 언어별 패턴으로 필요한 게이트만 자동 선택. |
-| **점진적 확장** | 3단계 불확실성 기반 디스커버리. 가장 저렴한 방법부터, 필요할 때만 확장. |
-| **O0-O4 관측 검증** | O0(없음) → O4(브라우저 자동화). 가용 도구 자동 감지, 정직한 캡. |
-| **Findings Gate** | PDCA 중 발견된 모든 갭을 추적. 미해결 finding이 있으면 완료 차단. FableCodex 패턴 흡수. |
-| **네이티브 도구 통합** | Loop Phase 5에서 Reasonix `review` + `security_review` 사용 — 더 빠르고 정확하고 저렴. |
-| **PDCA 증거 규율** | 하드스탑 규칙: 증거 없음→중단, 동일 실패×2→ESCALATE. |
-| **실패 패턴 메모리** | 구조화된 실패 기록, 해결 효과성 추적. QA 이력에서 자동 생성. |
-| **교차 스킬 증거 계약** | 7개 스킬 간 표준화된 아티팩트 교환. freshness 체크 포함. |
-
-## 아키텍처
-
-```
-blackcow-ops/
-├── skills/                          ← 7개 스킬 + 설치 스크립트
-│   ├── blackcow-governor.md         ← 파이프라인 제어기
-│   ├── blackcow-plan.md             ← 전략 설계자
-│   ├── blackcow-loop.md             ← 실행 엔진
-│   ├── blackcow-qa.md               ← 품질 보증
-│   ├── blackcow-librarian.md        ← 프로젝트 메모리
-│   ├── blackcow-skill-review.md     ← 메타 감사
-│   ├── blackcow-skill-evolver.md    ← 안전 진화 엔진
-│   └── install.sh                   ← 크로스플랫폼 설치
-├── docs/BKIT.md                     ← 11-게이트 레퍼런스
-├── README.md (EN/KO/JA/ZH-CN)
-├── LICENSE
-└── NOTICE
-```
-
-## 왜 DeepSeek인가?
-
-BlackCow는 **낭비해도 될 만큼 저렴한** 모델을 위해 설계되었습니다.
-
-| 패턴 | 의미 |
-| --- | --- |
-| 15개 병렬 디스커버리 레인 | 매번 전체 코드베이스 분석 |
-| 8 QA + 2 PoC 에이전트 | 모든 게이트 감사, 모든 익스플로잇 시도 |
-| 7회 PDCA 사이클 | "충분히 좋음"에 타협 금지 |
-| 호출마다 메타 리뷰 | 지속적 자기 개선 루프 |
-
-> **plan→execute→verify 1사이클 추정 비용**: $0.03 미만 (DeepSeek). 토큰 카운팅 기반 추정치.
-
-## 경쟁 비교
-
-| | BlackCow Ops | OmO / LazyCodeX | Gajae-Code | BKIT |
-| --- | --- | --- | --- | --- |
-| **플랫폼** | Reasonix + DeepSeek | OpenCode + Codex CLI | 독립형 (Rust+TS) | Claude Code |
-| **품질 프레임워크** | 11-Gate (M/S/P) | 없음 | 없음 | 11-Gate |
-| **자가 개선** | ✅ 스킬 감사+진화 | ❌ | ❌ | ❌ |
-| **사이클당 비용** | ~$0.03 추정 | 제공사 의존 | 제공사 의존 | 제공사 의존 |
-| **Red Team PoC** | ✅ 익스플로잇 엔지니어 | ✅ Security Research | ❌ | ❌ |
-| **루프 엔지니어링** | 7사이클 적응형 PDCA | 500회 Ralph Loop | ultragoal revision | 5사이클 PDCA |
-
-## 품질 점수 개선 이력
-
-**점수 기반 자기 개선 루프**(73라운드, 38커밋). 매 라운드: 점수 → 약점 식별 → 최소 수정 → 재측정 → 개선 시에만 채택.
-
-| 라운드 | 점수 | 주요 개선 |
-|---|---:|---:|---|
-| baseline | **57.0** | 최초 11-dimension 평가 |
-| R1-R3 | **71.1** | allowed-tools 호환성, 크로스플랫폼 install.sh |
-| R4-R6 | **84.4** | O0-O4 observable, evidence index, failure-pattern memory |
-| R7-R9 | **87.6** | Progressive widening, PDCA evidence discipline |
-| R10 | **90.7** | `blackcow-governor` — 파이프라인 제어기 |
-| R21-R40 | **91.4** | 11개 차원 전부 90+ |
-| R51-R55 | **91.5** | Governor E2E 검증, 풀파이프라인, ESCALATE |
-| R56-R60 | **93.0** | Failure Pattern Memory 가동, 9개 실패 auto-fix |
-| R61-R65 | **94.0** | S1+S3 gate 트리거, 실제 PDCA 사이클 |
-| R66-R70 | **95.5** | 7-agent 멀티도메인, FAN-OUT, 11/11 게이트 커버 |
-| R71 | **96.0** | O4 observable 검증 (puppeteer) |
-| R72 | **96.2** | Findings Gate (FableCodex), TOCTOU 버그 발견+수정 |
-
-| 차원 | 기준 (57) | 현재 (96.2) |
-|---|---:|---:|---:|
-| Reasonix-native | 52 | 91 |
-| DeepSeek fit | 78 | 92 |
-| Loop budget control | 48 | 92 |
-| Progressive widening | 40 | 91 |
-| Conditional gate selection | 38 | 91 |
-| PDCA evidence discipline | 58 | 91 |
-| Observable verification | 30 | 90 |
-| Evidence compaction | 45 | 91 |
-| Failure-pattern memory | 40 | 92 |
-| Self-review integration | 65 | 93 |
-| Safety / anti-hallucination | 80 | 91 |
-
-**+69% 개선. 기준표 고정 — 움직이는 골대 없음.**
-
-## BlackCow란?
-
-**BlackCow Ops**는 BKIT 품질 방법론을 Reasonix 에이전트 런타임에 구현하고 DeepSeek에 최적화한 것입니다.
-
-> *"OmO는 오케스트레이션을 가르쳐줬다. BKIT는 게이팅을 가르쳐줬다. DeepSeek은 토큰 세기를 멈추라고 가르쳐줬다. BlackCow는 셋 다 한다."*
-
-## 감사의 말
-
-- **[BKIT by POPUP STUDIO](https://github.com/popup-studio-ai/bkit-claude-code)** — 원조 11-게이트 품질 분류 체계. Apache 2.0.
-- **[OmO / oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — 디시플린 에이전트, 병렬 오케스트레이션.
-- **[Gajae-Code](https://github.com/Yeachan-Heo/gajae-code)** — deep-interview, tmux 기반 워커.
-- **[pi-team](https://github.com/minzique/pi-team)** — 멀티에이전트 라운드로빈 통신.
-- **[Claw Code](https://github.com/ultraworkers/claw-code)** — 자기 개선 루프 영감.
+- **[BKIT by POPUP STUDIO](https://github.com/popup-studio-ai/bkit-claude-code)** — 원조 11-게이트 품질 체계와 PDCA 방법론. Apache 2.0.
+- **[OmO / oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — 디시플린 에이전트, 병렬 오케스트레이션, Hashline 검증.
+- **[fablize](https://github.com/fivetaku/fablize)** — "절차는 모델의 천장을 올릴 수 없다." 정직한 한계 철학.
+- **[FableCodex](https://github.com/baskduf/FableCodex)** — Findings gate 패턴 (증거 기반 해결, 미해결 finding 차단).
+- **[prometheus](https://github.com/tmdgusya/prometheus)** — 컨텍스트 우선 분해, ZCode /goal 강제 통찰.
+- **[superpowers-reasonix](https://github.com/christopherarter/superpowers-reasonix)** — 원인 진단 우선 규율 (Phase 2.2).
 
 ## 라이선스
 
-Apache 2.0 — [LICENSE](LICENSE) 및 [NOTICE](NOTICE) 참조.
+Apache 2.0 — [LICENSE](LICENSE) · [NOTICE](NOTICE)
 
 ---
 
-<div align="center">
-  <p>BlackCow Ops로 만들고, BlackCow Ops가 만들었습니다.</p>
-</div>
+<div align="center"><p>BlackCow Ops로 만들고, BlackCow Ops가 만들었습니다.</p></div>
