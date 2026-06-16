@@ -1,0 +1,81 @@
+import { Request, Response } from 'express';
+import { asyncHandler } from '../middleware/asyncHandler';
+import { tasksService } from '../services/tasks.service';
+import { success, created, noContent, paginated, taskToResponse } from '../lib/response';
+import { CreateTaskDto, UpdateTaskDto } from '../types/task';
+import { PaginationInput } from '../schemas/task.schema';
+
+export const getAll = asyncHandler(async (req: Request, res: Response) => {
+  const pq = ((req as any).validatedQuery || req.query) as PaginationInput;
+  const userId = req.user!.sub;
+
+  const { tasks, total, nextCursor } = await tasksService.getAll(userId, pq);
+
+  const hasMore = pq.mode === 'cursor'
+    ? nextCursor !== null
+    : pq.page * pq.limit < total;
+
+  paginated(
+    res,
+    tasks.map(taskToResponse),
+    {
+      page: pq.page,
+      limit: pq.limit,
+      total,
+      hasMore,
+      cursor: nextCursor ?? undefined,
+    },
+  );
+});
+
+export const getById = asyncHandler(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const userId = req.user!.sub;
+
+  const task = await tasksService.getById(id, userId);
+  success(res, taskToResponse(task));
+});
+
+export const create = asyncHandler(async (req: Request, res: Response) => {
+  const dto = req.body as CreateTaskDto;
+  const userId = req.user!.sub;
+
+  const task = await tasksService.create(dto, userId);
+  created(res, taskToResponse(task));
+});
+
+export const update = asyncHandler(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const dto = req.body as UpdateTaskDto;
+  const userId = req.user!.sub;
+
+  const task = await tasksService.update(id, userId, dto);
+  success(res, taskToResponse(task));
+});
+
+export const patch = asyncHandler(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const dto = req.body as UpdateTaskDto;
+  const userId = req.user!.sub;
+
+  const task = await tasksService.update(id, userId, dto);
+  success(res, taskToResponse(task));
+});
+
+export const remove = asyncHandler(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const userId = req.user!.sub;
+
+  await tasksService.remove(id, userId);
+  noContent(res);
+});
+
+export const bulkRemove = asyncHandler(async (req: Request, res: Response) => {
+  const { ids } = req.body as { ids: string[] };
+  const userId = req.user!.sub;
+
+  const results = await tasksService.bulkRemove(ids, userId);
+
+  // Always return 207 Multi-Status for bulk operations
+  res.status(207).json({ results });
+});

@@ -26,7 +26,6 @@ package-lock.json
 package.json
 tsconfig.json
 
-# Simulation artifacts (generated source code, not part of the tool)
-src/
-__tests__/
-db/
+# Temp files (also nested under .omo/)
+**/*.tmp
+**/*.tmp;

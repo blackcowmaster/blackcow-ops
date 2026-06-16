@@ -1,0 +1,32 @@
+import { Router } from 'express';
+import { auth } from '../middleware/auth';
+import { validateBody, validateQuery, validateParams } from '../middleware/validate';
+import { asyncHandler } from '../middleware/asyncHandler';
+import * as controller from '../controllers/tasks.controller';
+import { createTaskSchema, updateTaskSchema, patchTaskSchema, taskIdSchema, paginationSchema, bulkDeleteSchema } from '../schemas/task.schema';
+
+export const taskRoutes = Router();
+
+// Auth middleware applied to ALL task routes
+taskRoutes.use(auth(true));
+
+// GET /api/tasks — list all tasks
+taskRoutes.get('/', validateQuery(paginationSchema), controller.getAll);
+
+// POST /api/tasks — create task
+taskRoutes.post('/', validateBody(createTaskSchema), controller.create);
+
+// GET /api/tasks/:id — get task by ID
+taskRoutes.get('/:id', validateParams(taskIdSchema), controller.getById);
+
+// PUT /api/tasks/:id — update task
+taskRoutes.put('/:id', validateParams(taskIdSchema), validateBody(updateTaskSchema), controller.update);
+
+// PATCH /api/tasks/:id — partial update
+taskRoutes.patch('/:id', validateParams(taskIdSchema), validateBody(patchTaskSchema), controller.patch);
+
+// DELETE /api/tasks/bulk — bulk soft-delete (MUST be before DELETE /:id)
+taskRoutes.delete('/bulk', validateBody(bulkDeleteSchema), controller.bulkRemove);
+
+// DELETE /api/tasks/:id — soft-delete task
+taskRoutes.delete('/:id', validateParams(taskIdSchema), controller.remove);
