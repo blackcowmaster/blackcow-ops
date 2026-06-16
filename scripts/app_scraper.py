@@ -2,6 +2,7 @@
 """blackcow-app-scraper — Extract app reviews + metadata from Play Store & App Store.
 Usage:
   .venv/bin/python scripts/app_scraper.py <app-url> [--count N] [--format json|csv]
+  .venv/bin/python scripts/app_scraper.py --search "<query>" --country CN [--limit 10]
 """
 
 import argparse
@@ -178,12 +179,83 @@ def _normalize_appstore_review(review) -> dict:
 
 # ── CLI ─────────────────────────────────────────────────────────────────
 
+# ── Search Mode ──────────────────────────────────────────────────────────
+
+def _do_search(args):
+    from app_reviews import AppStoreSearch, AppStoreReviews, Country
+
+    search = AppStoreSearch()
+    country = Country[args.country] if args.country in Country.__members__ else Country.CN
+
+    print(f"🔍 Searching App Store ({args.country}): {args.search}", file=sys.stderr)
+    results = search.search(args.search, country=country, limit=args.limit)
+
+    output = []
+    for r in results:
+        entry = {
+            "name": r.name,
+            "app_id": r.app_id,
+            "developer": r.developer,
+            "category": r.category,
+            "rating": r.rating,
+            "rating_count": r.rating_count,
+            "price": r.price,
+            "version": r.version,
+            "icon_url": r.icon_url,
+            "url": r.url,
+        }
+
+        # check Korean store for the same app name
+        if args.check_kr:
+            kr_results = search.search(r.name, country=Country.KR, limit=3)
+            kr_match = None
+            for kr in kr_results:
+                if kr.developer == r.developer or _name_similarity(kr.name, r.name) > 0.7:
+                    kr_match = {"name": kr.name, "app_id": kr.app_id, "rating": kr.rating}
+                    break
+            entry["kr_available"] = kr_match is not None
+            entry["kr_match"] = kr_match
+            if kr_match:
+                print(f"  🇰🇷 KR: {kr_match['name']} ⭐{kr_match['rating']}", file=sys.stderr)
+            else:
+                print(f"  🚀 NO KR: {r.name[:50]} ⭐{r.rating}", file=sys.stderr)
+
+        output.append(entry)
+
+    json.dump(output, sys.stdout, indent=2, ensure_ascii=False, default=str)
+    print(f"\n✅ Found {len(output)} apps", file=sys.stderr)
+    if args.check_kr:
+        missing = sum(1 for e in output if not e["kr_available"])
+        print(f"🚀 {missing}/{len(output)} apps NOT available in Korea", file=sys.stderr)
+
+
+def _name_similarity(a: str, b: str) -> float:
+    """Simple word-overlap similarity for app name matching."""
+    a_words = set(a.lower().split())
+    b_words = set(b.lower().split())
+    if not a_words or not b_words:
+        return 0
+    return len(a_words & b_words) / min(len(a_words), len(b_words))
+
+
 def main():
     parser = argparse.ArgumentParser(description="blackcow-app-scraper")
-    parser.add_argument("url", help="App Store or Play Store URL, or app ID")
+    parser.add_argument("url", nargs="?", help="App Store or Play Store URL, or app ID")
     parser.add_argument("--count", type=int, default=200, help="Number of reviews (default: 200)")
     parser.add_argument("--format", choices=["json", "csv"], default="json")
+    parser.add_argument("--search", help="Search App Store for keyword (e.g. '走路赚钱')")
+    parser.add_argument("--country", default="CN", help="Country code for search (default: CN)")
+    parser.add_argument("--limit", type=int, default=10, help="Results limit for search (default: 10)")
+    parser.add_argument("--check-kr", action="store_true", help="After search, check if each app exists in KR store")
     args = parser.parse_args()
+
+    # ── search mode ──────────────────────────────────────────────────────
+    if args.search:
+        _do_search(args)
+        return
+
+    if not args.url:
+        parser.error("URL required unless using --search")
 
     info = parse_url(args.url)
     store = info["store"]
