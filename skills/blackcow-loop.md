@@ -469,6 +469,18 @@ If ANY Hashline guard fails:
 
 ## Phase 1 — Implementation (TDD + Hashline + Self-Critique)
 
+### 1.0 Extract Core Scenarios (BEFORE any test)
+
+From the task description or plan, extract 3-8 core scenarios that MUST work. These represent the primary user flows. Edge cases (empty input, negative values, extreme lengths) are tested only if the core scenarios pass first.
+
+**Rule**: Core scenarios are mandatory (M2 gate). Edge cases are best-effort — they do NOT block completion. Findings gate catches edge-case bugs in production.
+
+Example for a "formatDuration" function:
+- Core: "25 min → 25m", "90 min → 1h 30m", "0s"
+- Edge (optional): negative, NaN, MAX_INT — skip unless time permits
+
+**Token budget for tests**: Core scenarios = ~60% of test tokens. If edge cases push the budget, skip them. Found bugs in edge cases become findings — they don't need tests to be valid issues.
+
 ### 1.1 Write Baseline (Characterization Test)
 - Run existing tests to establish baseline pass/fail state → write to checkpoint.json
 - If no tests exist for the target, write a minimal characterization test that captures current behavior
@@ -1373,7 +1385,7 @@ Write `.omo/ulw-loop/completion-report.md`:
 | Gate | Threshold | Actual | Pass? |
 |---|---|---|---|
 | M1 spec-match | ≥ 90% | <X>% | ✅/❌ |
-| M2 test-pass | 100% | <X>/<Y> | ✅/❌ |
+| M2 test-pass | Core scenarios 100%, edge cases best-effort | <X>/<Y> core, <Z>/<W> edge | ✅/❌ |
 | M2 coverage | ≥ 80% | <X>% | ✅/❌ |
 | M3 regression | 0 | <N> | ✅/❌ |
 | M4 lint | 0 | <N> | ✅/❌ |
