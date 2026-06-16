@@ -73,11 +73,19 @@ When the task lacks explicit tech stack choices, detect signals and form a recom
 | In-app purchases | expo-in-app-purchases or RevenueCat |
 | Subscriptions | RevenueCat + App Store / Play Store |
 
+**Infrastructure signals (use only when explicitly needed):**
+| Signal | Suggestion |
+|---|---|
+| Cross-platform push notifications (advanced) | OneSignal (only if expo-notifications insufficient) |
+| Error monitoring, crash reporting | Sentry (only for production apps; skip for prototypes) |
+
 **When to ask vs. just proceed:**
 - **Trivial tasks** (typo, config change, 1-file edit) → skip. Use existing stack.
 - **Clear signals** (package.json has Next.js) → confirm once: "Using Next.js — OK?"
 - **New project or ambiguous** → present 2-3 options with reasons via `ask_choice`
 - **Existing codebase** → detect from files first, suggest only if missing
+
+**Dependency philosophy**: Suggest the minimum viable stack. OneSignal and Sentry are powerful but add complexity — only recommend them when the task explicitly requires cross-platform push or production error monitoring. Default to expo-notifications for push and skip crash reporting for prototypes. Never bloat the stack without a clear signal.
 
 ### 0.0b — Stack Confirmation (user gates the decision)
 
