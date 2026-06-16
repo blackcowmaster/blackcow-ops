@@ -157,6 +157,21 @@ export function computeSessionStats(history: SessionRecord[]): SessionStats {
 }
 
 /**
+ * Reset the streak counter on session statistics.
+ *
+ * Returns a new SessionStats object with currentStreak set to 0,
+ * preserving sessionsToday and totalFocusMinutes.
+ *
+ * Pure function — no side effects, no mutation.
+ *
+ * @param stats  The session stats to reset the streak on
+ * @returns A new SessionStats with currentStreak = 0
+ */
+export function resetStreak(stats: SessionStats): SessionStats {
+  return { ...stats, currentStreak: 0 };
+}
+
+/**
  * Generate a daily summary from completed session history.
  *
  * Convenience wrapper around `computeSessionStats` that returns a

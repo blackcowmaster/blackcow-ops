@@ -13,6 +13,7 @@ import {
   generateDailySummary,
   getTodayDateString,
   isConsecutiveDay,
+  resetStreak,
 } from '../../src/pomodoro/sessionStats';
 import type { SessionRecord, SessionStats, DailySummary } from '../../src/pomodoro/sessionStats';
 
@@ -521,6 +522,64 @@ describe('generateDailySummary', () => {
     const summary = generateDailySummary(sessions);
     expect(summary.sessionsCompleted).toBe(2);
     expect(summary.focusMinutes).toBe(50);
+  });
+});
+
+// ── resetStreak ──────────────────────────────────────────────────────────────
+
+describe('resetStreak', () => {
+  it('sets currentStreak to 0 and preserves other fields', () => {
+    const input: SessionStats = {
+      sessionsToday: 4,
+      totalFocusMinutes: 100,
+      currentStreak: 7,
+    };
+    const result = resetStreak(input);
+    expect(result).toEqual({
+      sessionsToday: 4,
+      totalFocusMinutes: 100,
+      currentStreak: 0,
+    });
+  });
+
+  it('returns a new object (does not mutate input)', () => {
+    const input: SessionStats = {
+      sessionsToday: 3,
+      totalFocusMinutes: 75,
+      currentStreak: 5,
+    };
+    const result = resetStreak(input);
+    expect(result).not.toBe(input);
+    // Input unchanged
+    expect(input.currentStreak).toBe(5);
+    expect(input.sessionsToday).toBe(3);
+    expect(input.totalFocusMinutes).toBe(75);
+  });
+
+  it('works when currentStreak is already 0 (idempotent)', () => {
+    const input: SessionStats = {
+      sessionsToday: 2,
+      totalFocusMinutes: 50,
+      currentStreak: 0,
+    };
+    const result = resetStreak(input);
+    expect(result.currentStreak).toBe(0);
+    expect(result.sessionsToday).toBe(2);
+    expect(result.totalFocusMinutes).toBe(50);
+  });
+
+  it('works with all-zero stats', () => {
+    const input: SessionStats = {
+      sessionsToday: 0,
+      totalFocusMinutes: 0,
+      currentStreak: 0,
+    };
+    const result = resetStreak(input);
+    expect(result).toEqual({
+      sessionsToday: 0,
+      totalFocusMinutes: 0,
+      currentStreak: 0,
+    });
   });
 });
 
