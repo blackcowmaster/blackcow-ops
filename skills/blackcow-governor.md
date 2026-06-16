@@ -35,6 +35,53 @@ Ask four questions. If ANY answer is "no", widen discovery scope before proceedi
 
 **Output**: Extract a `context_tags` list from the task domain (language, framework, database, infrastructure). Example: `["typescript", "express", "postgresql"]`. This feeds Phase 0.1 failure-pattern filtering.
 
+### 0.0a — Tech Stack Inference (signals → suggestion)
+
+When the task lacks explicit tech stack choices, detect signals and form a recommendation. Do NOT decide autonomously — always confirm with user.
+
+**Frontend signals:**
+| Signal | Suggestion |
+|---|---|
+| SEO, SSR, server rendering needed | React + Next.js |
+| SPA, dashboard, internal tool | React + Vite |
+| Mobile app, iOS + Android | React Native |
+| Camera, push, BLE, file system needed | RN bare workflow |
+| No native deps, fast iteration | Expo managed workflow |
+| Static site, blog, docs | Next.js static export or Astro |
+
+**Backend signals:**
+| Signal | Suggestion |
+|---|---|
+| Relational data, complex queries, auth | Supabase (PostgreSQL) |
+| Key-value, documents, offline-first | SQLite or NoSQL |
+| Real-time, collaboration, live sync | Supabase Realtime |
+| No persistent server needed | Serverless (Vercel Functions + Edge) |
+| Long-running processes, custom logic | Express or Fastify |
+
+**When to ask vs. just proceed:**
+- **Trivial tasks** (typo, config change, 1-file edit) → skip. Use existing stack.
+- **Clear signals** (package.json has Next.js) → confirm once: "Using Next.js — OK?"
+- **New project or ambiguous** → present 2-3 options with reasons via `ask_choice`
+- **Existing codebase** → detect from files first, suggest only if missing
+
+### 0.0b — Stack Confirmation (user gates the decision)
+
+1. Present the inferred stack with a one-sentence rationale.
+2. Use `ask_choice` with 2-3 concrete options. Always include a custom option.
+3. Record the confirmed stack in the governance decision under "Tech Stack".
+4. If the user defers ("you decide"), use the first suggestion and note "auto-selected" in the log.
+5. During pipeline execution, if a technical roadblock requires changing the stack, re-trigger this phase. Do NOT silently switch — propose the change with rationale and get re-confirmation.
+
+**Example flow:**
+```
+Governor: "This looks like a React Native app. Native deps detected (camera, push).
+→ Option A: Expo managed (can't use camera/push natively without dev build)
+→ Option B: Bare workflow (full control, recommended for these deps)
+→ Option C: Other"
+
+User: picks B → context_tags = ["react-native", "bare", "typescript", "expo-camera"]
+```
+
 ### 0.1 Load Failure-Pattern Memory
 Check `.omo/memory/failure-patterns.jsonl`. Filter by `context_tags` matching the detected tech stack from Phase 0.0:
 - **Exact match** (all task tags ⊆ pattern tags) → apply feed effectiveness rules normally
@@ -121,6 +168,7 @@ Produce `.omo/governor/<slug>-governance.md`:
 |---|---|
 | **Task** | <summary> |
 | **Governed at** | <ISO> |
+| **Tech Stack** | <confirmed or inferred stack with rationale> |
 | **Detected Intent** | Feature / Bug / Security / Performance / Quality / Emergency |
 
 ## Task Decomposition
