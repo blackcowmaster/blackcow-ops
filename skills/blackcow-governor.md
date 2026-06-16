@@ -36,6 +36,8 @@ All phases append to `.omo/pipeline.log` — a JSONL file tracking every pipelin
 
 **Start of session**: Read the last 10 lines to understand recent pipeline state. No need to load the full file — it's append-only. Check the last `event` to see if the previous session ended cleanly (`done`, `escalated`) or was interrupted.
 
+**Session warm-up**: Check `recall_memory("blackcow-ops-meta")` for cached state (score, defaults, capabilities, failure patterns). If found, use it — skip redundant file reads for known facts. Prevents cold starts across sessions.
+
 **Phase 0 — Preflight Discovery**
 
 ### 0.0 Context Self-Diagnosis (BEFORE any discovery)
