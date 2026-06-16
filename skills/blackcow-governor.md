@@ -163,6 +163,12 @@ If git available: `git diff --name-only HEAD~1` to understand what files changed
 ### 0.3b Detect Infrastructure Capabilities
 Check `.omo/ulw-loop/capabilities.json` or run auto-detection. Determines max achievable O-level.
 
+**Visual review capability** (for O4 with actual image understanding):
+```bash
+which codex && echo "codex available"  # enables O4-VISION: screenshot + AI analysis
+```
+If `codex` CLI is available, the pipeline can take simulator screenshots and get AI-powered visual feedback — not just capture, but actual UI critique. This enables design review cycles during development.
+
 ### 0.3c Detect CLI Bridge Capabilities
 
 Subagents have `run_command` but NOT native puppeteer/cloud tools. However, many powerful CLIs are available via `run_command`:

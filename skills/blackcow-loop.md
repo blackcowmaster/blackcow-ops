@@ -88,7 +88,8 @@ Parse `--mode=auto|fast|standard|full|siege|escalate` (default: auto, which sele
 | 2a PDCA | ≤3 | 0 | ≤3 | ≤7 | ≤7 |
 | 3 Verification | Tests | M2 | M2-M4 | M2-M4 | All |
 | 4 Manual-QA | ❌ | ❌ | Optional | ✅ | ✅ |
-| 5 Adversarial QA | ❌ | ❌ | 3 agents | 8 agents | 10 agents |
+| 5 Visual Review | ❌ | codex if avail | codex if avail | codex if avail | codex if avail |
+| 6 Adversarial QA | ❌ | ❌ | 3 agents | 8 agents | 10 agents |
 | 6 Cleanup | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 7 Findings Gate | ❌ | ❌ | ✅ | ✅ | ✅ |
 | 8 Git Commit | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -1019,7 +1020,22 @@ RETURN EXACTLY: checked:bool, log_pattern_found:bool, new_errors:int
 - **Regression baseline**: For CLI/API changes, diff current output against stored baseline from Phase 1.1 characterization test
 - **→ Write checkpoint.json**
 
-## Phase 5 — Code Review & Security Audit
+## Phase 5 — Visual Review (O4-VISION)
+
+**If codex CLI is available AND the project has a UI (web or mobile):**
+
+1. **Mobile (Expo)**: Take a screenshot via `xcrun simctl io "<device>" screenshot`
+2. **Web**: Take a screenshot via `npx playwright screenshot <url>`
+3. **Analyze**: Send screenshot to codex for UI critique
+   ```bash
+   echo "You are a UI reviewer. Analyze for: readability, contrast, spacing, hierarchy, font sizes, alignment, empty states, loading states. List specific issues." | codex exec --image "<screenshot>"
+   ```
+4. **Apply fixes**: If codex reports issues, fix them before proceeding.
+5. **Re-verify**: Take another screenshot after fixes, confirm issues resolved.
+
+**If codex is NOT available**: skip this phase. Screenshots are still captured but not analyzed.
+
+## Phase 6 — Code Review & Security Audit (was Phase 5)
 
 **Mode-conditional dispatch.** Native Reasonix tools are faster, cheaper, and more thorough than subagent-based QA for routine audits. Reserve full adversarial QA for high-risk modes.
 
