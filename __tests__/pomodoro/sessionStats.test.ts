@@ -9,10 +9,12 @@
 
 import {
   computeSessionStats,
+  formatDuration,
+  generateDailySummary,
   getTodayDateString,
   isConsecutiveDay,
 } from '../../src/pomodoro/sessionStats';
-import type { SessionRecord, SessionStats } from '../../src/pomodoro/sessionStats';
+import type { SessionRecord, SessionStats, DailySummary } from '../../src/pomodoro/sessionStats';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -223,13 +225,8 @@ describe('computeSessionStats — cross-midnight', () => {
   });
 
   it('UTC midnight ≠ local midnight — uses local date', () => {
-    // If local timezone is UTC-5, then 2025-07-17T04:00:00Z = 2025-07-16 11PM local
-    // We can't hardcode the offset, but we can test that the module uses local time.
-    // Create a known UTC timestamp and verify it maps to the correct local date.
     const now = new Date();
     const todayLocal = dateString(0);
-    // A session at noon UTC today — should map to today's local date
-    // (unless local TZ is way off, which is fine — this tests the principle)
     const noonToday = new Date(now);
     noonToday.setHours(12, 0, 0, 0);
     const stats = computeSessionStats([record(noonToday.toISOString())]);
@@ -300,13 +297,11 @@ describe('computeSessionStats — streaks', () => {
   });
 
   it('streak across month boundary', () => {
-    // Use explicit date strings to test month boundary
     const sessions = [
       { completedAt: '2025-07-01T12:00:00.000Z', durationSeconds: 1500, type: 'work' as const },
       { completedAt: '2025-06-30T12:00:00.000Z', durationSeconds: 1500, type: 'work' as const },
       { completedAt: '2025-06-29T12:00:00.000Z', durationSeconds: 1500, type: 'work' as const },
     ];
-    // We can only assert this if today is July 1, 2025 — skip if not
     const today = dateString(0);
     if (today === '2025-07-01') {
       const stats = computeSessionStats(sessions);
@@ -332,13 +327,10 @@ describe('computeSessionStats — streaks', () => {
 
 describe('computeSessionStats — DST boundaries', () => {
   it('spring-forward: 23-hour day does not break streak', () => {
-    // March 10, 2024 (US DST spring-forward): day is 23 hours long
-    // Sessions on Mar 9, Mar 10, Mar 11 should form a streak of 3
-    // These are UTC timestamps at noon Eastern (before/after DST shift)
     const sessions = [
-      { completedAt: '2024-03-11T16:00:00.000Z', durationSeconds: 1500, type: 'work' as const }, // noon EDT = 16:00Z
-      { completedAt: '2024-03-10T16:00:00.000Z', durationSeconds: 1500, type: 'work' as const }, // noon EDT = 16:00Z
-      { completedAt: '2024-03-09T17:00:00.000Z', durationSeconds: 1500, type: 'work' as const }, // noon EST = 17:00Z
+      { completedAt: '2024-03-11T16:00:00.000Z', durationSeconds: 1500, type: 'work' as const },
+      { completedAt: '2024-03-10T16:00:00.000Z', durationSeconds: 1500, type: 'work' as const },
+      { completedAt: '2024-03-09T17:00:00.000Z', durationSeconds: 1500, type: 'work' as const },
     ];
     const today = dateString(0);
     if (today === '2024-03-11') {
@@ -348,11 +340,10 @@ describe('computeSessionStats — DST boundaries', () => {
   });
 
   it('fall-back: 25-hour day does not break streak', () => {
-    // November 3, 2024 (US DST fall-back): day is 25 hours long
     const sessions = [
-      { completedAt: '2024-11-04T17:00:00.000Z', durationSeconds: 1500, type: 'work' as const }, // noon EST = 17:00Z
-      { completedAt: '2024-11-03T17:00:00.000Z', durationSeconds: 1500, type: 'work' as const }, // noon EST = 17:00Z
-      { completedAt: '2024-11-02T16:00:00.000Z', durationSeconds: 1500, type: 'work' as const }, // noon EDT = 16:00Z
+      { completedAt: '2024-11-04T17:00:00.000Z', durationSeconds: 1500, type: 'work' as const },
+      { completedAt: '2024-11-03T17:00:00.000Z', durationSeconds: 1500, type: 'work' as const },
+      { completedAt: '2024-11-02T16:00:00.000Z', durationSeconds: 1500, type: 'work' as const },
     ];
     const today = dateString(0);
     if (today === '2024-11-04') {
@@ -362,11 +353,9 @@ describe('computeSessionStats — DST boundaries', () => {
   });
 
   it('DST transition does not affect session counting for a single day', () => {
-    // DST spring-forward: a session completed in the morning and evening of Mar 10
-    // should both count as Mar 10, not two different days
     const sessions = [
-      { completedAt: '2024-03-10T10:00:00.000Z', durationSeconds: 1500, type: 'work' as const }, // 5am EST
-      { completedAt: '2024-03-10T20:00:00.000Z', durationSeconds: 1500, type: 'work' as const }, // 4pm EDT
+      { completedAt: '2024-03-10T10:00:00.000Z', durationSeconds: 1500, type: 'work' as const },
+      { completedAt: '2024-03-10T20:00:00.000Z', durationSeconds: 1500, type: 'work' as const },
     ];
     const today = dateString(0);
     if (today === '2024-03-10') {
@@ -420,6 +409,121 @@ describe('computeSessionStats — mixed scenarios', () => {
   });
 });
 
+// ── generateDailySummary ─────────────────────────────────────────────────────
+
+describe('generateDailySummary', () => {
+  it('returns zeros with today date for empty history', () => {
+    const summary = generateDailySummary([]);
+    expect(summary).toEqual({
+      date: dateString(0),
+      sessionsCompleted: 0,
+      focusMinutes: 0,
+      streak: 0,
+    });
+  });
+
+  it('single work session today — correct fields', () => {
+    const summary = generateDailySummary([record(isoAtNoon(0))]);
+    expect(summary.date).toBe(dateString(0));
+    expect(summary.sessionsCompleted).toBe(1);
+    expect(summary.focusMinutes).toBe(25);
+    expect(summary.streak).toBe(1);
+  });
+
+  it('multiple work sessions today — aggregates correctly', () => {
+    const sessions = [
+      record(isoAtNoon(0), 1500, 'work'),
+      record(isoAtNoon(0), 1500, 'work'),
+      record(isoAtNoon(0), 1500, 'work'),
+    ];
+    const summary = generateDailySummary(sessions);
+    expect(summary.sessionsCompleted).toBe(3);
+    expect(summary.focusMinutes).toBe(75);
+    expect(summary.streak).toBe(1);
+  });
+
+  it('breaks-only history — all zeros', () => {
+    const sessions = [record(isoAtNoon(0), 300, 'break'), record(isoAtNoon(-1), 300, 'break')];
+    const summary = generateDailySummary(sessions);
+    expect(summary.sessionsCompleted).toBe(0);
+    expect(summary.focusMinutes).toBe(0);
+    expect(summary.streak).toBe(0);
+  });
+
+  it('multi-day streak — streak count is correct', () => {
+    const sessions = [
+      record(isoAtNoon(0)),
+      record(isoAtNoon(-1)),
+      record(isoAtNoon(-2)),
+      record(isoAtNoon(-3)),
+    ];
+    const summary = generateDailySummary(sessions);
+    expect(summary.streak).toBe(4);
+    expect(summary.sessionsCompleted).toBe(1);
+    expect(summary.focusMinutes).toBe(25);
+  });
+
+  it('streak stops at gap', () => {
+    const sessions = [
+      record(isoAtNoon(0)),
+      record(isoAtNoon(-1)),
+      // gap at -2
+      record(isoAtNoon(-3)),
+    ];
+    const summary = generateDailySummary(sessions);
+    expect(summary.streak).toBe(2);
+  });
+
+  it('field names differ from computeSessionStats', () => {
+    const sessions = [record(isoAtNoon(0)), record(isoAtNoon(0))];
+    const summary = generateDailySummary(sessions);
+    const stats = computeSessionStats(sessions);
+
+    // Field name mapping verified
+    expect(summary.sessionsCompleted).toBe(stats.sessionsToday);
+    expect(summary.focusMinutes).toBe(stats.totalFocusMinutes);
+    expect(summary.streak).toBe(stats.currentStreak);
+
+    // DailySummary has `date`; SessionStats does not
+    expect(summary.date).toBe(dateString(0));
+    expect('date' in stats).toBe(false);
+
+    // DailySummary does NOT have the old field names
+    expect('sessionsToday' in summary).toBe(false);
+    expect('totalFocusMinutes' in summary).toBe(false);
+    expect('currentStreak' in summary).toBe(false);
+  });
+
+  it('returns a new object each call (no mutation risk)', () => {
+    const sessions = [record(isoAtNoon(0))];
+    const a = generateDailySummary(sessions);
+    const b = generateDailySummary(sessions);
+    expect(a).toEqual(b);
+    expect(a).not.toBe(b);
+  });
+
+  it('non-standard session durations — focus minutes correct', () => {
+    const sessions = [
+      record(isoAtNoon(0), 1800, 'work'), // 30 min
+      record(isoAtNoon(0), 600, 'work'), // 10 min
+    ];
+    const summary = generateDailySummary(sessions);
+    expect(summary.sessionsCompleted).toBe(2);
+    expect(summary.focusMinutes).toBe(40);
+  });
+
+  it('mixed work + break today — only work counts', () => {
+    const sessions = [
+      record(isoAtNoon(0), 1500, 'work'),
+      record(isoAtNoon(0), 300, 'break'),
+      record(isoAtNoon(0), 1500, 'work'),
+    ];
+    const summary = generateDailySummary(sessions);
+    expect(summary.sessionsCompleted).toBe(2);
+    expect(summary.focusMinutes).toBe(50);
+  });
+});
+
 // ── TypeScript compile-time checks ───────────────────────────────────────────
 
 describe('type safety', () => {
@@ -439,5 +543,81 @@ describe('type safety', () => {
       currentStreak: 7,
     };
     expect(stats.currentStreak).toBe(7);
+  });
+
+  it('DailySummary shape is correct', () => {
+    const summary: DailySummary = {
+      date: '2025-07-17',
+      sessionsCompleted: 4,
+      focusMinutes: 100,
+      streak: 12,
+    };
+    expect(summary.streak).toBe(12);
+    expect(summary.date).toBe('2025-07-17');
+  });
+});
+
+// ── formatDuration ───────────────────────────────────────────────────────────
+
+describe('formatDuration', () => {
+  it('zero seconds → "0s"', () => {
+    expect(formatDuration(0)).toBe('0s');
+  });
+
+  it('negative seconds → "0s" (defensive fallback)', () => {
+    expect(formatDuration(-1)).toBe('0s');
+    expect(formatDuration(-3600)).toBe('0s');
+    expect(formatDuration(-99999)).toBe('0s');
+  });
+
+  it('seconds < 60 → "Xs"', () => {
+    expect(formatDuration(1)).toBe('1s');
+    expect(formatDuration(30)).toBe('30s');
+    expect(formatDuration(45)).toBe('45s');
+    expect(formatDuration(59)).toBe('59s');
+  });
+
+  it('60 ≤ seconds < 3600 → "Xm"', () => {
+    expect(formatDuration(60)).toBe('1m');
+    expect(formatDuration(300)).toBe('5m');
+    expect(formatDuration(1500)).toBe('25m');
+    expect(formatDuration(3540)).toBe('59m');
+    expect(formatDuration(3599)).toBe('59m');
+  });
+
+  it('seconds ≥ 3600 with zero remainder → "Xh"', () => {
+    expect(formatDuration(3600)).toBe('1h');
+    expect(formatDuration(7200)).toBe('2h');
+    expect(formatDuration(18000)).toBe('5h');
+    expect(formatDuration(36000)).toBe('10h');
+  });
+
+  it('seconds ≥ 3600 with remainder → "Xh Ym"', () => {
+    expect(formatDuration(3660)).toBe('1h 1m');
+    expect(formatDuration(5400)).toBe('1h 30m');
+    expect(formatDuration(9000)).toBe('2h 30m');
+    expect(formatDuration(5430)).toBe('1h 30m');
+    expect(formatDuration(7260)).toBe('2h 1m');
+  });
+
+  it('non-integer seconds — floors to whole seconds', () => {
+    expect(formatDuration(45.7)).toBe('45s');
+    expect(formatDuration(1500.9)).toBe('25m');
+    expect(formatDuration(3660.3)).toBe('1h 1m');
+  });
+
+  it('returns a string type', () => {
+    expect(typeof formatDuration(1500)).toBe('string');
+  });
+
+  it('edge: exactly 3600 → "1h" not "1h 0m"', () => {
+    expect(formatDuration(3600)).toBe('1h');
+    expect(formatDuration(7200)).toBe('2h');
+  });
+
+  it('edge: large values', () => {
+    expect(formatDuration(86400)).toBe('24h');
+    expect(formatDuration(90000)).toBe('25h');
+    expect(formatDuration(90060)).toBe('25h 1m');
   });
 });

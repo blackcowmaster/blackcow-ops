@@ -34,6 +34,18 @@ export interface SessionStats {
   currentStreak: number;
 }
 
+/** Daily summary — a flattened, consumer-friendly stats view for a single day. */
+export interface DailySummary {
+  /** Today's date in YYYY-MM-DD format (local timezone) */
+  date: string;
+  /** Total work sessions completed today */
+  sessionsCompleted: number;
+  /** Total focus minutes today (work sessions only) */
+  focusMinutes: number;
+  /** Consecutive days (including today) with ≥1 work session */
+  streak: number;
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Extract a YYYY-MM-DD date string from an ISO-8601 timestamp using the local timezone. */
@@ -142,4 +154,66 @@ export function computeSessionStats(history: SessionRecord[]): SessionStats {
   }
 
   return { sessionsToday, totalFocusMinutes, currentStreak };
+}
+
+/**
+ * Generate a daily summary from completed session history.
+ *
+ * Convenience wrapper around `computeSessionStats` that returns a
+ * flattened, consumer-friendly shape with today's date included.
+ *
+ * Pure function — no side effects, no mutation, no external state.
+ * Zero additional dependencies beyond existing module internals.
+ *
+ * @param history  Array of completed session records (any order)
+ * @returns DailySummary with date, sessionsCompleted, focusMinutes, streak
+ */
+export function generateDailySummary(history: SessionRecord[]): DailySummary {
+  const stats = computeSessionStats(history);
+  return {
+    date: getTodayDateString(),
+    sessionsCompleted: stats.sessionsToday,
+    focusMinutes: stats.totalFocusMinutes,
+    streak: stats.currentStreak,
+  };
+}
+
+/**
+ * Format a duration in seconds into a human-readable string.
+ *
+ * - seconds < 60: "Xs" (e.g., 45 → "45s")
+ * - 60 ≤ seconds < 3600: "Xm" (e.g., 1500 → "25m")
+ * - seconds ≥ 3600 with zero remainder: "Xh" (e.g., 3600 → "1h")
+ * - seconds ≥ 3600 with remainder: "Xh Ym" (e.g., 5400 → "1h 30m")
+ * - zero seconds: "0s"
+ * - negative seconds: "0s" (defensive fallback)
+ *
+ * Pure function — no side effects, no mutation, no external state.
+ *
+ * @param seconds  Duration in seconds
+ * @returns Human-readable duration string
+ */
+export function formatDuration(seconds: number): string {
+  if (seconds <= 0) return '0s';
+
+  const totalSeconds = Math.floor(seconds);
+
+  if (totalSeconds < 60) {
+    return `${totalSeconds}s`;
+  }
+
+  const minutes = Math.floor(totalSeconds / 60);
+
+  if (totalSeconds < 3600) {
+    return `${minutes}m`;
+  }
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const remainingMinutes = minutes % 60;
+
+  if (remainingMinutes === 0) {
+    return `${hours}h`;
+  }
+
+  return `${hours}h ${remainingMinutes}m`;
 }
