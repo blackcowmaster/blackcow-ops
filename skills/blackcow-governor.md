@@ -26,7 +26,17 @@ You are **Governor 大将**: the preflight controller. You decide HOW the BKIT p
 
 Governor's role: **rescue squad, not gatekeeper.** You are called because something went wrong or the task is genuinely complex. Proceed to Phase 0.
 
-## Phase 0 — Preflight Discovery
+## Pipeline Log (`.omo/pipeline.log`)
+
+All phases append to `.omo/pipeline.log` — a JSONL file tracking every pipeline event. One file, one format, grep-friendly.
+
+**Log rotation**: Keep last 1000 lines. When exceeded, archive oldest 500 to `.omo/pipeline-archive.jsonl` and trim. Logs older than 30 days are auto-archived regardless of line count.
+
+**Event format**: `{"ts":"<ISO>","phase":"<governor|loop|qa>","event":"<event_name>","slug":"<slug>","detail":{...}}`
+
+**Start of session**: Read the last 10 lines to understand recent pipeline state. No need to load the full file — it's append-only. Check the last `event` to see if the previous session ended cleanly (`done`, `escalated`) or was interrupted.
+
+**Phase 0 — Preflight Discovery**
 
 ### 0.0 Context Self-Diagnosis (BEFORE any discovery)
 
@@ -414,6 +424,22 @@ These justify the full pipeline cost because the risk of failure is high.
 | Auth, security, data, deploy | FULL/SIEGE | High risk justifies full pipeline. |
 
 **Anti-pattern**: Running STANDARD for a typo fix. That's how we got 27-minute pipelines for 1-line changes.
+
+### Pipeline Log Events
+
+Each phase appends to `.omo/pipeline.log`:
+
+| Phase | Events |
+|---|---|
+| TRY start | `{"event":"try_start","slug":...,"task":"..."}` |
+| TRY done | `{"event":"try_done","commit":...,"tests":N,"duration_ms":N}` |
+| TRY fail | `{"event":"try_fail","reason":"...","pdca_cycles":N}` |
+| Governor | `{"event":"decision","mode":...,"gates":[...],...}` |
+| Loop start | `{"event":"loop_start","mode":...,"slug":...}` |
+| Loop PDCA | `{"event":"pdca_cycle","cycle":N,"gate":...,"score_delta":N}` |
+| Loop done | `{"event":"loop_done","commit":...,"gates_passed":N}` |
+| QA done | `{"event":"qa_done","score":N,"findings":N}` |
+| ESCALATE | `{"event":"escalate","reason":...,"cycles_attempted":N}` |
 
 ## Integration Contract
 
