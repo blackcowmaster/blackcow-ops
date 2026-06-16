@@ -107,7 +107,19 @@ When the task lacks explicit tech stack choices, detect signals and form a recom
 
 **Dependency philosophy**: Suggest the minimum viable stack. Never use emojis in code, filenames, or generated output — use plain text or proper icon libraries instead. OneSignal and Sentry are powerful but add complexity — only recommend them when the task explicitly requires cross-platform push or production error monitoring. Default to expo-notifications for push and skip crash reporting for prototypes. Never bloat the stack without a clear signal.
 
-### 0.0b — Stack Confirmation (user gates the decision)
+### 0.0b — Stack Confirmation + Simulator Setup
+
+**If the task targets mobile (React Native):**
+
+1. Ask which simulator: `ask_choice` with detected devices from `xcrun simctl list devices available`
+2. Boot the chosen simulator: `xcrun simctl boot "<device>"`
+3. If Expo managed workflow: open `exp://` URL on simulator (requires Expo Go installed once)
+4. If bare workflow: the build step will use `npx react-native run-ios --simulator "<device>"` or `xcrun simctl install` the .app bundle
+5. Verify the simulator is responsive: take a test screenshot `xcrun simctl io "<device>" screenshot`
+
+This ensures visual verification is possible BEFORE any code is written. The pipeline can screenshot each screen during development.
+
+**For web projects:** skip simulator. Use `npx playwright screenshot` for O4 verification instead.
 
 1. Present the inferred stack with a one-sentence rationale.
 2. **MUST call `ask_choice` tool directly.** Emit this exact format — do NOT print text asking for confirmation:
