@@ -228,8 +228,11 @@ get_skill_extra_win() {
 get_skill_extra_mac() {
   local skill="$1"
   case "$skill" in
-    blackcow-plan.md|blackcow-loop.md|blackcow-qa.md|blackcow-governor.md)
+    blackcow-plan.md|blackcow-loop.md|blackcow-qa.md)
       echo "get_symbols, find_in_code"
+      ;;
+    blackcow-governor.md)
+      echo "get_symbols, find_in_code, ask_choice"
       ;;
     blackcow-librarian.md)
       echo "get_symbols, find_in_code"

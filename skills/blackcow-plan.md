@@ -75,7 +75,7 @@ This is the **standard autonomous path**. It is normal and expected — governan
 
 Governance decisions are produced by `blackcow-governor` and consumed by `blackcow-plan`, `blackcow-loop`, and `blackcow-qa`. Meta-cycle skills (`blackcow-skill-review`, `blackcow-skill-evolver`) audit and evolve the pipeline itself. `blackcow-librarian` provides cached structure and failure-pattern memory to all skills.
 
-**Staleness check**: Delegate to `blackcow-librarian --command=check-governance`. Do NOT compute staleness yourself — librarian is the single source of truth for the 7-day threshold. The staleness threshold (7 days) is defined by the **Cross-Skill Evidence Contract** in `blackcow-governor`. All consumers MUST honor the same threshold. If a consumer detects staleness, it MUST NOT silently use stale data — it must either warn (with `--stale-ok`) or reject and fall back.
+**Staleness check**: The 7-day threshold is defined here in plan.md. `blackcow-librarian --command=check-governance` may be used as a convenience wrapper but is not required — the inline staleness logic is self-contained. The staleness threshold (7 days) is defined by the **Cross-Skill Evidence Contract** in `blackcow-governor`. All consumers MUST honor the same threshold. If a consumer detects staleness, it MUST NOT silently use stale data — it must either warn (with `--stale-ok`) or reject and fall back.
 
 ## Mode Detection
 
