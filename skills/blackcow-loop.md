@@ -483,7 +483,17 @@ If ANY Hashline guard fails:
 
 ## Phase 1 — Implementation (TDD + Hashline + Self-Critique)
 
-### 1.0 Extract Core Scenarios (BEFORE any test)
+### 1.0 Pre-Implementation Checklist (MANDATORY — before ANY code)
+
+Verify these 3 rules before writing a single line:
+
+1. **No emojis**: Use text labels or icon libraries (lucide-react, @expo/vector-icons). Never use emoji characters in source files, UI text, or comments.
+2. **Pipeline log**: After every phase transition, append to `.omo/pipeline.log` via `write_file` with `mode: "append"`. Format: `{"ts":"<ISO>","phase":"loop","event":"<name>","slug":"<slug>"}`.
+3. **Minimum verification**: Before declaring done, run `tsc --noEmit` (TypeScript), `eslint` (if config exists), or `bash -n` (shell). If runtime is unavailable, type-checking is still mandatory.
+
+These rules are enforced by the skills themselves — not optional. Violating any of them means the implementation is incomplete.
+
+### 1.1 Extract Core Scenarios (BEFORE any test)
 
 From the task description or plan, extract 3-8 core scenarios that MUST work. These represent the primary user flows. Edge cases (empty input, negative values, extreme lengths) are tested only if the core scenarios pass first.
 
