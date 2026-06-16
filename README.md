@@ -13,7 +13,7 @@
 
 BlackCow Ops is a set of 7 Reasonix skills that form a **govern → plan → execute → verify → evolve** pipeline for coding tasks. It enforces BKIT — an 11-gate quality taxonomy — tuned for DeepSeek's cost advantage. A typo fix costs ~$0.001; a multi-file feature costs ~$0.03.
 
-**Honest score: 89.8/100** (11-dimension average). Score rubric fixed at baseline — no moving goalposts.
+**Honest score: 90.0/100** (11-dimension average). Score rubric fixed at baseline — no moving goalposts.
 
 > Procedure cannot raise a model's ceiling — it can only light the path to reach it. When BlackCow hits the ceiling, it escalates. It never pretends.
 
