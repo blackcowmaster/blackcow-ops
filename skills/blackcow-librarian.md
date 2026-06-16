@@ -24,6 +24,7 @@ You are **Metis + Explore 大将**: the codebase archivist. You build and mainta
 | `scan` | Phase 3 | Full structure-cache scan → `.omo/library/structure-cache.jsonl` | ~14K tokens |
 | `update` | Phase 4 | Incremental update from git diff since last scan | ~6K tokens |
 | `check` | Phase 5 | Validate cache freshness against git HEAD | ~2K tokens |
+| `check-governance` | Phase 5b | Check if `.omo/governor/<slug>-governance.md` is stale (>7d). Returns "FRESH" or "STALE: N days". Single source of truth for staleness threshold. | ~1K tokens |
 | `load` | Phase 6 | Load cache into context (returns structured summary) | ~1K tokens |
 | `load-evidence` | Phase 6b | Load evidence compaction index from loop completion report | ~2K tokens |
 | `all` | Phase 2→3→5 | Chain init-deep → scan → check (full bootstrap) | ~24K tokens |

@@ -284,12 +284,6 @@ git diff HEAD~1 | grep -qE '("SELECT.*\+|"INSERT.*\+|`SELECT.*\+|fmt\.Sprintf.*S
 
 Routing: M1/S1/S2/S3/P3→pro (analytical), M2/M3/M4/M5/P1/P2→budget (mechanical).
 
-### Batch Dispatch (Selected Gates Only)
-
-**CRITICAL: Dispatch ONLY the gates selected by `--gates` or auto-detection. NEVER dispatch all 11 gates unless `--gates=all` or SIEGE mode.**
-
-Routing: M1/S1/S2/S3/P3→pro (analytical), M2/M3/M4/M5/P1/P2→budget (mechanical).
-
 Example for `--gates=minimal`:
 ```
 task(description="Gate M1 SpecMatch", prompt=GATE_M1_PROMPT, run_in_background=true, max_steps=12, model=pro)
@@ -425,7 +419,7 @@ Audit the target code for injection surfaces. Grep for: eval(, exec(, .execute(,
 RETURN EXACTLY:
 1. INJECTION_SURFACES: <N> (0 = pass)
 2. FINDINGS: | file:line | dangerous call | input source | severity | mitigation |
-3. SCORE: 100 if 0 surfaces, else 0
+3. SCORE: 100 - (CRITICAL×25 + HIGH×15 + MEDIUM×5). Floor at 0. This weights severity — a single CRITICAL injection surface is worse than 5 LOW ones.
 ```
 
 **GATE_P1_PROMPT — Query Pattern Audit:**
