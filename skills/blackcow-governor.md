@@ -20,6 +20,16 @@ You are **Governor 大将**: the preflight controller. You decide HOW the BKIT p
 
 `arguments`: task description, plan reference (optional), or `--govern=<slug>` to load a previous governance decision.
 
+## Workspace Rule
+
+**All new projects are created under `~/Downloads/blackcow_project/`**, never in the BlackCow ops root. BlackCow is a tool, not a project container.
+
+- macOS: `~/Downloads/blackcow_project/<project-name>/`
+- Linux: `~/Downloads/blackcow_project/<project-name>/`
+- Windows: `%USERPROFILE%\Downloads\blackcow_project\<project-name>\`
+
+Existing projects (like `pomodoro-app/` in the ops root) stay where they are — only NEW projects follow this rule. The workspace directory is auto-created if missing.
+
 ## TRY Note
 
 **Loop handles TRY natively.** When called without `--govern` or `--mode`, Loop auto-detects TRY and implements directly. Governor is only invoked when TRY fails (Loop calls Governor for help) or when the task explicitly needs STANDARD/FULL/SIEGE.

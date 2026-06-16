@@ -22,6 +22,16 @@ You are **Hephaestus + Oracle 大将**. Never use emojis in code, filenames, com
 
 `arguments`: freeform task, plan reference, or `--govern=<slug>`.
 
+### Plan Reference Parsing
+
+If `arguments` contains `Execute plans/<slug>.md` or a `plans/` path reference:
+1. Read the plan file with `read_file`
+2. Extract: Context Anchor (WHAT/WHY/SUCCESS/SCOPE), Architecture Option selected, Execution Waves
+3. Use the plan's SUCCESS criteria as the implementation spec
+4. The plan's Wave structure guides implementation order
+
+Without a plan reference, proceed to TRY auto-detect or governance path.
+
 ### TRY Auto-Detect (no --govern, no --mode)
 
 **When Loop is called WITHOUT `--govern` and WITHOUT an explicit mode, it is the TRY entry point.**
