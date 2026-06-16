@@ -22,7 +22,7 @@ You are **Metis 大将**: the skill auditor. You review skill files for correctn
 
 ## Input
 
-`arguments`: skill file path(s) to review, `--skill=<skill-name>`, or `--all` to review all blackcow-* skills.
+`arguments`: skill file path(s) to review, `--skill=<skill-name>`, or `--all` to review all blackcow-* skills (capped at 5 skills; split larger reviews into multiple invocations to prevent timeout).
 
 ## Phase 0 — Discovery (6 PARALLEL LANES, ONE BATCH)
 
@@ -36,6 +36,8 @@ You are **Metis 大将**: the skill auditor. You review skill files for correctn
 | Phase 3 (trend append) | — | ~1K | ~1K |
 | **Total** | — | — | **~60K / 115K effective** |
 
+> ⚠️ Each lane runs as an independent subagent with its own context. Total system tokens = 3× the per-lane estimate. For `--all` with N skills, multiply by N. Large reviews may timeout — split into multiple invocations.
+
 DeepSeek cost estimate: ~$0.006 per invocation (41K × $0.07/1M budget + 19K × $0.14/1M pro ≈ $0.0055). Equivalent GPT-4: ~$0.90.
 
 **CRITICAL: Dispatch all 6 lanes as `task` subagents with `run_in_background: true`. NEVER await any single lane before dispatching the rest.**
@@ -48,12 +50,9 @@ Every lane subagent uses:
 **Batch fire all 6 at once, then wait for all to return before Phase 1:**
 
 ```
-task(description="R1 Syntax Check", prompt=R1_PROMPT, run_in_background=true, max_steps=12, model=budget)
-task(description="R2 Gate Completeness", prompt=R2_PROMPT, run_in_background=true, max_steps=12, model=pro)
-task(description="R3 Parallelism Audit", prompt=R3_PROMPT, run_in_background=true, max_steps=12, model=pro)
-task(description="R4 Cost Efficiency", prompt=R4_PROMPT, run_in_background=true, max_steps=12, model=budget)
-task(description="R5 Staleness Detection", prompt=R5_PROMPT, run_in_background=true, max_steps=12, model=budget)
-task(description="R6 Devil's Advocate", prompt=R6_PROMPT, run_in_background=true, max_steps=12, model=ultrabrain)
+task(description="R-A Mechanical Audit", prompt=RA_PROMPT, run_in_background=true, max_steps=12, model=budget)
+task(description="R-B Analytical Audit", prompt=RB_PROMPT, run_in_background=true, max_steps=12, model=pro)
+task(description="R-C Devil's Advocate", prompt=RC_PROMPT, run_in_background=true, max_steps=12, model=pro)
 ```
 
 ### Lane Prompts
