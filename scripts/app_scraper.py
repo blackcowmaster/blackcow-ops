@@ -183,6 +183,7 @@ def _normalize_appstore_review(review) -> dict:
 
 def _do_search(args):
     from app_reviews import AppStoreSearch, AppStoreReviews, Country
+    import urllib.request
 
     search = AppStoreSearch()
     country = Country[args.country] if args.country in Country.__members__ else Country.CN
@@ -191,7 +192,10 @@ def _do_search(args):
     results = search.search(args.search, country=country, limit=args.limit)
 
     output = []
-    for r in results:
+    for i, r in enumerate(results):
+        # Fetch screenshots via iTunes Lookup API
+        screenshots = _fetch_screenshots(r.app_id, args.country.lower())
+
         entry = {
             "name": r.name,
             "app_id": r.app_id,
@@ -202,6 +206,7 @@ def _do_search(args):
             "price": r.price,
             "version": r.version,
             "icon_url": r.icon_url,
+            "screenshots": screenshots,
             "url": r.url,
         }
 
@@ -216,9 +221,11 @@ def _do_search(args):
             entry["kr_available"] = kr_match is not None
             entry["kr_match"] = kr_match
             if kr_match:
-                print(f"  🇰🇷 KR: {kr_match['name']} ⭐{kr_match['rating']}", file=sys.stderr)
+                print(f"  🇰🇷 KR: {kr_match['name']} ⭐{kr_match['rating']} ({len(screenshots)} screens)", file=sys.stderr)
             else:
-                print(f"  🚀 NO KR: {r.name[:50]} ⭐{r.rating}", file=sys.stderr)
+                print(f"  🚀 NO KR: {r.name[:50]} ⭐{r.rating} ({len(screenshots)} screens)", file=sys.stderr)
+        else:
+            print(f"  📱 {r.name[:50]} ⭐{r.rating} ({len(screenshots)} screens)", file=sys.stderr)
 
         output.append(entry)
 
@@ -227,6 +234,22 @@ def _do_search(args):
     if args.check_kr:
         missing = sum(1 for e in output if not e["kr_available"])
         print(f"🚀 {missing}/{len(output)} apps NOT available in Korea", file=sys.stderr)
+
+
+def _fetch_screenshots(app_id: str, country: str = "cn") -> list[str]:
+    """Fetch screenshot URLs from iTunes Lookup API."""
+    import urllib.request
+    try:
+        url = f"https://itunes.apple.com/lookup?id={app_id}&country={country}"
+        req = urllib.request.Request(url, headers={"User-Agent": "blackcow-app-scraper/1.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read())
+            if data.get("resultCount", 0) > 0:
+                result = data["results"][0]
+                return result.get("screenshotUrls", [])
+    except Exception as e:
+        print(f"    ⚠️ Screenshot fetch failed for {app_id}: {e}", file=sys.stderr)
+    return []
 
 
 def _name_similarity(a: str, b: str) -> float:
