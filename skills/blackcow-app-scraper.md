@@ -64,6 +64,14 @@ Output saved to: .blackcow/app-scraper/<app-name>.json
 | metadata.rating | Average rating |
 | metadata.rating_count | Total ratings count |
 | metadata.installs | Install range (Play Store) |
+| metadata.free | Free or paid |
+| metadata.contains_ads | Has ads (Play Store) |
+| metadata.offers_iap | Has in-app purchases |
+| metadata.in_app_price_range | IAP price range |
+| metadata.content_rating | Age rating |
+| metadata.released | First release date |
+| metadata.updated | Last update date |
+| metadata.android_version | Min Android version |
 | metadata.description | Full description |
 | metadata.screenshots | Array of screenshot URLs |
 | reviews[].rating | 1-5 star rating |
