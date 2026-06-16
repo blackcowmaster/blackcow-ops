@@ -26,6 +26,12 @@ package-lock.json
 package.json
 tsconfig.json
 
+# ...except for sub-projects (e.g. pomodoro-app needs its own configs)
+!pomodoro-app/tsconfig.json
+!pomodoro-app/package.json
+!pomodoro-app/package-lock.json
+!pomodoro-app/.env
+
 # Temp files (also nested under .omo/)
 **/*.tmp
 **/*.tmp;
