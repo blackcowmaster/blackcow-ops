@@ -34,7 +34,7 @@ All phases append to `.omo/pipeline.log` — a JSONL file tracking every pipelin
 
 **Event format**: `{"ts":"<ISO>","phase":"<governor|loop|qa>","event":"<event_name>","slug":"<slug>","detail":{...}}`
 
-**Start of session**: Read the last 10 lines to understand recent pipeline state. No need to load the full file — it's append-only. Check the last `event` to see if the previous session ended cleanly (`done`, `escalated`) or was interrupted.
+**Start of session**: Launch `run_background: tail -f .omo/pipeline.log` to stream progress. Read the last 10 lines to understand recent pipeline state. No need to load the full file — it's append-only. Check the last `event` to see if the previous session ended cleanly (`done`, `escalated`) or was interrupted.
 
 **Session warm-up**: Check `recall_memory("blackcow-ops-meta")` for cached state (score, defaults, capabilities, failure patterns). If found, use it — skip redundant file reads for known facts. Prevents cold starts across sessions.
 
@@ -366,7 +366,21 @@ Phase 2-MERGE: Collect all plan outputs → resolve cross-references → unified
 Phase 2-DISPATCH: Single loop → single QA (sequential, to avoid file conflicts)
 ```
 
-**IMPORTANT**: When running as a subagent, you cannot dispatch sub-sub-agents in parallel yourself. Instead, output explicit instructions for the parent context: "Dispatch these N plans in parallel: [list of run_skill calls]." The parent will execute them in one batch. If running in the parent context directly, emit all run_skill calls in ONE response — Reasonix runs them in parallel.
+**IMPORTANT**: When running as a subagent, output FAN-OUT_DISPATCH in this exact machine-readable format at the end of the governance decision:
+
+```json
+FAN-OUT_DISPATCH: [
+  {"skill":"blackcow-plan","args":"<subtask-1> --govern=<slug>-sub1"},
+  {"skill":"blackcow-plan","args":"<subtask-2> --govern=<slug>-sub2"}
+]
+```
+
+The parent context reads this and dispatches all plans in parallel via multiple `run_skill` calls in a single turn. Subagent pipelines can also tail progress via:
+```bash
+run_background: tail -f .omo/pipeline.log
+```
+
+Do NOT call plans sequentially from within the subagent — output the FAN-OUT_DISPATCH block and let the parent handle parallel execution.
 
 ### When NOT to FAN-OUT
 
