@@ -61,7 +61,8 @@ Invoke via `run_skill` or the `/` shortcut: `/blackcow-plan Add OAuth2`
 
 ## Key Strengths
 
-- **Cost-optimized for DeepSeek.** 5 execution modes scale from $0.001 (typo fix) to ~$0.10 (full security audit). The pipeline uses progressive widening — it starts cheap and widens only when needed.
+- **PRD to implementation.** Reads specs, infers tech stack, decomposes into independent units, and dispatches parallel planning. Asks before deciding — never silently picks your stack.
+- **Cost-optimized for DeepSeek.** 5 execution modes scale from $0.001 (typo fix) to ~$0.10 (full security audit). Progressive widening starts cheap and widens only when needed.
 - **11-gate quality.** M1-M5 (implementation), S1-S3 (security), P1-P3 (performance). Every gate has a numeric threshold and requires evidence to pass.
 - **Findings gate.** Issues discovered during review are tracked and must be resolved before completion. No silent acceptance of known bugs.
 - **Failure-pattern memory.** Past failures are recorded with effectiveness scores. High-effectiveness fixes are auto-applied; low-effectiveness patterns trigger escalation.
