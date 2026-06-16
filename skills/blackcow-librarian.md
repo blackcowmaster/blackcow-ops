@@ -31,9 +31,13 @@ You are **Metis + Explore 大将**: the codebase archivist. You build and mainta
 
 All 7 commands can also be chained: `init-deep → scan → check` in a single invocation. `load-evidence` is standalone (reads from `.omo/ulw-loop/completion-report.md`).
 
+### Pipeline Log
+
+Append events to `.omo/pipeline.log` at command start and command done. Format: `{"ts":"<ISO>","phase":"librarian","event":"<command>_done","command":"<name>","files":<N>}`.
+
 ## Input
 
-`arguments`: `--command=<name>` (required, one of: init-deep, scan, update, check, load, load-evidence), plus optional target directory path.
+`arguments`: `--command=<name>` (required, one of: init-deep, scan, update, check, load, load-evidence, check-governance), plus optional target directory path.
 
 Parse `--model-tier=auto|budget|pro` (default: auto). Scan lanes use budget, analysis lanes use pro.
 

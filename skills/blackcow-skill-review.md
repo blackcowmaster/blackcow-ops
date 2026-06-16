@@ -310,6 +310,18 @@ Append summary row to `.omo/meta-review/review-history.jsonl`:
 - `.omo/meta-review/review-*.md` reports as input for automated skill evolution
 - Review scores and recommendations drive evolution decisions
 
+## Self-Audit Checklist
+
+Before emitting review report, verify:
+- [ ] All 3 review lanes returned (not timed out)
+- [ ] Full file reads completed (anti-hallucination rule enforced)
+- [ ] Every finding has file:line or section evidence
+- [ ] Scores are numeric 0-100, not invented ranges
+- [ ] Review report written to `.omo/meta-review/`
+- [ ] review-history.jsonl appended with trend data
+- [ ] Cross-reference contradictions escalated in report
+- [ ] No emojis in output
+
 ## Stop Rules
 - All 6 review lanes returned → DONE
 - Skill file not found → report and stop

@@ -298,6 +298,18 @@ This confirms the evolution actually improved scores. If scores decreased → re
 - Phase 7 (post-evolution verification) skipped → BLOCK, evolution invalidated
 - Phase 7 score regression → auto-revert from backup, STOP
 
+## Self-Audit Checklist
+
+Before emitting evolution DONE, verify:
+- [ ] Backup created before any edit
+- [ ] All edits within `.reasonix/skills/*.md` (scope-lock)
+- [ ] Phase 7 post-evolution verification completed
+- [ ] No score regression beyond ±3 noise band (or auto-reverted)
+- [ ] Evolution log appended with before/after diffs
+- [ ] YAML frontmatter intact after all edits
+- [ ] Constraint count not decreased (no safety rules removed)
+- [ ] `--approve` flag was explicitly provided
+
 ## Constraints
 1. **NEVER edit outside `.reasonix/skills/*.md`.**
 2. **ALWAYS backup before any edit.**

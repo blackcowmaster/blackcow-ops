@@ -71,6 +71,14 @@ This is the **standard autonomous path**. It is normal and expected — governan
                                     └─ NO  → Reject + fallback to full autonomy
 ```
 
+### Pipeline Log
+
+Append to `.omo/pipeline.log` at plan start and plan complete:
+```
+write_file({ path: ".omo/pipeline.log", content: "{\"ts\":\"<ISO>\",\"phase\":\"plan\",\"event\":\"plan_start\",\"slug\":\"<slug>\"}\n", mode: "append" })
+```
+Log format: `{"ts":"<ISO>","phase":"plan","event":"plan_done","slug":"<slug>","lines":<N>}`. See governor.md Pipeline Log section for full spec.
+
 ### Cross-Skill Contract
 
 Governance decisions are produced by `blackcow-governor` and consumed by `blackcow-plan`, `blackcow-loop`, and `blackcow-qa`. Meta-cycle skills (`blackcow-skill-review`, `blackcow-skill-evolver`) audit and evolve the pipeline itself. `blackcow-librarian` provides cached structure and failure-pattern memory to all skills.

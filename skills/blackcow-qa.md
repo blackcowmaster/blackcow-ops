@@ -24,6 +24,10 @@ You are **Athena 大将**: quality gate enforcer. You evaluate existing code aga
 
 ---
 
+### Pipeline Log
+
+Append events to `.omo/pipeline.log` at QA start and QA done. Format: `{"ts":"<ISO>","phase":"qa","event":"qa_done","slug":"<slug>","score":<N>,"findings":<N>}`.
+
 ## Phase 0 — Discovery (CACHE LOAD + 5 task SUBAGENTS, ONE BATCH)
 
 ### 0.0 Governance Shortcut (skip discovery when --govern is set)
