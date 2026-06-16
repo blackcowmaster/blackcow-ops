@@ -108,10 +108,10 @@ When the task lacks explicit tech stack choices, detect signals and form a recom
 ### 0.0b — Stack Confirmation (user gates the decision)
 
 1. Present the inferred stack with a one-sentence rationale.
-2. Use `ask_choice` with 2-3 concrete options. Always include a custom option.
+2. **MUST use `ask_choice`** with 2-3 concrete options. Always include a custom option. Do NOT skip this step — even if the stack seems obvious.
 3. Record the confirmed stack in the governance decision under "Tech Stack".
-4. If the user defers ("you decide"), use the first suggestion and note "auto-selected" in the log.
-5. During pipeline execution, if a technical roadblock requires changing the stack, re-trigger this phase. Do NOT silently switch — propose the change with rationale and get re-confirmation.
+4. Only skip `ask_choice` if: (a) existing codebase with package.json already defines the stack, or (b) user explicitly said "use whatever you think is best."
+5. During pipeline execution, if a technical roadblock requires changing the stack, re-trigger this phase.
 
 **Example flow:**
 ```
@@ -364,7 +364,7 @@ Phase 2-MERGE: Collect all plan outputs → resolve cross-references → unified
 Phase 2-DISPATCH: Single loop → single QA (sequential, to avoid file conflicts)
 ```
 
-**IMPORTANT**: Emit all `run_skill` calls in ONE response. Reasonix executes multiple tool calls from the same turn in parallel. Do NOT call them sequentially — that defeats the purpose of FAN-OUT.
+**IMPORTANT**: When running as a subagent, you cannot dispatch sub-sub-agents in parallel yourself. Instead, output explicit instructions for the parent context: "Dispatch these N plans in parallel: [list of run_skill calls]." The parent will execute them in one batch. If running in the parent context directly, emit all run_skill calls in ONE response — Reasonix runs them in parallel.
 
 ### When NOT to FAN-OUT
 
