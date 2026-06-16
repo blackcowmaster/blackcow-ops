@@ -8,7 +8,7 @@ model: deepseek-v4-pro
 model_tiers:
   budget: deepseek-v4-flash    # mechanical tasks (~$0.14/1M input)
   pro: deepseek-v4-pro        # analysis, security, design (~$0.435/1M input)
-allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, web_fetch, write_file, explore, run_skill, get_file_info
+allowed-tools: read_file, search_content, search_files, glob, list_directory, directory_tree, run_command, web_fetch, write_file, explore, run_skill, get_file_info, ask_choice
 ---
 # blackcow-governor — Pipeline Governor
 
@@ -333,18 +333,26 @@ When the governor detects that a task naturally decomposes into **independent su
 
 ### Dispatch Pattern
 
-```markdown
+```
 Phase 1: Governance → detect decomposable
   ↓
-Phase 2-FAN-OUT: N parallel plan dispatches (one per subtask, unique slug)
-  run_skill({ name: "blackcow-plan", arguments: "<subtask-1> --govern=<slug>-sub1" })
-  run_skill({ name: "blackcow-plan", arguments: "<subtask-2> --govern=<slug>-sub2" })
-  ... (all in single turn, parallel execution)
+Phase 2-FAN-OUT: Dispatch ALL plans in ONE tool-call batch (parallel subagents):
+  <invoke name="run_skill">
+    <parameter name="name">blackcow-plan</parameter>
+    <parameter name="arguments">subtask-1 --govern=slug-sub1</parameter>
+  </invoke>
+  <invoke name="run_skill">
+    <parameter name="name">blackcow-plan</parameter>
+    <parameter name="arguments">subtask-2 --govern=slug-sub2</parameter>
+  </invoke>
+  ... (up to 5, all in single turn — Reasonix runs subagents in parallel)
   ↓
-Phase 2-MERGE: Collect plans → resolve cross-references → produce unified master plan
+Phase 2-MERGE: Collect all plan outputs → resolve cross-references → unified plan
   ↓
-Phase 2-DISPATCH: Single loop → single QA (sequential, to avoid conflicts)
+Phase 2-DISPATCH: Single loop → single QA (sequential, to avoid file conflicts)
 ```
+
+**IMPORTANT**: Emit all `run_skill` calls in ONE response. Reasonix executes multiple tool calls from the same turn in parallel. Do NOT call them sequentially — that defeats the purpose of FAN-OUT.
 
 ### When NOT to FAN-OUT
 
