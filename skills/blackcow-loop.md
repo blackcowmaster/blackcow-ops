@@ -1409,6 +1409,19 @@ Write `.omo/ulw-loop/completion-report.md`:
 | Cleanup (3 agents) | ~<N>K | budget | ~$<X> |
 | **TOTAL** | **~<N>K** | — | **~$<X>** |
 
+### Pipeline Efficiency Score
+
+Compare actual cost against the minimal viable path for this task:
+
+| Metric | Value |
+|---|---|
+| **Mode used** | TRY / STANDARD / FULL |
+| **Minimal mode for this task** | <TRY/STANDARD> (what a 1-line fix actually needed) |
+| **Over-orchestration?** | YES/NO — if mode > minimal, suggest cheaper path |
+| **Efficiency** | actual_cost ÷ minimal_cost (1.0 = optimal, >2.0 = overkill) |
+
+**Rule**: If efficiency > 2.0, append to completion report: "This task could have been done in <minimal_mode> mode (~$<X>). Next time, try `blackcow-loop \"<task>\"` directly."
+
 ## Evidence Compaction Index
 
 Each artifact produced during execution is indexed for compact downstream consumption. Later phases read this index instead of re-reading full logs.

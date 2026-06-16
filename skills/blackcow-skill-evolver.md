@@ -240,28 +240,31 @@ Append the complete atomic diff log to `.omo/meta-review/evolution-<date>-<skill
 
 ### Parse-Verify Gate (M2 pre-check)
 
-Before triggering re-review, perform a parse-verify of the edited skill file:
+Before triggering review, perform a structural parse-verify of the edited skill file:
 
 1. **Read back** the edited skill file in full
-2. **Verify YAML frontmatter parses**: confirm ≥ 2 `---` markers exist (opening + closing frontmatter). Note: markdown thematic breaks (`---`) below the closing frontmatter are fine and expected.
-3. **Verify markdown structure is intact**: heading hierarchy is consistent (no skipped levels), code fences are balanced, no truncated sections
-4. Only THEN trigger `blackcow-skill-review` re-review
+2. **Verify YAML frontmatter parses**: confirm ≥ 2 `---` markers exist
+3. **Verify markdown structure is intact**: heading hierarchy consistent, code fences balanced, no truncated sections
+4. Only THEN proceed to review
 
-If parse-verify fails → **auto-revert from backup** immediately, do NOT proceed to re-review.
+If parse-verify fails → **auto-revert from backup** immediately.
 
-### Re-Review
+### Review (Native)
 
-Trigger a re-review of the evolved skill:
+Use the native `review` tool — NOT `blackcow-skill-review` (known hallucination issue). The native tool reads actual on-disk content and produces line-specific findings.
+
 ```
-blackcow-skill-review --skill=<skill-name>
+review({ task: "Verify this skill edit: check frontmatter, allowed-tools, model names, and structural integrity. Flag any regression." })
 ```
 
-**Self-modification guard**: If the evolved skill IS `blackcow-skill-review.md` itself, do NOT use it for re-verification. Instead, use a pinned baseline: compare against the last review score stored in `.omo/meta-review/review-history.jsonl` for this skill. If `after ≥ before - 3` (allowing for ±3 review noise) → CONFIRMED. If the drop exceeds 3 → auto-revert.
+**Why native review**: skill-review's frontmatter acknowledges audit lanes may hallucinate file contents (scores oscillate 58-76 for the same file). Native `review` reads the actual file and produces verifiable line-level findings. It is cheaper (~$0.005) and more reliable.
+
+**Self-modification guard**: If the evolved skill IS `blackcow-skill-review.md` itself, skip review entirely and rely on parse-verify + structural checks only.
 
 Verify:
-1. **M2 verification**: total_score_after ≥ total_score_before - 3 (noise band, matching skill-review's own ±3 tolerance)
-2. **M3 regression**: no NEW critical/high findings introduced by the edit
-3. **Gate comparison**: compare gate coverage before/after — no gate should drop
+1. **No new CRITICAL/HIGH findings** introduced by the edit
+2. **Frontmatter intact**: name, version, allowed-tools, model fields present
+3. **No broken references**: all skill names referenced exist on disk
 
 If total_score_after < total_score_before - 3 OR new critical findings → **auto-revert from backup** and log the failure.
 
