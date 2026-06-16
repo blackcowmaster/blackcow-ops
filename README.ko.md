@@ -23,7 +23,7 @@ BlackCow Ops는 코딩 작업을 위한 **govern → plan → execute → verify
 |---|---|
 | `blackcow-governor` | 사전 점검 제어기. 작업 전에 모드, 게이트, 관측 수준, PDCA 예산을 선택합니다. |
 | `blackcow-plan` | 전략 설계자. 점진적 확장, 아키텍처 옵션, 결정 완결형 계획. |
-| `blackcow-loop` | 실행 엔진. 5가지 모드(FAST~ESCALATE), PDCA, findings gate, O0-O4 검증. |
+| `blackcow-loop` | 실행 엔진. TRY 모드(2-3분) + STANDARD/FULL. PDCA, Findings Gate, Visual Review(codex), O0-O4 검증. |
 | `blackcow-qa` | 품질 보증. 수치 임계값 기반 조건부 11-게이트 평가. |
 | `blackcow-librarian` | 프로젝트 메모리. 구조 캐싱, 실패 패턴 메모리, 트렌드 분석. |
 | `blackcow-skill-review` | 메타 감사. 스킬 자체의 트렌드 추적과 진부화 감지. |
@@ -66,8 +66,9 @@ blackcow-qa "src/auth/" --gates=auto
 - **11-게이트 품질.** M1-M5(구현), S1-S3(보안), P1-P3(성능). 모든 게이트는 수치 임계값과 증거를 요구합니다.
 - **Findings gate.** 리뷰 중 발견된 이슈는 추적되며 완료 전에 반드시 해결되어야 합니다. 알려진 버그를 묵인하지 않습니다.
 - **실패 패턴 메모리.** 과거 실패가 효과성 점수와 함께 기록됩니다. 높은 효과성의 수정은 자동 적용되고, 낮은 효과성 패턴은 에스컬레이션됩니다.
-- **Subagent O4 검증.** Playwright CLI(`npx playwright screenshot`)로 브라우저 스크린샷 — subagent에서 네이티브 puppeteer 의존성 불필요.
-- **CLI 브릿지.** Subagent는 `run_command`로 모든 CLI 도구(`supabase`, `aws`, `firebase`, `docker`)를 사용할 수 있습니다. 인증 도구는 사용자 확인이 필요합니다.
+- **비주얼 리뷰.** codex CLI로 스크린샷 분석 — 가독성, 대비, 여백, 위계 피드백. iOS 시뮬레이터와 웹에서 작동.
+- **시뮬레이터 자동화.** `xcrun simctl`로 부팅, 스크린샷, 앱 실행 — 터미널 안에서 모바일 개발.
+- **워크스페이스 격리.** 모든 새 프로젝트는 `~/Downloads/blackcow_project/` 아래 생성 — 도구 디렉토리를 오염시키지 않음.
 - **자가 감사.** 모든 스킬에 구조화된 자가 감사 체크리스트가 있습니다. 스킬이 스스로를 검토하고 진화합니다.
 
 ## 아키텍처

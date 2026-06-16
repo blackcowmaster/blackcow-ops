@@ -23,7 +23,7 @@ BlackCow Opsは、コーディングタスクのための **govern → plan → 
 |---|---|
 | `blackcow-governor` | 事前チェック制御。作業前にモード、ゲート、可観測レベル、PDCA予算を選択。 |
 | `blackcow-plan` | 戦略設計。プログレッシブワイドニング、アーキテクチャオプション、決定完結型計画。 |
-| `blackcow-loop` | 実行エンジン。5モード(FAST~ESCALATE)、PDCA、Findings Gate、O0-O4検証。 |
+| `blackcow-loop` | 実行エンジン。TRY(2-3分)+STANDARD/FULL。PDCA、Findings Gate、Visual Review(codex)、O0-O4検証。 |
 | `blackcow-qa` | 品質保証。数値閾値ベースの条件付き11ゲート評価。 |
 | `blackcow-librarian` | プロジェクトメモリ。構造キャッシュ、障害パターンメモリ、トレンド分析。 |
 | `blackcow-skill-review` | メタ監査。スキル自体のトレンド追跡と陳腐化検出。 |

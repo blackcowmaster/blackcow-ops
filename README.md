@@ -23,7 +23,7 @@ BlackCow Ops is a set of 7 Reasonix skills that form a **govern → plan → exe
 |---|---|
 | `blackcow-governor` | Preflight controller. Selects mode, gates, observable level, and PDCA budget before any work begins. |
 | `blackcow-plan` | Strategic planner. Progressive widening, architecture options, decision-complete plans. |
-| `blackcow-loop` | Execution engine. TRY mode (2-3 min direct) + STANDARD/FULL/SIEGE. PDCA on failure, Findings Gate, O0-O4 verification. Entry point for most tasks. |
+| `blackcow-loop` | Execution engine. TRY mode (2-3 min) + STANDARD/FULL. PDCA on failure, Findings Gate, Visual Review (codex), O0-O4 verification. |
 | `blackcow-qa` | Quality assurance. Conditional 11-gate evaluation with numeric thresholds. |
 | `blackcow-librarian` | Project memory. Structure caching, failure-pattern memory, trend analysis. |
 | `blackcow-skill-review` | Meta-auditor. Trend tracking and staleness detection for the skills themselves. |
@@ -41,11 +41,13 @@ Restart Reasonix. All 7 skills with correct platform-specific tool names are ava
 ## Quick Start
 
 ```
-# 80% of tasks: just ask Loop (TRY mode, ~3 min)
-blackcow-loop "Add a password reset feature"
+# New projects are created in ~/Downloads/blackcow_project/
 
-# Complex tasks: full pipeline (Governor plans, Loop executes, QA verifies)
-blackcow-governor "Add OAuth2 authentication with role-based access"
+# 80% of tasks: just ask Loop (TRY mode, ~3 min)
+blackcow-loop "Build a Pomodoro timer app"
+
+# Complex tasks: full pipeline
+blackcow-governor "Add OAuth2 with role-based access"
 blackcow-loop "Execute plans/oauth.md" --govern=oauth
 blackcow-qa "src/auth/" --govern=oauth
 ```
@@ -59,7 +61,9 @@ Invoke via `run_skill` or the `/` shortcut: `/blackcow-plan Add OAuth2`
 - **11-gate quality.** M1-M5 (implementation), S1-S3 (security), P1-P3 (performance). Every gate has a numeric threshold and requires evidence to pass.
 - **Findings gate.** Issues discovered during review are tracked and must be resolved before completion. No silent acceptance of known bugs.
 - **Failure-pattern memory.** Past failures are recorded with effectiveness scores. High-effectiveness fixes are auto-applied; low-effectiveness patterns trigger escalation.
-- **Subagent O4 verification.** Browser screenshots via Playwright CLI (`npx playwright screenshot`) — no native puppeteer dependency needed in subagents.
+- **Visual review.** Screenshots analyzed by codex CLI for UI feedback — readability, contrast, spacing, hierarchy. Works on iOS simulator and web. Falls back gracefully if codex is unavailable.
+- **Simulator automation.** `xcrun simctl` boot, screenshot, and app launch — full mobile development cycle without leaving the terminal.
+- **Workspace isolation.** All new projects created under `~/Downloads/blackcow_project/` — never pollutes the tool directory.
 - **CLI bridge.** Subagents can use any CLI tool (`supabase`, `aws`, `firebase`, `docker`) via `run_command`. Authenticated tools require user confirmation.
 - **Self-audit.** Every skill has a structured self-audit checklist. Skills review and evolve themselves.
 
