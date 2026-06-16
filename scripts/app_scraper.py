@@ -85,6 +85,14 @@ def _normalize_playstore_meta(raw: dict) -> dict:
         "icon_url": raw.get("icon"),
         "screenshots": raw.get("screenshots", []),
         "url": raw.get("appUrl"),
+        "free": raw.get("free"),
+        "contains_ads": raw.get("containsAds"),
+        "ad_supported": raw.get("adSupported"),
+        "offers_iap": raw.get("offersIAP"),
+        "in_app_price_range": raw.get("inAppProductPrice"),
+        "content_rating": raw.get("contentRating"),
+        "released": raw.get("released"),
+        "android_version": raw.get("androidVersion"),
     }
 
 
