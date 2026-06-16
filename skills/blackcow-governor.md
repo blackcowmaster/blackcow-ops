@@ -69,6 +69,8 @@ When the task lacks explicit tech stack choices, detect signals and form a recom
 | Signal | Suggestion |
 |---|---|
 | Web UI components needed | shadcn/ui (default for React projects) |
+| Web icons needed | lucide-react (tree-shakeable, 1st choice) or react-icons (largest collection) |
+| Mobile (RN) icons needed | @expo/vector-icons (Expo) or lucide-react-native (bare RN) |
 | Korean service, localization needed | Reference `getdesign.kr` for KR design patterns |
 | Global service, brand design needed | Reference `getdesign.md` for 75+ brand design systems |
 | Custom design system required | Generate DESIGN.md following Google's spec (see getdesign.md for examples) |
@@ -101,7 +103,7 @@ When the task lacks explicit tech stack choices, detect signals and form a recom
 - **New project or ambiguous** → present 2-3 options with reasons via `ask_choice`
 - **Existing codebase** → detect from files first, suggest only if missing
 
-**Dependency philosophy**: Suggest the minimum viable stack. OneSignal and Sentry are powerful but add complexity — only recommend them when the task explicitly requires cross-platform push or production error monitoring. Default to expo-notifications for push and skip crash reporting for prototypes. Never bloat the stack without a clear signal.
+**Dependency philosophy**: Suggest the minimum viable stack. Never use emojis in code, filenames, or generated output — use plain text or proper icon libraries instead. OneSignal and Sentry are powerful but add complexity — only recommend them when the task explicitly requires cross-platform push or production error monitoring. Default to expo-notifications for push and skip crash reporting for prototypes. Never bloat the stack without a clear signal.
 
 ### 0.0b — Stack Confirmation (user gates the decision)
 
