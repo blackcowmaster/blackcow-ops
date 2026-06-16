@@ -133,7 +133,24 @@ Parse `--resume` flag. Only active at Trust Level L3+. If `--resume` is present 
 
 ## Phase 0 — Bootstrap (CACHE LOAD + 7+2 PARALLEL LANES + PRE-WRITE EVIDENCE COLLECTOR)
 
-### 0.0 Cache Load (blackcow-librarian integration)
+### 0.0 Governance Shortcut (skip discovery when --govern is set)
+
+**If `--govern=<slug>` was provided and the governance decision is FRESH (≤7d):**
+
+Load from `.omo/governor/<slug>-governance.md` and **skip all discovery**:
+- `context_tags` → use governor's tags (Phase 0.0 output)
+- `mode`, `trust_level`, `pdca_max`, `gates`, `o_level` → use governor's decisions
+- Failure-pattern feed → already loaded by governor (Phase 0.1)
+- Change surface → already analyzed by governor (Phase 0.3)
+- Capabilities → already detected by governor (Phase 0.3b)
+
+**Skip**: Phase 0.0 (cache load), 0.1 (state dir check — it's already done), 0.3 (bootstrap lanes — governor already explored the change surface).
+
+**Still run**: Phase 0.5 (Hashline) — content verification is always fresh.
+
+This prevents redundant re-discovery. Governor already spent ~4 minutes on these steps. Loop doesn't need to repeat them. If governance is stale or absent, fall through to standard discovery.
+
+### 0.1 Cache Load (blackcow-librarian integration)
 
 **BEFORE dispatching 7+2 bootstrap lanes, check for cache:**
 
