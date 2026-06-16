@@ -74,7 +74,41 @@ Subagents have `run_command` but NOT native puppeteer/cloud tools. However, many
 - If a CLI is not installed, suggest installation but do NOT auto-install.
 
 Auto-detect which CLIs are available and record in the governance decision under a new "CLI Bridge" table. This expands the observable and verification surface beyond Reasonix-native tools.
+
+### 0.4 Load Evidence Index
 If `.omo/ulw-loop/completion-report.md` exists from a prior loop run, load the Evidence Compaction Index. Already-passed gates may be skipped.
+
+### 0.5 Task Decomposition (PRD / Multi-Feature Specs)
+
+When the task input includes a PRD, spec document, or multiple features, decompose before gate selection:
+
+1. **Read the spec.** If a file path is provided (`--spec=prd.md`), read it. If the task description lists multiple features, treat each as a candidate subtask.
+
+2. **Identify independent units.** A unit is a piece of work that can be planned, implemented, and verified without depending on another unit's completion. Mark units that must be sequential.
+
+3. **Assess each unit:**
+   - Domain tags: language, framework, platform (`react-native`, `expo`, `bare`, `ios`, `android`)
+   - Estimated complexity: XS (<5 files), S (5-10), M (10-20), L (20+)
+   - Mode suggestion: FAST/STANDARD/FULL per unit
+   - Gate subset per unit (mobile apps trigger S1 dataFlow + S3 injection; auth work triggers S2)
+
+4. **Build a task DAG:**
+   ```
+   Unit A (auth) ──→ Unit B (dashboard) ──→ Unit D (deploy)
+   Unit A (auth) ──→ Unit C (settings)
+   ```
+   Units at the same depth with no shared files → FAN-OUT parallel planning.
+   Units with shared files → sequential.
+
+5. **Output** a decomposition table in the governance decision. If >5 units, batch into groups of 5.
+
+**Mobile / cross-platform awareness:**
+- `react-native` / `expo` context → check for native module dependencies, platform-specific files
+- `bare` workflow → flag native linking (S1), permissions (S2)
+- `managed` workflow → flag Expo Go compatibility, EAS build config
+- Multi-platform (iOS + Android) → each platform-specific change is a subtask
+
+This phase prevents the most common failure on large specs: treating a multi-feature PRD as a single monolithic task.
 
 ## Phase 1 — Governance Decision
 
@@ -88,6 +122,17 @@ Produce `.omo/governor/<slug>-governance.md`:
 | **Task** | <summary> |
 | **Governed at** | <ISO> |
 | **Detected Intent** | Feature / Bug / Security / Performance / Quality / Emergency |
+
+## Task Decomposition
+
+| # | Unit | Domain | Complexity | Mode | Depends On |
+|---|---|---|---|---|---|
+| 1 | <name> | <tags> | XS-M | FAST-STANDARD | — |
+| 2 | <name> | <tags> | M | STANDARD | 1 |
+| _...if multi-feature PRD..._ | | | | | |
+
+**FAN-OUT eligible:** Units with same dependency depth + zero shared files → parallel plan dispatch.
+**Sequential required:** Units sharing files or with `Depends On` → ordered execution.
 
 ## Mode Selection
 
