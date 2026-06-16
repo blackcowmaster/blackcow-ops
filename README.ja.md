@@ -1,6 +1,6 @@
 <div align="center">
   <h1>BlackCow Ops</h1>
-  <p><strong>Reasonix + DeepSeekのための7つの自己改善型ワークフロースキル。</strong></p>
+  <p><strong>Reasonix + DeepSeekのための9つの自己改善型ワークフロースキル。</strong></p>
   <p>
     <a href="#インストール">インストール</a> · <a href="#クイックスタート">クイックスタート</a> ·
     <a href="README.md">English</a> · <a href="README.ko.md">한국어</a> · <a href="README.zh-cn.md">简体中文</a>
@@ -11,7 +11,7 @@
 
 ## 概要
 
-BlackCow Opsは、コーディングタスクのための **govern → plan → execute → verify → evolve** パイプラインを形成する7つのReasonixスキルです。BKIT 11ゲート品質体系をDeepSeekのコスト優位性に合わせて調整しています。タイポ修正は約$0.001、マルチファイル機能は約$0.03で処理されます。
+BlackCow Opsは、コーディングタスクのための **govern → plan → execute → verify → evolve** パイプラインを形成する9つのReasonixスキルです。BKIT 11ゲート品質体系をDeepSeekのコスト優位性に合わせて調整しています。タイポ修正は約$0.001、マルチファイル機能は約$0.03で処理されます。
 
 **正直なスコア: 90.6/100**（11次元平均）。評価基準は固定 — ゴールポスト移動なし。
 
@@ -28,6 +28,8 @@ BlackCow Opsは、コーディングタスクのための **govern → plan → 
 | `blackcow-librarian` | プロジェクトメモリ。構造キャッシュ、障害パターンメモリ、トレンド分析。 |
 | `blackcow-skill-review` | メタ監査。スキル自体のトレンド追跡と陳腐化検出。 |
 | `blackcow-skill-evolver` | 安全進化エンジン。レビュー済み変更を3重安全ゲートで適用。 |
+| `blackcow-app-scraper` | App Store + Play Store レビュースクレイパー。メタデータ、レビュー、類似アプリをAPIキー不要で抽出。 |
+| `blackcow-app-intel` | スクレイピングしたレビューから市場インテリジェンスを抽出。感情分析、不満ランキング、弱点マップ、PRD向けインサイト。 |
 
 ## インストール
 
@@ -36,7 +38,7 @@ git clone https://github.com/blackcowmaster/blackcow-ops.git
 cp blackcow-ops/skills/*.md ~/.reasonix/skills/
 ```
 
-Reasonixを再起動すると、7つのスキルがグローバルで使用可能になります。
+Reasonixを再起動すると、9つのスキルがグローバルで使用可能になります。
 
 ## クイックスタート
 

@@ -1,6 +1,6 @@
 <div align="center">
   <h1>BlackCow Ops</h1>
-  <p><strong>7 self-improving workflow skills for Reasonix + DeepSeek.</strong></p>
+  <p><strong>9 self-improving workflow skills for Reasonix + DeepSeek.</strong></p>
   <p>
     <a href="#install">Install</a> · <a href="#quick-start">Quick Start</a> ·
     <a href="README.ko.md">한국어</a> · <a href="README.ja.md">日本語</a> · <a href="README.zh-cn.md">简体中文</a>
@@ -11,7 +11,7 @@
 
 ## What it is
 
-BlackCow Ops is a set of 7 Reasonix skills that form a **govern → plan → execute → verify → evolve** pipeline for coding tasks. It enforces BKIT — an 11-gate quality taxonomy — tuned for DeepSeek's cost advantage. A typo fix costs ~$0.001; a multi-file feature costs ~$0.03.
+BlackCow Ops is a set of 9 Reasonix skills that form a **govern → plan → execute → verify → evolve** pipeline for coding tasks. It enforces BKIT — an 11-gate quality taxonomy — tuned for DeepSeek's cost advantage. A typo fix costs ~$0.001; a multi-file feature costs ~$0.03.
 
 **Honest score: 90.6/100** (11-dimension average). Score rubric fixed at baseline — no moving goalposts.
 
@@ -28,6 +28,8 @@ BlackCow Ops is a set of 7 Reasonix skills that form a **govern → plan → exe
 | `blackcow-librarian` | Project memory. Structure caching, failure-pattern memory, trend analysis. |
 | `blackcow-skill-review` | Meta-auditor. Trend tracking and staleness detection for the skills themselves. |
 | `blackcow-skill-evolver` | Safe evolution engine. Triple-safety gates for applying reviewed changes to skills. |
+| `blackcow-app-scraper` | App Store + Play Store review scraper. Extracts metadata, reviews, and similar apps — no API keys needed. |
+| `blackcow-app-intel` | Market intelligence from scraped reviews. Sentiment analysis, complaint ranking, weakness maps, PRD-ready takeaways. |
 
 ## Install
 
@@ -36,7 +38,7 @@ git clone https://github.com/blackcowmaster/blackcow-ops.git
 bash blackcow-ops/skills/install.sh
 ```
 
-Restart Reasonix. All 7 skills with correct platform-specific tool names are available globally.
+Restart Reasonix. All 9 skills with correct platform-specific tool names are available globally.
 
 ## Quick Start
 

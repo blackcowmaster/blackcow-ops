@@ -1,6 +1,6 @@
 <div align="center">
   <h1>BlackCow Ops</h1>
-  <p><strong>Reasonix + DeepSeek를 위한 7개의 자기 개선형 워크플로우 스킬.</strong></p>
+  <p><strong>Reasonix + DeepSeek를 위한 9개의 자기 개선형 워크플로우 스킬.</strong></p>
   <p>
     <a href="#설치">설치</a> · <a href="#빠른-시작">빠른 시작</a> ·
     <a href="README.md">English</a> · <a href="README.ja.md">日本語</a> · <a href="README.zh-cn.md">简体中文</a>
@@ -11,7 +11,7 @@
 
 ## 무엇인가
 
-BlackCow Ops는 코딩 작업을 위한 **govern → plan → execute → verify → evolve** 파이프라인을 형성하는 7개의 Reasonix 스킬입니다. BKIT 11-게이트 품질 체계를 DeepSeek의 비용 이점에 맞게 튜닝했습니다. 오타 수정은 약 $0.001, 다중 파일 기능은 약 $0.03에 처리됩니다.
+BlackCow Ops는 코딩 작업을 위한 **govern → plan → execute → verify → evolve** 파이프라인을 형성하는 9개의 Reasonix 스킬입니다. BKIT 11-게이트 품질 체계를 DeepSeek의 비용 이점에 맞게 튜닝했습니다. 오타 수정은 약 $0.001, 다중 파일 기능은 약 $0.03에 처리됩니다.
 
 **솔직한 점수: 90.6/100** (11차원 평균). 기준표 고정 — 움직이는 골대 없음.
 
@@ -28,6 +28,8 @@ BlackCow Ops는 코딩 작업을 위한 **govern → plan → execute → verify
 | `blackcow-librarian` | 프로젝트 메모리. 구조 캐싱, 실패 패턴 메모리, 트렌드 분석. |
 | `blackcow-skill-review` | 메타 감사. 스킬 자체의 트렌드 추적과 진부화 감지. |
 | `blackcow-skill-evolver` | 안전 진화 엔진. 검토된 변경사항을 3중 안전 게이트로 적용. |
+| `blackcow-app-scraper` | 앱스토어 + 플레이스토어 리뷰 스크래퍼. 메타데이터, 리뷰, 유사 앱을 API 키 없이 추출. |
+| `blackcow-app-intel` | 스크래핑된 리뷰에서 시장 인텔리전스 도출. 감정 분석, 불만 랭킹, 약점 맵, PRD 인사이트. |
 
 ## 설치
 
@@ -36,7 +38,7 @@ git clone https://github.com/blackcowmaster/blackcow-ops.git
 cp blackcow-ops/skills/*.md ~/.reasonix/skills/
 ```
 
-Reasonix를 재시작하면 7개 스킬이 전역에서 사용 가능합니다.
+Reasonix를 재시작하면 9개 스킬이 전역에서 사용 가능합니다.
 
 ## 빠른 시작
 
