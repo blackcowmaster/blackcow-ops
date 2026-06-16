@@ -88,14 +88,10 @@ BlackCowは無駄にできるほど安いモデルのために設計されまし
 
 ## 参照
 
-以下のプロジェクトのアイデアに基づいています：
-
-- **[BKIT by POPUP STUDIO](https://github.com/popup-studio-ai/bkit-claude-code)** — オリジナル11ゲート品質体系とPDCA方法論。Apache 2.0。
-- **[OmO / oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — ディシプリンエージェント、並列オーケストレーション、Hashline検証。
-- **[fablize](https://github.com/fivetaku/fablize)** — 「手順はモデルの天井を上げられない」正直な限界哲学。
-- **[FableCodex](https://github.com/baskduf/FableCodex)** — Findings Gateパターン（証拠ベース解決、未解決findingブロック）。
-- **[prometheus](https://github.com/tmdgusya/prometheus)** — コンテキスト優先分解、ZCode /goal強制の洞察。
-- **[superpowers-reasonix](https://github.com/christopherarter/superpowers-reasonix)** — 根本原因診断優先の規律（Phase 2.2）。
+- **[BKIT](https://github.com/popup-studio-ai/bkit-claude-code)** — 11ゲート品質体系。Apache 2.0。
+- **[FableCodex](https://github.com/baskduf/FableCodex)** — Findings Gateパターン。
+- **[superpowers-reasonix](https://github.com/christopherarter/superpowers-reasonix)** — 根本原因診断優先の規律。
+- **[fablize](https://github.com/fivetaku/fablize)** — 正直な限界哲学。
 
 ## ライセンス
 

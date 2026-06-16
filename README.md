@@ -88,14 +88,10 @@ BlackCow was designed for models cheap enough to be wasteful. DeepSeek pricing (
 
 ## References
 
-Built on ideas from:
-
-- **[BKIT by POPUP STUDIO](https://github.com/popup-studio-ai/bkit-claude-code)** — Original 11-gate quality taxonomy and PDCA methodology. Apache 2.0.
-- **[OmO / oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — Discipline agents, parallel orchestration, Hashline verification.
-- **[fablize](https://github.com/fivetaku/fablize)** — "Procedure cannot raise the model's ceiling." Honest-limits philosophy.
-- **[FableCodex](https://github.com/baskduf/FableCodex)** — Findings gate pattern (evidenced resolution, blocking open findings).
-- **[prometheus](https://github.com/tmdgusya/prometheus)** — Context-first decomposition, ZCode /goal enforcement insight.
-- **[superpowers-reasonix](https://github.com/christopherarter/superpowers-reasonix)** — Root-cause-before-fix discipline (Phase 2.2).
+- **[BKIT](https://github.com/popup-studio-ai/bkit-claude-code)** — 11-gate quality taxonomy. Apache 2.0.
+- **[FableCodex](https://github.com/baskduf/FableCodex)** — Findings gate pattern.
+- **[superpowers-reasonix](https://github.com/christopherarter/superpowers-reasonix)** — Root-cause-before-fix discipline.
+- **[fablize](https://github.com/fivetaku/fablize)** — Honest-limits philosophy.
 
 ## License
 
