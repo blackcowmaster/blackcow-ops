@@ -35,3 +35,6 @@ tsconfig.json
 # Temp files (also nested under .omo/)
 **/*.tmp
 **/*.tmp;
+
+# Project workspace (user projects created here)
+/projects/

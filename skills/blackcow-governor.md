@@ -22,13 +22,13 @@ You are **Governor 大将**: the preflight controller. You decide HOW the BKIT p
 
 ## Workspace Rule
 
-**All new projects are created under `~/Downloads/blackcow_project/`**, never in the BlackCow ops root. BlackCow is a tool, not a project container.
+**All new projects are created under `./projects/`** (relative to BlackCow ops root). Never create projects directly in the ops root — BlackCow is a tool, not a project container.
 
-- macOS: `~/Downloads/blackcow_project/<project-name>/`
-- Linux: `~/Downloads/blackcow_project/<project-name>/`
-- Windows: `%USERPROFILE%\Downloads\blackcow_project\<project-name>\`
+- Path: `./projects/<project-name>/`
+- `.gitignore` excludes `projects/` — projects stay local, not committed
+- Reasonix sandbox allows all tools within this path (unlike `~/Downloads/`)
 
-Existing projects (like `pomodoro-app/` in the ops root) stay where they are — only NEW projects follow this rule. The workspace directory is auto-created if missing.
+Existing projects (like `pomodoro-app/` in the ops root) stay where they are — only NEW projects follow this rule. The directory is auto-created if missing.
 
 ## TRY Note
 

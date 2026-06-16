@@ -41,7 +41,7 @@ Restart Reasonix. All 7 skills with correct platform-specific tool names are ava
 ## Quick Start
 
 ```
-# New projects are created in ~/Downloads/blackcow_project/
+# New projects are created in ./projects/
 
 # 80% of tasks: just ask Loop (TRY mode, ~3 min)
 blackcow-loop "Build a Pomodoro timer app"
@@ -63,7 +63,7 @@ Invoke via `run_skill` or the `/` shortcut: `/blackcow-plan Add OAuth2`
 - **Failure-pattern memory.** Past failures are recorded with effectiveness scores. High-effectiveness fixes are auto-applied; low-effectiveness patterns trigger escalation.
 - **Visual review.** Screenshots analyzed by codex CLI for UI feedback — readability, contrast, spacing, hierarchy. Works on iOS simulator and web. Falls back gracefully if codex is unavailable.
 - **Simulator automation.** `xcrun simctl` boot, screenshot, and app launch — full mobile development cycle without leaving the terminal.
-- **Workspace isolation.** All new projects created under `~/Downloads/blackcow_project/` — never pollutes the tool directory.
+- **Workspace isolation.** All new projects created under `./projects/` — never pollutes the tool directory. Sandbox-compatible.
 - **CLI bridge.** Subagents can use any CLI tool (`supabase`, `aws`, `firebase`, `docker`) via `run_command`. Authenticated tools require user confirmation.
 - **Self-audit.** Every skill has a structured self-audit checklist. Skills review and evolve themselves.
 
