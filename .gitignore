@@ -15,6 +15,16 @@ eco-out.txt
 # Reasonix runtime artifacts (session-specific)
 .reasonix/truncated-results/
 
+# BlackCow Swarm runtime artifacts
+.omo/swarm/runs/
+.worktrees/swarm/
+
+# Python runtime/cache artifacts
+__pycache__/
+*.pyc
+/python3
+/scripts/python3
+
 # Dependencies and build artifacts
 node_modules/
 coverage/

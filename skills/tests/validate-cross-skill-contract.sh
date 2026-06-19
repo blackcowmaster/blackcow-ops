@@ -36,6 +36,7 @@ PLAN_FILE="${SKILLS_DIR}/blackcow-plan.md"
 LOOP_FILE="${SKILLS_DIR}/blackcow-loop.md"
 QA_FILE="${SKILLS_DIR}/blackcow-qa.md"
 LIBRARIAN_FILE="${SKILLS_DIR}/blackcow-librarian.md"
+SWARM_FILE="${SKILLS_DIR}/blackcow-swarm.md"
 
 MISSING=""
 for f in "$GOVERNOR_FILE" "$PLAN_FILE" "$LOOP_FILE" "$QA_FILE" "$LIBRARIAN_FILE"; do
@@ -211,6 +212,16 @@ for i in "${!CONSUMERS_ROW1[@]}"; do
   assert_grep_or "1d — $skill references governance.md or .omo/governor/ path" \
     "$file" "governance\.md|--govern=" "\.omo/governor/"
 done
+
+if [[ -f "$SWARM_FILE" ]]; then
+  header "SWARM — blackcow-swarm isolated runtime contract"
+  assert_grep "SWARM.1 — Swarm references blackcow-plan" "$SWARM_FILE" "blackcow-plan"
+  assert_grep "SWARM.2 — Swarm references blackcow-loop" "$SWARM_FILE" "blackcow-loop"
+  assert_grep "SWARM.3 — Swarm references blackcow-qa" "$SWARM_FILE" "blackcow-qa"
+  assert_grep "SWARM.4 — Swarm records .omo/swarm runtime artifacts" "$SWARM_FILE" "\.omo/swarm/runs"
+  assert_grep "SWARM.5 — Swarm uses isolated writer worktrees" "$SWARM_FILE" "\.worktrees/swarm"
+  assert_grep "SWARM.6 — Swarm requires worker result.json" "$SWARM_FILE" "result\.json"
+fi
 
 # ============================================================================
 # ROW 2 — blackcow-plan → plans/<slug>.md → loop

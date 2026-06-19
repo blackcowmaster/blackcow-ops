@@ -1,6 +1,6 @@
 <div align="center">
   <h1>BlackCow Ops</h1>
-  <p><strong>Reasonix + DeepSeek를 위한 7개의 자기 개선형 워크플로우 스킬.</strong></p>
+  <p><strong>Reasonix + DeepSeek를 위한 8개의 자기 개선형 워크플로우 스킬.</strong></p>
   <p>
     <a href="#설치">설치</a> · <a href="#빠른-시작">빠른 시작</a> ·
     <a href="README.md">English</a> · <a href="README.ja.md">日本語</a> · <a href="README.zh-cn.md">简体中文</a>
@@ -11,7 +11,7 @@
 
 ## 무엇인가
 
-BlackCow Ops는 코딩 작업을 위한 **govern → plan → execute → verify → evolve** 파이프라인을 형성하는 7개의 Reasonix 스킬입니다. BKIT 11-게이트 품질 체계를 DeepSeek의 비용 이점에 맞게 튜닝했습니다. 오타 수정은 약 $0.001, 다중 파일 기능은 약 $0.03에 처리됩니다.
+BlackCow Ops는 코딩 작업을 위한 **govern → plan → execute → verify → evolve** 파이프라인과 명시적 로컬 swarm 제어기를 형성하는 8개의 Reasonix 스킬입니다. BKIT 11-게이트 품질 체계를 DeepSeek의 비용 이점에 맞게 튜닝했습니다. 오타 수정은 약 $0.001, 다중 파일 기능은 약 $0.03에 처리됩니다.
 
 **솔직한 점수: 90.6/100** (11차원 평균). 기준표 고정 — 움직이는 골대 없음.
 
@@ -24,6 +24,7 @@ BlackCow Ops는 코딩 작업을 위한 **govern → plan → execute → verify
 | `blackcow-governor` | 사전 점검 제어기. 작업 전에 모드, 게이트, 관측 수준, PDCA 예산을 선택합니다. |
 | `blackcow-plan` | 전략 설계자. 점진적 확장, 아키텍처 옵션, 결정 완결형 계획. |
 | `blackcow-loop` | 실행 엔진. TRY 모드(2-3분) + STANDARD/FULL. PDCA, Findings Gate, Visual Review(codex), O0-O4 검증. |
+| `blackcow-swarm` | 명시적 DeepSeek/Reasonix swarm 제어기. 로컬 병렬 worker를 추정, 계획, 실행, 재개, 취소, 정리합니다. |
 | `blackcow-qa` | 품질 보증. 수치 임계값 기반 조건부 11-게이트 평가. |
 | `blackcow-librarian` | 프로젝트 메모리. 구조 캐싱, 실패 패턴 메모리, 트렌드 분석. |
 | `blackcow-skill-review` | 메타 감사. 스킬 자체의 트렌드 추적과 진부화 감지. |
@@ -36,7 +37,7 @@ git clone https://github.com/blackcowmaster/blackcow-ops.git
 cp blackcow-ops/skills/*.md ~/.reasonix/skills/
 ```
 
-Reasonix를 재시작하면 7개 스킬이 전역에서 사용 가능합니다.
+Reasonix를 재시작하면 8개 스킬이 전역에서 사용 가능합니다.
 
 ## 빠른 시작
 
@@ -76,6 +77,9 @@ blackcow-qa "src/auth/" --gates=auto
 ```
 blackcow-governor ──→ blackcow-plan ──→ blackcow-loop ──→ blackcow-qa
    (사전 점검)         (설계)          (실행)          (검증)
+                         │
+                         └──→ blackcow-swarm
+                              (명시적 병렬 worker)
 
 blackcow-skill-review ──→ blackcow-skill-evolver
       (스킬 감사)              (스킬 수정)

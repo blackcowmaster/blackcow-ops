@@ -3,11 +3,11 @@
 # validate-blackcow-ecosystem.sh — L4 System-Level Test for BKIT Skill Ecosystem
 #
 # Tests the FULL blackcow-* skill pipeline across 6 subsystems:
-#   S01-S05  File Integrity — all 7 skill files exist + cross-reference checks
+#   S01-S05  File Integrity — all 8 skill files exist + cross-reference checks
 #   S06-S07  JSONL Validation — qa-history.jsonl + review-history.jsonl
 #   S08      Evidence Directory — exists, writable, has content
 #   S09-S13  Cross-Reference Integrity — skills reference each other correctly
-#   S14-S18  Frontmatter Schema — all 7 skills have valid YAML frontmatter
+#   S14-S18  Frontmatter Schema — all 8 skills have valid YAML frontmatter
 #   S19-S22  Pipeline Contract — plan→loop→qa→review→evolver→governor chain
 #   S23-S24  Self-Audit Checklist — governor's cross-skill evidence contract
 #   S25-S27  Cost Model Consistency — model_tiers and allowed-tools alignment
@@ -162,19 +162,21 @@ echo " Meta-review:    $META_REVIEW_DIR"
 echo " Evidence:       $EVIDENCE_DIR"
 
 # ============================================================================
-# S01-S05: FILE INTEGRITY — All 7 skill files exist
+# S01-S05: FILE INTEGRITY — All 8 skill files exist
 # ============================================================================
-header "S01-S05 — File Integrity (All 7 blackcow-* skill files)"
+header "S01-S05 — File Integrity (All 8 blackcow-* skill files)"
 
 ALL_SKILLS=(
   "blackcow-plan.md"
   "blackcow-loop.md"
+  "blackcow-swarm.md"
   "blackcow-qa.md"
   "blackcow-librarian.md"
   "blackcow-skill-review.md"
   "blackcow-skill-evolver.md"
   "blackcow-governor.md"
 )
+EXPECTED_SKILL_COUNT="${#ALL_SKILLS[@]}"
 
 MISSING_COUNT=0; MISSING_LIST=""
 for skill in "${ALL_SKILLS[@]}"; do
@@ -186,7 +188,7 @@ elif [[ "$MISSING_COUNT" -eq 1 ]]; then
   echo "WARNING: 1 target skill file not found (continuing with partial validation):"$'\n'"$MISSING_LIST" >&2
 fi
 
-echo "  Expected skills (7):"
+echo "  Expected skills (${EXPECTED_SKILL_COUNT}):"
 for skill in "${ALL_SKILLS[@]}"; do
   echo "    • ${skill}"
 done
@@ -201,10 +203,10 @@ for skill in "${ALL_SKILLS[@]}"; do
   fi
 done
 
-if [[ "$SKILL_COUNT" -eq 7 ]]; then
-  pass_msg "S02 — All 7 blackcow-* skill files present (7/7)"
+if [[ "$SKILL_COUNT" -eq "$EXPECTED_SKILL_COUNT" ]]; then
+  pass_msg "S02 — All ${EXPECTED_SKILL_COUNT} blackcow-* skill files present (${EXPECTED_SKILL_COUNT}/${EXPECTED_SKILL_COUNT})"
 else
-  fail_msg "S02 — Expected 7 skill files, found ${SKILL_COUNT}"
+  fail_msg "S02 — Expected ${EXPECTED_SKILL_COUNT} skill files, found ${SKILL_COUNT}"
 fi
 
 # Also verify they exist in ~/.reasonix/skills/ (the run_skill target)
@@ -215,10 +217,10 @@ for skill in "${ALL_SKILLS[@]}"; do
   fi
 done
 
-if [[ "$HOMEDIR_SKILLS" -eq 7 ]]; then
-  pass_msg "S03 — All 7 skills installed in ~/.reasonix/skills/ (7/7)"
+if [[ "$HOMEDIR_SKILLS" -eq "$EXPECTED_SKILL_COUNT" ]]; then
+  pass_msg "S03 — All ${EXPECTED_SKILL_COUNT} skills installed in ~/.reasonix/skills/ (${EXPECTED_SKILL_COUNT}/${EXPECTED_SKILL_COUNT})"
 elif [[ "$HOMEDIR_SKILLS" -gt 0 ]]; then
-  pass_msg "S03 — ${HOMEDIR_SKILLS}/7 skills found in ~/.reasonix/skills/"
+  pass_msg "S03 — ${HOMEDIR_SKILLS}/${EXPECTED_SKILL_COUNT} skills found in ~/.reasonix/skills/"
 else
   skip_msg "S03 — No skills found in ~/.reasonix/skills/ (run skills/install.sh first)"
 fi
@@ -235,12 +237,12 @@ for skill in "${ALL_SKILLS[@]}"; do
   fi
 done
 
-# Check version consistency across all 7 skills
+# Check version consistency across all 8 skills
 header "S05 — Version Consistency Across All Skills"
 VERSIONS=$(grep -h '^version: ' "${SKILLS_DIR}"/blackcow-*.md 2>/dev/null | sort -u)
 VERSION_COUNT=$(echo "$VERSIONS" | wc -l | tr -d ' ')
 if [[ "$VERSION_COUNT" -eq 1 ]]; then
-  pass_msg "S05 — All 7 skills share the same version: $(echo "$VERSIONS" | head -1)"
+  pass_msg "S05 — All ${EXPECTED_SKILL_COUNT} skills share the same version: $(echo "$VERSIONS" | head -1)"
 else
   echo "  Versions found ($VERSION_COUNT unique):"
   echo "$VERSIONS" | sed 's/^/    /'
@@ -324,12 +326,13 @@ done
 # ============================================================================
 # S09-S13: CROSS-REFERENCE INTEGRITY
 # ============================================================================
-header "S09-S13 — Cross-Reference Integrity (6→7 Skill References)"
+header "S09-S13 — Cross-Reference Integrity (7→8 Skill References)"
 
 # Each skill should reference the other 6 skills
 SKILL_NAMES=(
   "blackcow-plan"
   "blackcow-loop"
+  "blackcow-swarm"
   "blackcow-qa"
   "blackcow-librarian"
   "blackcow-skill-review"
@@ -350,7 +353,7 @@ for skill in "${SKILL_NAMES[@]}"; do
     fi
   done
 
-  expected=6
+  expected=$((${#SKILL_NAMES[@]} - 1))
   if [[ "$refs" -eq "$expected" ]]; then
     pass_msg "S09 — ${skill}.md references all $expected other skills"
   elif [[ "$refs" -ge 4 ]]; then
@@ -425,7 +428,7 @@ if [[ -f "${SKILLS_DIR}/blackcow-qa.md" ]]; then
 fi
 
 # ============================================================================
-# S14-S18: FRONTMATTER SCHEMA — All 7 skills
+# S14-S18: FRONTMATTER SCHEMA — All 8 skills
 # ============================================================================
 header "S14-S18 — Frontmatter Schema Validation"
 
@@ -590,7 +593,7 @@ fi
 
 # Each skill should declare its pipeline neighbor's reference in allowed-tools
 # The most critical: run_skill is needed for skills that invoke other skills
-for skill_with_run_skill in "blackcow-governor" "blackcow-plan" "blackcow-loop" "blackcow-qa" "blackcow-librarian" "blackcow-skill-review" "blackcow-skill-evolver"; do
+for skill_with_run_skill in "blackcow-governor" "blackcow-plan" "blackcow-loop" "blackcow-swarm" "blackcow-qa" "blackcow-librarian" "blackcow-skill-review" "blackcow-skill-evolver"; do
   file="${SKILLS_DIR}/${skill_with_run_skill}.md"
   [[ ! -f "$file" ]] && continue
   if grep -q "run_skill" "$file" 2>/dev/null; then
@@ -638,17 +641,17 @@ fi
 
 # S29: Verify the install.sh can install all skills (syntax check)
 if [[ -f "${SKILLS_DIR}/install.sh" ]]; then
-  # Check that install.sh references all 7 skills
+  # Check that install.sh references all skills
   INSTALL_REF_COUNT=0
   for skill in "${ALL_SKILLS[@]}"; do
     if grep -q "$skill" "${SKILLS_DIR}/install.sh" 2>/dev/null; then
       ((INSTALL_REF_COUNT++))
     fi
   done
-  if [[ "$INSTALL_REF_COUNT" -eq 7 ]]; then
-    pass_msg "S29 — install.sh references all 7 skills ($INSTALL_REF_COUNT/7)"
+  if [[ "$INSTALL_REF_COUNT" -eq "$EXPECTED_SKILL_COUNT" ]]; then
+    pass_msg "S29 — install.sh references all ${EXPECTED_SKILL_COUNT} skills ($INSTALL_REF_COUNT/${EXPECTED_SKILL_COUNT})"
   else
-    fail_msg "S29 — install.sh references $INSTALL_REF_COUNT/7 skills (expected 7)"
+    fail_msg "S29 — install.sh references $INSTALL_REF_COUNT/${EXPECTED_SKILL_COUNT} skills (expected ${EXPECTED_SKILL_COUNT})"
   fi
 else
   fail_msg "S29 — install.sh NOT FOUND"
@@ -661,6 +664,7 @@ echo "  Pipeline phase structure check:"
 PIPELINE_PHASES=(
   "blackcow-plan:Phase -1|Phase 0|Phase 1|Phase 2|Phase 3|Phase 4|Phase 5"
   "blackcow-loop:Phase 0|Phase 1|Phase 2|Phase 3|Phase 4|Phase 5|Phase 6|Phase 7"
+  "blackcow-swarm:Phase 0|Phase 1|Phase 2|Phase 3|Phase 4|Phase 5"
   "blackcow-qa:Phase 0|Phase 1|Phase 2|Phase 3"
   "blackcow-librarian:Phase 0|Phase 1|Phase 2|Phase 3|Phase 4|Phase 5|Phase 6"
   "blackcow-skill-review:Phase 0|Phase 1|Phase 2|Phase 3"
@@ -701,7 +705,7 @@ done
 header "TEST SUMMARY"
 
 echo ""
-echo "  All 7 skills under test:"
+echo "  All ${EXPECTED_SKILL_COUNT} skills under test:"
 for skill in "${ALL_SKILLS[@]}"; do
   if [[ -f "${SKILLS_DIR}/${skill}" ]]; then
     sz=$(stat -f%z "${SKILLS_DIR}/${skill}" 2>/dev/null || stat -c%s "${SKILLS_DIR}/${skill}" 2>/dev/null || echo "?")
@@ -728,7 +732,7 @@ echo "============================================================"
 
 if [[ "$FAIL" -eq 0 ]]; then
   echo "  ✅ ALL SYSTEM-LEVEL CHECKS PASSED — ecosystem is healthy."
-  echo "  Skills involved: 7 blackcow-* skill files"
+  echo "  Skills involved: ${EXPECTED_SKILL_COUNT} blackcow-* skill files"
   echo "  Data files: qa-history.jsonl + review-history.jsonl"
   echo "  Infrastructure: evidence directory + pipeline contract"
   echo ""

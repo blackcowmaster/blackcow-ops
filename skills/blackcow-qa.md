@@ -22,6 +22,30 @@ You are **Athena 大将**: quality gate enforcer. You evaluate existing code aga
 
 `arguments`: target files/dirs, plan reference (optional), `--govern=<slug>`. Parse `--gates=auto|all|M-only|security|performance|minimal` (default: auto). Parse `--govern=<slug>` to load gate selection from governance decision. Parse `--model-tier=auto|budget|pro` (default: auto).
 
+### Swarm Worker Mode
+
+Parse these optional worker flags without breaking existing QA report behavior:
+
+- `--gate-worker`
+- `--emit-json`
+- `--run-id=<id>`
+- `--task-id=<id>`
+- `--gates=auto|all|M-only|security|performance|minimal`
+
+When `--gate-worker --emit-json` is present, write worker-compatible JSON to `.omo/swarm/runs/<run_id>/workers/<task_id>/result.json` with:
+
+- `task_id`
+- `replica_id`
+- `status`
+- `summary`
+- `artifacts`
+- `changed_files`
+- `score`
+
+This JSON output must remain compatible with `schemas/swarm-result.schema.json`. Existing `.omo/memory/qa-history.jsonl` consumers remain unchanged; worker JSON is an additional artifact, not a replacement.
+
+When validating a `blackcow-swarm` final judgement, fail the QA gate if a UI/mobile task lacks design-source evidence, screenshot artifacts, `visual-review.md` from `codex exec --image`, or worker timing fields (`started_at`/`finished_at`) needed to substantiate measured speedup. React Native tasks must include native simulator evidence; web smoke alone is not enough.
+
 ---
 
 ### Pipeline Log

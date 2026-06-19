@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BlackCow Swarm Worker Result",
+  "type": "object",
+  "required": ["task_id", "replica_id", "status", "summary", "artifacts", "changed_files", "score"],
+  "properties": {
+    "task_id": {"type": "string", "minLength": 1},
+    "replica_id": {"type": "string", "minLength": 1},
+    "status": {
+      "type": "string",
+      "enum": ["SUCCEEDED", "FAILED_RETRYABLE", "FAILED_FINAL", "CANCELLED", "TIMED_OUT"]
+    },
+    "summary": {"type": "string"},
+    "artifacts": {"type": "array", "items": {"type": "string"}},
+    "changed_files": {"type": "array", "items": {"type": "string"}},
+    "patch_path": {"type": ["string", "null"]},
+    "score": {
+      "type": "object",
+      "required": ["overall", "correctness", "safety", "tests"],
+      "properties": {
+        "overall": {"type": "number", "minimum": 0, "maximum": 100},
+        "correctness": {"type": "number", "minimum": 0, "maximum": 100},
+        "safety": {"type": "number", "minimum": 0, "maximum": 100},
+        "tests": {"type": "number", "minimum": 0, "maximum": 100}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

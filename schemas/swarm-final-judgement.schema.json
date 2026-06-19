@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BlackCow Swarm Final Judgement",
+  "type": "object",
+  "required": ["run_id", "status", "summary", "selected_patches", "score"],
+  "properties": {
+    "run_id": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "enum": ["SUCCEEDED", "FAILED", "CANCELLED", "BLOCKED"]},
+    "summary": {"type": "string"},
+    "selected_patches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["task_id", "replica_id", "patch_path"],
+        "properties": {
+          "task_id": {"type": "string", "minLength": 1},
+          "replica_id": {"type": "string", "minLength": 1},
+          "patch_path": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": true
+      }
+    },
+    "score": {
+      "type": "object",
+      "required": ["overall", "correctness", "safety", "tests"],
+      "properties": {
+        "overall": {"type": "number", "minimum": 0, "maximum": 100},
+        "correctness": {"type": "number", "minimum": 0, "maximum": 100},
+        "safety": {"type": "number", "minimum": 0, "maximum": 100},
+        "tests": {"type": "number", "minimum": 0, "maximum": 100}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

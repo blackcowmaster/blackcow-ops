@@ -1,6 +1,6 @@
 <div align="center">
   <h1>BlackCow Ops</h1>
-  <p><strong>7 self-improving workflow skills for Reasonix + DeepSeek.</strong></p>
+  <p><strong>8 self-improving workflow skills for Reasonix + DeepSeek.</strong></p>
   <p>
     <a href="#install">Install</a> · <a href="#quick-start">Quick Start</a> ·
     <a href="README.ko.md">한국어</a> · <a href="README.ja.md">日本語</a> · <a href="README.zh-cn.md">简体中文</a>
@@ -11,7 +11,7 @@
 
 ## What it is
 
-BlackCow Ops is a set of 7 Reasonix skills that form a **govern → plan → execute → verify → evolve** pipeline for coding tasks. It enforces BKIT — an 11-gate quality taxonomy — tuned for DeepSeek's cost advantage. A typo fix costs ~$0.001; a multi-file feature costs ~$0.03.
+BlackCow Ops is a set of 8 Reasonix skills that form a **govern → plan → execute → verify → evolve** pipeline for coding tasks, with an explicit local swarm control plane for tasks that benefit from parallel DeepSeek workers. It enforces BKIT — an 11-gate quality taxonomy — tuned for DeepSeek's cost advantage. A typo fix costs ~$0.001; a multi-file feature costs ~$0.03.
 
 **Honest score: 90.6/100** (11-dimension average). Score rubric fixed at baseline — no moving goalposts.
 
@@ -24,6 +24,7 @@ BlackCow Ops is a set of 7 Reasonix skills that form a **govern → plan → exe
 | `blackcow-governor` | Preflight controller. Selects mode, gates, observable level, and PDCA budget before any work begins. |
 | `blackcow-plan` | Strategic planner. Progressive widening, architecture options, decision-complete plans. |
 | `blackcow-loop` | Execution engine. TRY mode (2-3 min) + STANDARD/FULL. PDCA on failure, Findings Gate, Visual Review (codex), O0-O4 verification. |
+| `blackcow-swarm` | Explicit DeepSeek/Reasonix swarm control plane. Estimates, plans, runs, resumes, cancels, and cleans up local worker swarms. |
 | `blackcow-qa` | Quality assurance. Conditional 11-gate evaluation with numeric thresholds. |
 | `blackcow-librarian` | Project memory. Structure caching, failure-pattern memory, trend analysis. |
 | `blackcow-skill-review` | Meta-auditor. Trend tracking and staleness detection for the skills themselves. |
@@ -36,7 +37,7 @@ git clone https://github.com/blackcowmaster/blackcow-ops.git
 bash blackcow-ops/skills/install.sh
 ```
 
-Restart Reasonix. All 7 skills with correct platform-specific tool names are available globally.
+Restart Reasonix. All 8 skills with correct platform-specific tool names are available globally.
 
 ## Quick Start
 
@@ -50,6 +51,10 @@ blackcow-loop "Build a Pomodoro timer app"
 blackcow-governor "Add OAuth2 with role-based access"
 blackcow-loop "Execute plans/oauth.md" --govern=oauth
 blackcow-qa "src/auth/" --govern=oauth
+
+# Explicit swarm path for parallelizable work
+blackcow-swarm estimate "Implement team invite flow" --intensity high
+blackcow-swarm plan "Implement team invite flow" --dry-run
 ```
 
 Invoke via `run_skill` or the `/` shortcut: `/blackcow-plan Add OAuth2`
@@ -72,6 +77,9 @@ Invoke via `run_skill` or the `/` shortcut: `/blackcow-plan Add OAuth2`
 ```
 blackcow-governor ──→ blackcow-plan ──→ blackcow-loop ──→ blackcow-qa
    (preflight)         (design)          (execute)         (verify)
+                         │
+                         └──→ blackcow-swarm
+                              (explicit parallel workers)
 
 blackcow-skill-review ──→ blackcow-skill-evolver
       (audit skills)          (fix skills)

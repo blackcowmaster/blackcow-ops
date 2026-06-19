@@ -212,7 +212,7 @@ MAC_TOOLS="search_content, search_files, list_directory, directory_tree, run_com
 get_skill_extra_win() {
   local skill="$1"
   case "$skill" in
-    blackcow-plan.md|blackcow-loop.md|blackcow-qa.md|blackcow-governor.md)
+    blackcow-plan.md|blackcow-loop.md|blackcow-qa.md|blackcow-governor.md|blackcow-swarm.md)
       echo "explore, research"
       ;;
     blackcow-librarian.md|blackcow-skill-review.md|blackcow-skill-evolver.md)
@@ -228,7 +228,7 @@ get_skill_extra_win() {
 get_skill_extra_mac() {
   local skill="$1"
   case "$skill" in
-    blackcow-plan.md|blackcow-loop.md|blackcow-qa.md)
+    blackcow-plan.md|blackcow-loop.md|blackcow-qa.md|blackcow-swarm.md)
       echo "get_symbols, find_in_code"
       ;;
     blackcow-governor.md)

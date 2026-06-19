@@ -1,0 +1,97 @@
+{
+  "swarm": {
+    "default_policy": "auto",
+    "default_mode": "adaptive",
+    "default_intensity": "high",
+    "cost_multiplier_limit": 6.0,
+    "runner": {
+      "type": "reasonix",
+      "command_template": [
+        "python3",
+        "scripts/blackcow_reasonix_acp_worker.py",
+        "--skill",
+        "{skill}",
+        "--prompt-file",
+        "{prompt_file}",
+        "--result-json",
+        "{result_json}",
+        "--workspace",
+        "{workspace}",
+        "--run-id",
+        "{run_id}",
+        "--task-id",
+        "{task_id}",
+        "--replica-id",
+        "{replica_id}",
+        "--read-only",
+        "{read_only}"
+      ],
+      "cwd_mode": "task_workspace",
+      "require_json_result": true
+    },
+    "intensity": {
+      "normal": {
+        "max_total_workers": 8,
+        "max_readonly_workers": 7,
+        "max_writer_workers": 1,
+        "timeout_seconds": 600,
+        "retry_limit": 1,
+        "heartbeat_seconds": 15,
+        "cancel_grace_seconds": 10
+      },
+      "high": {
+        "max_total_workers": 24,
+        "max_readonly_workers": 21,
+        "max_writer_workers": 3,
+        "timeout_seconds": 900,
+        "retry_limit": 1,
+        "heartbeat_seconds": 10,
+        "cancel_grace_seconds": 10
+      },
+      "max": {
+        "max_total_workers": 64,
+        "max_readonly_workers": 58,
+        "max_writer_workers": 6,
+        "timeout_seconds": 1200,
+        "retry_limit": 2,
+        "heartbeat_seconds": 5,
+        "cancel_grace_seconds": 15
+      }
+    },
+    "single_writer_paths": [
+      "package-lock.json",
+      "pnpm-lock.yaml",
+      "yarn.lock",
+      "bun.lockb",
+      "uv.lock",
+      "poetry.lock",
+      "Cargo.lock"
+    ],
+    "risky_writer_patterns": [
+      "auth",
+      "authorization",
+      "permission",
+      "billing",
+      "payment",
+      "secret",
+      ".env",
+      "migration",
+      "schema",
+      "deploy",
+      "infrastructure",
+      "package-lock.json",
+      "pnpm-lock.yaml",
+      "yarn.lock",
+      "bun.lockb",
+      "uv.lock",
+      "poetry.lock",
+      "Cargo.lock"
+    ],
+    "anti_gaming": [
+      "Do not change or delete required checks.",
+      "Do not weaken assertions to make tests pass.",
+      "Do not emit fake result JSON.",
+      "Do not claim success without required artifacts."
+    ]
+  }
+}

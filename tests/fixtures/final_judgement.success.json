@@ -1,0 +1,18 @@
+{
+  "run_id": "swarm-test-run",
+  "status": "SUCCEEDED",
+  "summary": "Selected the safest passing patch.",
+  "selected_patches": [
+    {
+      "task_id": "writer-1",
+      "replica_id": "writer-1-r2",
+      "patch_path": ".omo/swarm/runs/swarm-test-run/patches/writer-1-r2.patch"
+    }
+  ],
+  "score": {
+    "overall": 93,
+    "correctness": 94,
+    "safety": 95,
+    "tests": 90
+  }
+}

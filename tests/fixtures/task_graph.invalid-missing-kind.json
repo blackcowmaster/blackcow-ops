@@ -1,0 +1,19 @@
+{
+  "run_id": "swarm-test-run",
+  "tasks": [
+    {
+      "id": "discover-1",
+      "title": "Inspect invite flow",
+      "skill": "blackcow-plan",
+      "prompt": "Inspect the team invite flow and report implementation targets.",
+      "depends_on": [],
+      "read_only": true,
+      "writes": [],
+      "write_scope": [],
+      "acceptance_checks": ["python3 -m unittest tests.test_swarm_schema"],
+      "replicas": 1,
+      "max_replicas": 1,
+      "timeout_minutes": 15
+    }
+  ]
+}

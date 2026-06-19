@@ -1,0 +1,35 @@
+{
+  "run_id": "swarm-test-run",
+  "tasks": [
+    {
+      "id": "discover-1",
+      "kind": "discovery",
+      "title": "Inspect invite flow",
+      "skill": "blackcow-plan",
+      "prompt": "Inspect the team invite flow and report implementation targets.",
+      "depends_on": [],
+      "read_only": true,
+      "writes": [],
+      "write_scope": [],
+      "acceptance_checks": ["python3 -c 'print(\"acceptance ok\")'"],
+      "replicas": 2,
+      "max_replicas": 2,
+      "timeout_minutes": 15
+    },
+    {
+      "id": "qa-1",
+      "kind": "qa",
+      "title": "Review invite flow risks",
+      "skill": "blackcow-qa",
+      "prompt": "Review invite flow risks using discovery output.",
+      "depends_on": ["discover-1"],
+      "read_only": true,
+      "writes": [],
+      "write_scope": [],
+      "acceptance_checks": ["python3 -c 'print(\"acceptance ok\")'"],
+      "replicas": 1,
+      "max_replicas": 1,
+      "timeout_minutes": 15
+    }
+  ]
+}

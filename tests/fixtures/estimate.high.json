@@ -1,0 +1,19 @@
+{
+  "task": "Implement team invite flow",
+  "requested_policy": "auto",
+  "requested_mode": "adaptive",
+  "requested_intensity": "high",
+  "recommended_mode": "full",
+  "recommended_intensity": "high",
+  "recommended_workers": 5,
+  "estimated_serial_minutes": 22,
+  "expected_speedup": 1.9,
+  "requires_approval": false,
+  "writer_swarm_allowed": true,
+  "risk_flags": [],
+  "rationale": [
+    "estimated serial work: 22 minutes",
+    "recommended mode: full",
+    "task appears to require file modifications"
+  ]
+}

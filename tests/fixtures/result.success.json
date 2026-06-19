@@ -1,0 +1,15 @@
+{
+  "task_id": "qa-1",
+  "replica_id": "qa-1-r1",
+  "status": "SUCCEEDED",
+  "summary": "No blocking issues found.",
+  "artifacts": ["runs/swarm-test-run/workers/qa-1-r1/result.json"],
+  "changed_files": [],
+  "patch_path": null,
+  "score": {
+    "overall": 92,
+    "correctness": 95,
+    "safety": 90,
+    "tests": 91
+  }
+}

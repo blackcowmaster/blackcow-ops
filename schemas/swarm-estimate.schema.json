@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BlackCow Swarm Estimate",
+  "type": "object",
+  "required": [
+    "task",
+    "requested_policy",
+    "requested_mode",
+    "requested_intensity",
+    "recommended_mode",
+    "recommended_intensity",
+    "recommended_workers",
+    "estimated_serial_minutes",
+    "expected_speedup",
+    "requires_approval",
+    "writer_swarm_allowed",
+    "risk_flags",
+    "rationale"
+  ],
+  "properties": {
+    "task": {"type": "string", "minLength": 1},
+    "requested_policy": {"type": "string", "enum": ["off", "suggest", "auto", "force"]},
+    "requested_mode": {"type": "string", "enum": ["serial", "qa", "discovery", "review", "coder", "full", "adaptive"]},
+    "requested_intensity": {"type": "string", "enum": ["normal", "high", "max"]},
+    "recommended_mode": {"type": "string", "enum": ["serial", "qa", "discovery", "review", "coder", "full", "adaptive"]},
+    "recommended_intensity": {"type": "string", "enum": ["normal", "high", "max"]},
+    "recommended_workers": {"type": "integer", "minimum": 1},
+    "estimated_serial_minutes": {"type": "integer", "minimum": 1},
+    "expected_speedup": {"type": "number", "minimum": 1},
+    "requires_approval": {"type": "boolean"},
+    "writer_swarm_allowed": {"type": "boolean"},
+    "risk_flags": {"type": "array", "items": {"type": "string"}},
+    "rationale": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

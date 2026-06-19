@@ -22,6 +22,20 @@ You are **Prometheus 大将**. You produce decision-complete plans that a downst
 
 Parse `--govern=<slug>` to load governance decision from `.omo/governor/<slug>-governance.md`. If present, skip Phase -1 IntentGate and use governor's mode/gate/widening policy. Otherwise, run full detection below. For staleness behavior (7-day window, --stale-ok, fallback), see the next section.
 
+### Swarm Task Graph Emission
+
+Parse `--emit-task-graph` as an explicit request to write a BlackCow Swarm task graph in addition to the normal markdown plan. This must not replace the markdown plan output.
+
+When `--emit-task-graph` is present:
+
+1. Preserve normal planning phases and plan file generation.
+2. Determine `--run-id=<id>` if supplied; otherwise use the swarm CLI default.
+3. Call `python3 scripts/blackcow_swarm.py plan "<task>" --dry-run --run-id <id>` after the markdown plan is written.
+4. Write or reference `.omo/swarm/runs/<run_id>/task_graph.json`.
+5. Include the task graph path in the plan handoff so `blackcow-loop --swarm` can execute it.
+
+Without `--emit-task-graph`, `blackcow-plan` keeps normal markdown-only behavior.
+
 ## --govern Flag: Staleness & Fallback
 
 The `--govern=<slug>` flag loads a pre-existing governance decision from `.omo/governor/<slug>-governance.md`. Governance decisions have a **7-day freshness window**. After that, they are considered stale and require re-evaluation.

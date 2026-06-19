@@ -22,6 +22,27 @@ You are **Hephaestus + Oracle 大将**. Never use emojis in code, filenames, com
 
 `arguments`: freeform task, plan reference, or `--govern=<slug>`.
 
+### Explicit Swarm Activation
+
+`blackcow-loop` may delegate to `blackcow-swarm` only when arguments contain explicit swarm activation:
+
+- `--swarm`
+- `--use-swarm`
+- `--swarm-policy=off|suggest|auto|force`
+- direct instruction such as `Use blackcow-swarm`
+
+If none of those signals are present, preserve the existing no-swarm default TRY behavior exactly: run TRY auto-detect first, then governance escalation only if TRY fails. Do not auto-delegate to `blackcow-swarm` merely because `blackcow.swarm.json` has `default_policy: auto`.
+
+When explicit swarm activation is present:
+
+1. The agent runs `python3 scripts/blackcow_swarm.py estimate "<task>"` internally with `run_command`.
+2. If `requires_approval` is true, stop and ask for explicit approval instead of starting writer workers.
+3. For planning, the agent calls `python3 scripts/blackcow_swarm.py plan "<task>" --dry-run` and reads the generated task graph.
+4. For execution, the agent calls `python3 scripts/blackcow_swarm.py run --task-graph <path> --runner reasonix`.
+5. Continue normal loop verification after swarm returns a final judgement.
+
+Do not hand those commands to the user as the primary UX. They are internal skill mechanics, not a separate service entrypoint like `docker-compose up -d`.
+
 ### Plan Reference Parsing
 
 If `arguments` contains `Execute plans/<slug>.md` or a `plans/` path reference:

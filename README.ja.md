@@ -1,6 +1,6 @@
 <div align="center">
   <h1>BlackCow Ops</h1>
-  <p><strong>Reasonix + DeepSeekのための7つの自己改善型ワークフロースキル。</strong></p>
+  <p><strong>Reasonix + DeepSeekのための8つの自己改善型ワークフロースキル。</strong></p>
   <p>
     <a href="#インストール">インストール</a> · <a href="#クイックスタート">クイックスタート</a> ·
     <a href="README.md">English</a> · <a href="README.ko.md">한국어</a> · <a href="README.zh-cn.md">简体中文</a>
@@ -11,7 +11,7 @@
 
 ## 概要
 
-BlackCow Opsは、コーディングタスクのための **govern → plan → execute → verify → evolve** パイプラインを形成する7つのReasonixスキルです。BKIT 11ゲート品質体系をDeepSeekのコスト優位性に合わせて調整しています。タイポ修正は約$0.001、マルチファイル機能は約$0.03で処理されます。
+BlackCow Opsは、コーディングタスクのための **govern → plan → execute → verify → evolve** パイプラインと明示的なローカルswarm制御を形成する8つのReasonixスキルです。BKIT 11ゲート品質体系をDeepSeekのコスト優位性に合わせて調整しています。タイポ修正は約$0.001、マルチファイル機能は約$0.03で処理されます。
 
 **正直なスコア: 90.6/100**（11次元平均）。評価基準は固定 — ゴールポスト移動なし。
 
@@ -24,6 +24,7 @@ BlackCow Opsは、コーディングタスクのための **govern → plan → 
 | `blackcow-governor` | 事前チェック制御。作業前にモード、ゲート、可観測レベル、PDCA予算を選択。 |
 | `blackcow-plan` | 戦略設計。プログレッシブワイドニング、アーキテクチャオプション、決定完結型計画。 |
 | `blackcow-loop` | 実行エンジン。TRY(2-3分)+STANDARD/FULL。PDCA、Findings Gate、Visual Review(codex)、O0-O4検証。 |
+| `blackcow-swarm` | 明示的なDeepSeek/Reasonix swarm制御。ローカル並列workerを見積もり、計画、実行、再開、取消、整理します。 |
 | `blackcow-qa` | 品質保証。数値閾値ベースの条件付き11ゲート評価。 |
 | `blackcow-librarian` | プロジェクトメモリ。構造キャッシュ、障害パターンメモリ、トレンド分析。 |
 | `blackcow-skill-review` | メタ監査。スキル自体のトレンド追跡と陳腐化検出。 |
@@ -36,7 +37,7 @@ git clone https://github.com/blackcowmaster/blackcow-ops.git
 cp blackcow-ops/skills/*.md ~/.reasonix/skills/
 ```
 
-Reasonixを再起動すると、7つのスキルがグローバルで使用可能になります。
+Reasonixを再起動すると、8つのスキルがグローバルで使用可能になります。
 
 ## クイックスタート
 
@@ -76,6 +77,9 @@ blackcow-qa "src/auth/" --gates=auto
 ```
 blackcow-governor ──→ blackcow-plan ──→ blackcow-loop ──→ blackcow-qa
    (事前チェック)      (設計)          (実行)          (検証)
+                         │
+                         └──→ blackcow-swarm
+                              (明示的な並列worker)
 
 blackcow-skill-review ──→ blackcow-skill-evolver
       (スキル監査)            (スキル修正)
